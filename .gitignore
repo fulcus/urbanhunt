@@ -75,3 +75,8 @@
 .settings/
 .classpath
 .project
+
+# API keys
+#lib/api_key.dart
+#app/google-services.json
+#android/app/src/main/AndroidManifest.xml
