@@ -27,14 +27,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Stream<QuerySnapshot> _iceCreamStores;
+  late Stream<QuerySnapshot> _places;
   final Completer<GoogleMapController> _mapController = Completer();
 
   @override
   void initState() {
     super.initState();
-    _iceCreamStores = FirebaseFirestore.instance
-        .collection('ice_cream_stores')
+    _places = FirebaseFirestore.instance
+        .collection('places')
         .orderBy('name')
         .snapshots();
   }
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _iceCreamStores,
+        stream: _places,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
@@ -69,6 +69,41 @@ class _HomePageState extends State<HomePage> {
             ],
           );
         },
+      ),
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text('My profile',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                textScaleFactor: 3.0,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.green,
+              ),
+            ),
+            ListTile(
+              title: Text('Item 1'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

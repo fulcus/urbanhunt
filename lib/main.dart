@@ -17,8 +17,8 @@ class App extends StatelessWidget {
       title: 'Hunt Your Picture',
       home: const HomePage(title: 'Hunt App'),
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.blue[50],
+        primarySwatch: Colors.green,
+        scaffoldBackgroundColor: Colors.greenAccent[50],
       ),
     );
   }
