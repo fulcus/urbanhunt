@@ -76,6 +76,9 @@
 .classpath
 .project
 
+# others
+.flutter-plugins-dependencies
+
 # API keys
 #lib/api_key.dart
 #app/google-services.json
