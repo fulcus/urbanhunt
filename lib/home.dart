@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_maps_firestore/add_place.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:flutter/material.dart';
@@ -78,19 +79,23 @@ class _HomePageState extends State<HomePage> {
             DrawerHeader(
               child: Text('My profile',
                 style: TextStyle(fontWeight: FontWeight.bold),
-                textScaleFactor: 3.0,
+                textScaleFactor: 2.0,
               ),
               decoration: BoxDecoration(
                 color: Colors.green,
               ),
             ),
             ListTile(
-              title: Text('Item 1'),
+              title: Text('Add Place'),
               onTap: () {
                 // Update the state of the app
-                // ...
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                      builder: (context) => AddPlace()),
+                );
+
                 // Then close the drawer
-                Navigator.pop(context);
+                //Navigator.pop(context);
               },
             ),
             ListTile(
