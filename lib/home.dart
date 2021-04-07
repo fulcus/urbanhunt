@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_maps_firestore/add_place.dart';
+import 'package:hunt_app/add_place.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:flutter/material.dart';
 import 'api_key.dart';
-
 
 // Center of the Google Map
 const initialPosition = LatLng(37.7786, -122.4375);
@@ -14,7 +12,6 @@ const initialPosition = LatLng(37.7786, -122.4375);
 const _pinkHue = 350.0;
 // Places API client used for Place Photos
 final _placesApiClient = GoogleMapsPlaces(apiKey: googleMapsApiKey);
-
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.title});
@@ -77,7 +74,8 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Text('My profile',
+              child: Text(
+                'My profile',
                 style: TextStyle(fontWeight: FontWeight.bold),
                 textScaleFactor: 2.0,
               ),
@@ -90,8 +88,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 // Update the state of the app
                 Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                      builder: (context) => AddPlace()),
+                  MaterialPageRoute<void>(builder: (context) => AddPlace()),
                 );
 
                 // Then close the drawer
@@ -232,9 +229,9 @@ class _StoreListTileState extends State<StoreListTile> {
         height: 100,
         child: _placePhotoUrl.isNotEmpty
             ? ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(2)),
-          child: Image.network(_placePhotoUrl, fit: BoxFit.cover),
-        )
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                child: Image.network(_placePhotoUrl, fit: BoxFit.cover),
+              )
             : Container(),
       ),
       onTap: () async {
@@ -276,17 +273,17 @@ class StoreMap extends StatelessWidget {
       ),
       markers: documents
           .map((document) => Marker(
-        markerId: MarkerId(document['placeId'] as String),
-        icon: BitmapDescriptor.defaultMarkerWithHue(_pinkHue),
-        position: LatLng(
-          document['location'].latitude as double,
-          document['location'].longitude as double,
-        ),
-        infoWindow: InfoWindow(
-          title: document['name'] as String?,
-          snippet: document['address'] as String?,
-        ),
-      ))
+                markerId: MarkerId(document['placeId'] as String),
+                icon: BitmapDescriptor.defaultMarkerWithHue(_pinkHue),
+                position: LatLng(
+                  document['location'].latitude as double,
+                  document['location'].longitude as double,
+                ),
+                infoWindow: InfoWindow(
+                  title: document['name'] as String?,
+                  snippet: document['address'] as String?,
+                ),
+              ))
           .toSet(),
       onMapCreated: (mapController) {
         this.mapController.complete(mapController);
