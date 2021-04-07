@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import './auth.dart';
 import './home.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,10 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hunt Your Picture',
-      home: const HomePage(title: 'Hunt App'),
+      //home: const HomePage(title: 'Hunt App'),
+      home: Scaffold(
+        body: AuthTypeSelector(),
+      ),
       theme: ThemeData(
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.greenAccent[50],
@@ -23,4 +27,3 @@ class App extends StatelessWidget {
     );
   }
 }
-

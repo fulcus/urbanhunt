@@ -12,13 +12,15 @@ dependencies:
   firebase_auth: ^1.0.2
   cloud_firestore: ^1.0.4
   google_maps_flutter: ^2.0.3
-  google_maps_webservice: ^0.0.20-nullsafety.0
-  location: ^4.0.0-nullsafety.0
+  google_maps_webservice: ^0.0.20-nullsafety.3
+  location: ^4.1.1
+  flutter_signin_button: ^2.0.0
+  google_sign_in: ^5.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pedantic: ^1.10.0
+  pedantic: ^1.11.0
 
 flutter:
   uses-material-design: true
