@@ -223,7 +223,7 @@ class _StoreListTileState extends State<StoreListTile> {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(widget.document['name'] as String),
-      subtitle: Text(widget.document['address'] as String),
+      subtitle: Text(widget.document['address']['street'] as String),
       leading: Container(
         width: 100,
         height: 100,
@@ -281,7 +281,7 @@ class StoreMap extends StatelessWidget {
                 ),
                 infoWindow: InfoWindow(
                   title: document['name'] as String?,
-                  snippet: document['address'] as String?,
+                  snippet: document['address']['street'] as String?,
                 ),
               ))
           .toSet(),
