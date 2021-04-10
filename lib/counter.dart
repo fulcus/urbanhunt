@@ -34,7 +34,6 @@ class UnlockPlace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return TextButton(
       onPressed: _unlockPlace,
       child: Text(
@@ -44,13 +43,15 @@ class UnlockPlace extends StatelessWidget {
   }
 
   Future<void> _unlockPlace() async {
-    var place = await db.collection('places').doc(placeId).get();
+    /*
+    All places have actually been already downloaded, so not need to get it again.
+    Only need to update UI with new info and write "unlocking" to db.
+     */
     var unlockedPlaces =
-        await db.collection('users').doc(userId).collection('unlockedPlaces');
-    Map<String, dynamic>? data = place.data();
-    print("place unlocked");
+        db.collection('users').doc(userId).collection('unlockedPlaces');
+    var data = <String, dynamic>{'liked': false, 'disliked': false};
 
-    return unlockedPlaces.doc(placeId).set(data!);
+    return await unlockedPlaces.doc(placeId).set(data);
   }
 }
 
@@ -60,10 +61,8 @@ class LikePlace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create a CollectionReference called users that references the firestore collection
-
     return TextButton(
-      onPressed: _likePlace,
+      onPressed: _like,
       child: Text(
         "Like Place",
       ),
@@ -71,35 +70,54 @@ class LikePlace extends StatelessWidget {
   }
 
   // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
-  Future<void> _likePlace() async {
-    // Create a reference to the document the transaction will use
-    var documentReference = db
+  Future<void> _like() async {
+    var unlockedPlaceRef = db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
         .doc(placeId);
 
-    return db
-        .runTransaction((transaction) async {
-      DocumentSnapshot snapshot = await transaction.get(documentReference);
+    var data = <String, dynamic>{'liked': true, 'disliked': false};
 
-      if (!snapshot.exists) {
-        throw Exception("Place does not exist!");
-      }
-      // TODO: should also update places collection
-      int newLikesCount = snapshot.data()!['likes'] + 1 as int;
-
-      var data = <String, dynamic>{'likes': newLikesCount};
-      transaction.update(documentReference, data);
-
-      return newLikesCount;
-    })
-        .then((value) => print("Likes count updated to $value"))
-        .catchError(
-            (Error error) => print('Failed to update likes: $error'));
+    return await unlockedPlaceRef.update(data);
   }
 }
 
+class DislikePlace extends StatelessWidget {
+  final String placeId = 'VXnmELXoSf8M4PkzHPRu'; //get from selected card
+  final String userId = 'Kd5combpKoh1gLYyYUyftiAwcbP2'; //get from auth
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+        onPressed: _dislike,
+        child: Text(
+          'Dislike Place',
+        ),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+            (states) {
+              if (states.contains(MaterialState.pressed)) {
+                return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+              }
+              return Colors.red.shade50; // Use the component's default.
+            },
+          ),
+        ));
+  }
+
+  Future<void> _dislike() async {
+    var unlockedPlaceRef = db
+        .collection('users')
+        .doc(userId)
+        .collection('unlockedPlaces')
+        .doc(placeId);
+
+    var data = <String, dynamic>{'liked': false, 'disliked': true};
+
+    return await unlockedPlaceRef.update(data);
+  }
+}
 
 class CounterHome extends StatefulWidget {
   CounterHome({Key? key, required this.title}) : super(key: key);
@@ -167,9 +185,10 @@ class _CounterHomeState extends State<CounterHome> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            GetData(),
+            //GetData(),
             UnlockPlace(),
             LikePlace(),
+            DislikePlace(),
             Text(
               'You have pushed the button this many times:',
             ),
