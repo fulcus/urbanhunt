@@ -16,6 +16,7 @@ dependencies:
   location: ^4.1.1
   flutter_signin_button: ^2.0.0
   google_sign_in: ^5.0.1
+  geolocator: 7.0.1
 
 dev_dependencies:
   flutter_test:
