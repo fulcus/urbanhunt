@@ -3,28 +3,52 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 final db = FirebaseFirestore.instance;
 
-class GetData extends StatelessWidget {
-  final String documentId = 'VXnmELXoSf8M4PkzHPRu';
+class AddPlace extends StatelessWidget {
+  final String placeId = 'VXnmELXoSf8M4PkzHPRu'; //get from selected card
+  final String userId = 'Kd5combpKoh1gLYyYUyftiAwcbP2'; //get from auth
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference places = db.collection('places');
-
-    return FutureBuilder<DocumentSnapshot>(
-      future: places.doc(documentId).get(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
-
-        if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data = snapshot.data!.data()!;
-          return Text("Data: ${data['name']}");
-        }
-
-        return Text("loading");
-      },
+    return TextButton(
+      onPressed: _addPlace,
+      child: Text(
+        'Add Place',
+      ),
     );
+  }
+
+  Future<void> _addPlace() async {
+
+    var zip = 20100,
+        city = 'Milan',
+        state = 'Italy',
+        imgpath = 'images/secret_door',
+        lockedDescr = 'Some interesting facts',
+        unlockedDescr = 'Less interesting facts',
+        name = 'Secret Door',
+        dislikes = 0,
+        latitude = 45.485044,
+        longitude = 9.202816,
+        location = GeoPoint(latitude, longitude),
+        likes = 0;
+    var categories = ['culture'];
+
+    var places = db.collection('places');
+    var data = <String, dynamic>{
+      'address': {'zip': zip, 'city': city, 'state': state},
+      'categories': categories,
+      'imgpath': imgpath,
+      'lockedDescr': lockedDescr,
+      'unlockedDescr': unlockedDescr,
+      'name': name,
+      'dislikes': dislikes,
+      'latitude': latitude,
+      'longitude': longitude,
+      'location': location,
+      'likes': likes
+    };
+
+    await places.add(data);
   }
 }
 
@@ -37,7 +61,7 @@ class UnlockPlace extends StatelessWidget {
     return TextButton(
       onPressed: _unlockPlace,
       child: Text(
-        "Unlock Place",
+        'Unlock Place',
       ),
     );
   }
@@ -64,13 +88,12 @@ class LikePlace extends StatelessWidget {
     return TextButton(
       onPressed: _like,
       child: Text(
-        "Like Place",
+        'Like Place',
       ),
     );
   }
 
-  // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
-  Future<void> _like() async {
+/*  Future<void> _like() async {
     var unlockedPlaceRef = db
         .collection('users')
         .doc(userId)
@@ -80,6 +103,37 @@ class LikePlace extends StatelessWidget {
     var data = <String, dynamic>{'liked': true, 'disliked': false};
 
     return await unlockedPlaceRef.update(data);
+  }*/
+
+  //TODO: checks on like and dislike: like only if not already liked, if liked after disliked set dislike false ecc
+  // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
+  Future<void> _like() async {
+    var placeRef = db.collection('places').doc(placeId);
+    var unlockedPlaceRef = db
+        .collection('users')
+        .doc(userId)
+        .collection('unlockedPlaces')
+        .doc(placeId);
+
+    return db
+        .runTransaction((transaction) async {
+          var placeSnapshot = await transaction.get(placeRef);
+          var unlockedPlaceSnapshot = await transaction.get(unlockedPlaceRef);
+
+          if (!placeSnapshot.exists || !unlockedPlaceSnapshot.exists) {
+            throw Exception('Place does not exist!');
+          }
+          var newLikesCount = placeSnapshot.data()!['likes'] + 1 as int;
+
+          transaction.update(
+              placeRef, <String, dynamic>{'likes': newLikesCount}); //likes++
+          transaction.update(unlockedPlaceRef,
+              <String, dynamic>{'liked': true}); //liked == true
+
+          return newLikesCount;
+        })
+        .then((value) => print('Likes count updated to $value'))
+        .catchError((Error error) => print('Failed to update likes: $error'));
   }
 }
 
@@ -107,17 +161,61 @@ class DislikePlace extends StatelessWidget {
   }
 
   Future<void> _dislike() async {
+    var placeRef = db.collection('places').doc(placeId);
     var unlockedPlaceRef = db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
         .doc(placeId);
 
-    var data = <String, dynamic>{'liked': false, 'disliked': true};
+    return db
+        .runTransaction((transaction) async {
+          var placeSnapshot = await transaction.get(placeRef);
+          var unlockedPlaceSnapshot = await transaction.get(unlockedPlaceRef);
 
-    return await unlockedPlaceRef.update(data);
+          if (!placeSnapshot.exists || !unlockedPlaceSnapshot.exists) {
+            throw Exception('Place does not exist!');
+          }
+          var newLikesCount = placeSnapshot.data()!['dislikes'] + 1 as int;
+
+          transaction.update(
+              placeRef, <String, dynamic>{'dislikes': newLikesCount}); //likes++
+          transaction.update(unlockedPlaceRef,
+              <String, dynamic>{'disliked': true}); //liked == true
+
+          return newLikesCount;
+        })
+        .then((value) => print('Dislikes count updated to $value'))
+        .catchError(
+            (Error error) => print('Failed to update dislikes: $error'));
   }
 }
+
+class GetData extends StatelessWidget {
+  final String documentId = 'VXnmELXoSf8M4PkzHPRu';
+
+  @override
+  Widget build(BuildContext context) {
+    var places = db.collection('places');
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: places.doc(documentId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('Something went wrong');
+        }
+        if (snapshot.connectionState == ConnectionState.done) {
+          Map<String, dynamic> data = snapshot.data!.data()!;
+          return Text("Data: ${data}");
+        }
+        return Text('loading...');
+      },
+    );
+  }
+}
+
+
+
 
 class CounterHome extends StatefulWidget {
   CounterHome({Key? key, required this.title}) : super(key: key);
@@ -186,6 +284,7 @@ class _CounterHomeState extends State<CounterHome> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             //GetData(),
+            AddPlace(),
             UnlockPlace(),
             LikePlace(),
             DislikePlace(),
