@@ -34,7 +34,6 @@ class UnlockPlace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create a CollectionReference called users that references the firestore collection
 
     return TextButton(
       onPressed: _unlockPlace,
@@ -46,15 +45,60 @@ class UnlockPlace extends StatelessWidget {
 
   Future<void> _unlockPlace() async {
     var place = await db.collection('places').doc(placeId).get();
-    var unlockedPlaces = await db.collection('users').doc(userId).collection('unlockedPlaces');
+    var unlockedPlaces =
+        await db.collection('users').doc(userId).collection('unlockedPlaces');
     Map<String, dynamic>? data = place.data();
     print("place unlocked");
 
     return unlockedPlaces.doc(placeId).set(data!);
   }
-
 }
 
+class LikePlace extends StatelessWidget {
+  final String placeId = 'VXnmELXoSf8M4PkzHPRu'; //get from selected card
+  final String userId = 'Kd5combpKoh1gLYyYUyftiAwcbP2'; //get from auth
+
+  @override
+  Widget build(BuildContext context) {
+    // Create a CollectionReference called users that references the firestore collection
+
+    return TextButton(
+      onPressed: _likePlace,
+      child: Text(
+        "Like Place",
+      ),
+    );
+  }
+
+  // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
+  Future<void> _likePlace() async {
+    // Create a reference to the document the transaction will use
+    var documentReference = db
+        .collection('users')
+        .doc(userId)
+        .collection('unlockedPlaces')
+        .doc(placeId);
+
+    return db
+        .runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(documentReference);
+
+      if (!snapshot.exists) {
+        throw Exception("Place does not exist!");
+      }
+      // TODO: should also update places collection
+      int newLikesCount = snapshot.data()!['likes'] + 1 as int;
+
+      var data = <String, dynamic>{'likes': newLikesCount};
+      transaction.update(documentReference, data);
+
+      return newLikesCount;
+    })
+        .then((value) => print("Likes count updated to $value"))
+        .catchError(
+            (Error error) => print('Failed to update likes: $error'));
+  }
+}
 
 
 class CounterHome extends StatefulWidget {
@@ -91,7 +135,6 @@ class _CounterHomeState extends State<CounterHome> {
 
   @override
   Widget build(BuildContext context) {
-
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -126,6 +169,7 @@ class _CounterHomeState extends State<CounterHome> {
           children: <Widget>[
             GetData(),
             UnlockPlace(),
+            LikePlace(),
             Text(
               'You have pushed the button this many times:',
             ),
