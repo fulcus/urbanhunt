@@ -16,11 +16,11 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hunt Your Picture',
-      home: CounterHome(title: 'Counter'),
+      //home: CounterHome(title: 'Counter'),
       //home: const HomePage(title: 'Hunt App'),
-      /*home: Scaffold(
+      home: Scaffold(
         body: AuthTypeSelector(),
-      ),*/
+      ),
       theme: ThemeData(
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.greenAccent[50],

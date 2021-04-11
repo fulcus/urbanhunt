@@ -208,8 +208,7 @@ class _StoreListTileState extends State<StoreListTile> {
   }
 
   Future<void> _retrievePlacesDetails() async {
-    final details = await _placesApiClient
-        .getDetailsByPlaceId(widget.document['placeId'] as String);
+    /*final details = await _placesApiClient.getDetailsByPlaceId(widget.document.id);
     if (!_disposed) {
       setState(() {
         _placePhotoUrl = _placesApiClient.buildPhotoUrl(
@@ -217,7 +216,7 @@ class _StoreListTileState extends State<StoreListTile> {
           maxHeight: 300,
         );
       });
-    }
+    }*/
   }
 
   @override

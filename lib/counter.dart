@@ -18,32 +18,28 @@ class AddPlace extends StatelessWidget {
   }
 
   Future<void> _addPlace() async {
+    int zip = 20100, dislikes = 0, likes = 0;
+    double latitude = 45.485044, longitude = 9.202816;
 
-    var zip = 20100,
-        city = 'Milan',
+    var city = 'Milan',
         state = 'Italy',
+        street = 'Piazza Duca d\'Aosta, 1',
         imgpath = 'images/secret_door',
         lockedDescr = 'Some interesting facts',
         unlockedDescr = 'Less interesting facts',
         name = 'Secret Door',
-        dislikes = 0,
-        latitude = 45.485044,
-        longitude = 9.202816,
-        location = GeoPoint(latitude, longitude),
-        likes = 0;
+        location = GeoPoint(latitude, longitude);
     var categories = ['culture'];
 
     var places = db.collection('places');
     var data = <String, dynamic>{
-      'address': {'zip': zip, 'city': city, 'state': state},
+      'address': {'zip': zip, 'city': city, 'state': state, 'street': street},
       'categories': categories,
       'imgpath': imgpath,
       'lockedDescr': lockedDescr,
       'unlockedDescr': unlockedDescr,
       'name': name,
       'dislikes': dislikes,
-      'latitude': latitude,
-      'longitude': longitude,
       'location': location,
       'likes': likes
     };
@@ -213,9 +209,6 @@ class GetData extends StatelessWidget {
     );
   }
 }
-
-
-
 
 class CounterHome extends StatefulWidget {
   CounterHome({Key? key, required this.title}) : super(key: key);
