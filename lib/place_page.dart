@@ -19,10 +19,18 @@ class PlaceData {
   final double latitude;
   final double longitude;
 
-  const PlaceData({this.id, this.name, this.categories,
-                   this.descriptionLocked, this.descriptionUnlocked,
-                   this.imagePathLocked, this.imagePathUnlocked,
-                   this.address, this.latitude, this.longitude});
+  const PlaceData({
+    required this.id,
+    required this.name,
+    required this.categories,
+    required this.descriptionLocked,
+    required this.descriptionUnlocked,
+    required this.imagePathLocked,
+    required this.imagePathUnlocked,
+    required this.address,
+    required this.latitude,
+    required this.longitude
+  });
   
   // Proof of Concept:
   // non-const attributes fetch their value every time.
@@ -52,8 +60,8 @@ class PlacePage extends StatefulWidget {
   final PlaceData placeData;
 
   const PlacePage({
-    Key key,
-    @required this.placeData,
+    Key? key,
+    required this.placeData,
   }): super(key: key);
 
   @override
@@ -113,8 +121,8 @@ class _PlacePageState extends State<PlacePage> {
     Icon likeIcon = Icon(Icons.arrow_drop_up, color: _isLiked ? Colors.green[600] : Colors.grey[400]);
     Icon dislikeIcon = Icon(Icons.arrow_drop_down, color: _isDisliked ? Colors.red[600] : Colors.grey[400]);
 
+    // Tags boxes
     List<Widget> tags = [];
-
     for (int i = 0; i < placeData.categories.length; i++) {
       tags.add(
         Container(
@@ -131,8 +139,8 @@ class _PlacePageState extends State<PlacePage> {
 
     // Topbar (arrow back to prev page)
     Widget topbar = Container(
-      margin: EdgeInsets.only(top: 32.0),
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      margin: EdgeInsets.only(top: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
       height: 56.0,
       child: Row(
         children: <Widget>[
@@ -146,64 +154,81 @@ class _PlacePageState extends State<PlacePage> {
     );
 
     // Content
-    Widget content = Padding(
-      padding: EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          // Sep
-          SizedBox(height: 8.0),
-          // Image
-          Center(child: Image.asset(imagePath, width: width)),
-          // Sep
-          SizedBox(height: 4.0),
-          // Below Image: Like/Dislike and Category tags
-          Row(
-            children: <Widget>[
-              // Like Dislike stats
-              GestureDetector(onTap: like, child: likeIcon),
-              Text((placeData.likes() + (_isLiked ? 1: 0)).toString(), style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400, color: Colors.green[600])),
-              SizedBox(width: 4.0),
-              GestureDetector(onTap: dislike, child: dislikeIcon),
-              Text((placeData.dislikes() + (_isDisliked ? 1: 0)).toString(), style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400, color: Colors.red[600])),
-              // Sep
-              Spacer(),
-              // Category tags
-              Row(children: tags),
-            ],
-          ),
-          // Sep
-          SizedBox(height: 4.0),
-          // Name
-          Text(placeData.name, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w900)),
-          // Sep
-          SizedBox(height: 4.0),
-          // Address
-          Text(placeData.address, style: TextStyle(fontSize: 14.0)),
-          // Sep
-          SizedBox(height: 4.0),
-          // Distance
-          Text(placeData.distanceKm().toStringAsFixed(2) + " km", style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.w900, color: Colors.black45)),
-          // Sep
-          SizedBox(height: 8.0),
-          // Description
-          Text(description, style: TextStyle(fontSize: 12.0)),
-          // Sep
-          SizedBox(height: 32.0),
-        ],
-      ),
-    );
-    
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
+    Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        // Sep
+        SizedBox(height: 8.0),
+        // Image
+        Stack(
           children: <Widget>[
+            ShaderMask(
+              shaderCallback: (rect) => LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.center,
+                colors: [Colors.black, Colors.transparent],
+              ).createShader(rect),
+              blendMode: BlendMode.darken,
+              child: Image.asset(imagePath, fit: BoxFit.cover),
+              // child: Container(
+              //   decoration: BoxDecoration(
+              //     image: DecorationImage(
+              //       image: AssetImage(imagePath),
+              //       fit: BoxFit.cover,
+              //       colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken),
+              //     ),
+              //   ),
+              // ),
+            ),
             topbar,
-            content,
           ],
         ),
-      ),
+        // Pad
+        Padding(
+          padding: EdgeInsets.only(top: 4.0, left: 32.0, right: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Below Image: Like/Dislike and Category tags
+              Row(
+                children: <Widget>[
+                  // Like Dislike stats
+                  GestureDetector(onTap: like, child: likeIcon),
+                  Text((placeData.likes() + (_isLiked ? 1: 0)).toString(), style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400, color: Colors.green[600])),
+                  SizedBox(width: 4.0),
+                  GestureDetector(onTap: dislike, child: dislikeIcon),
+                  Text((placeData.dislikes() + (_isDisliked ? 1: 0)).toString(), style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400, color: Colors.red[600])),
+                  // Sep
+                  Spacer(),
+                  // Category tags
+                  Row(children: tags),
+                ],
+              ),
+              // Sep
+              SizedBox(height: 12.0),
+              // Name
+              Text(placeData.name, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w900)),
+              // Sep
+              SizedBox(height: 4.0),
+              // Address
+              Text(placeData.address, style: TextStyle(fontSize: 14.0)),
+              // Sep
+              SizedBox(height: 4.0),
+              // Distance
+              Text(placeData.distanceKm().toStringAsFixed(2) + ' km', style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.w900, color: Colors.black45)),
+              // Sep
+              SizedBox(height: 8.0),
+              // Description
+              Text(description, style: TextStyle(fontSize: 12.0)),
+              // Sep
+              SizedBox(height: 32.0),
+            ],
+          ),
+        ),
+      ],
     );
+    
+    return Scaffold(body: SingleChildScrollView(child: content));
   }
 
 }
