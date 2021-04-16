@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 final db = FirebaseFirestore.instance;
+final FirebaseStorage storage = FirebaseStorage.instance;
 
 class AddPlace extends StatelessWidget {
   final String placeId = 'VXnmELXoSf8M4PkzHPRu'; //get from selected card
@@ -47,6 +49,27 @@ class AddPlace extends StatelessWidget {
     await places.add(data);
   }
 }
+
+
+
+class GetImage extends StatelessWidget {
+  final String imagePath = 'images/fountain.jpg'; //get from db
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: _getImage,
+      child: Text(
+        'Get Image',
+      ),
+    );
+  }
+
+  Future<void> _getImage() async {
+    Reference ref = FirebaseStorage.instance.ref(imagePath);
+  }
+}
+
 
 class UnlockPlace extends StatelessWidget {
   final String placeId = 'VXnmELXoSf8M4PkzHPRu'; //get from selected card
@@ -278,7 +301,7 @@ class _CounterHomeState extends State<CounterHome> {
           children: <Widget>[
             //GetData(),
             AddPlace(),
-            UnlockPlace(),
+            GetImage(),
             LikePlace(),
             DislikePlace(),
             Text(

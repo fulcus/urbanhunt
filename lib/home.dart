@@ -273,7 +273,7 @@ class StoreMap extends StatelessWidget {
       ),
       markers: documents
           .map((document) => Marker(
-                markerId: MarkerId(document['placeId'] as String),
+                markerId: MarkerId(document.id),
                 icon: BitmapDescriptor.defaultMarkerWithHue(_pinkHue),
                 position: LatLng(
                   document['location'].latitude as double,
