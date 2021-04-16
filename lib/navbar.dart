@@ -62,23 +62,28 @@ class NavState extends State<Nav> {
           currentIndex: _selectedIndex,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore),
+              icon: Icon(Icons.explore_outlined),
+              activeIcon: Icon(Icons.explore),
               label: 'Map',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.add_circle_outline),
+              activeIcon: Icon(Icons.add_circle),
               label: 'Contribute',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
+              icon: Icon(Icons.group_outlined),
+              activeIcon: Icon(Icons.group),
               label: 'Social',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings),
               label: 'Settings',
             ),
           ],
           type: BottomNavigationBarType.fixed,
+          selectedFontSize: 12.0,
         ),
       ),
     );
@@ -94,8 +99,6 @@ class NavState extends State<Nav> {
     );
   }
 }
-
-
 
 class TabNavigatorRoutes {
   static const String root = '/';
@@ -127,7 +130,6 @@ class TabNavigator extends StatelessWidget {
     );
   }
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 /// CUPERTINO SOLUTION
