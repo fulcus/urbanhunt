@@ -8,7 +8,6 @@ final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
 
-
 class PlacePage extends StatefulWidget {
   late DocumentSnapshot document;
 
@@ -30,18 +29,18 @@ class PlacePage extends StatefulWidget {
 
   PlacePage(DocumentSnapshot document, {Key? key}) : super(key: key) {
     this.document = document;
-    this.placeId = document.id;
-    this.name = document['name'] as String;
-    this.address = document['address'] as Map<String, dynamic>;
-    this.categories = document['categories'] as List;
-    this.descriptionLocked = document['lockedDescr'] as String;
-    this.descriptionUnlocked = document['unlockedDescr'] as String;
-    this.latitude = document['location'].latitude as double;
-    this.longitude = document['location'].longitude as double;
-    this.imagePathUnlocked = document['imgpath'] as String;
-    this.imagePathLocked = 'PathLocked';
-    this.likes = document['likes'] as int;
-    this.dislikes = document['dislikes'] as int;
+    placeId = document.id;
+    name = document['name'] as String;
+    address = document['address'] as Map<String, dynamic>;
+    categories = document['categories'] as List;
+    descriptionLocked = document['lockedDescr'] as String;
+    descriptionUnlocked = document['unlockedDescr'] as String;
+    latitude = document['location'].latitude as double;
+    longitude = document['location'].longitude as double;
+    imagePathUnlocked = document['imgpath'] as String;
+    imagePathLocked = 'PathLocked';
+    likes = document['likes'] as int;
+    dislikes = document['dislikes'] as int;
   }
 
   @override
@@ -209,17 +208,43 @@ class _PlacePageState extends State<PlacePage> {
     });
   }
 
+  // todo check if db calls are successful
+
   void like() {
     setState(() {
+      if (!_isLiked && !_isDisliked) {
+        _dbUpdateLikes(1);
+      } else if (_isLiked && !_isDisliked) {
+        _dbUpdateLikes(-1);
+      } else if (!_isLiked && _isDisliked) {
+        __dbSwapLikeDislike(false);
+      }
+
       _isLiked = !_isLiked;
       _isDisliked = false;
     });
-    _dbLike(); // backend num likes/dislikes update
   }
 
-  //TODO: checks on like and dislike: like only if not already liked, if liked after disliked set dislike false ecc
+  void dislike() {
+    setState(() {
+      if (!_isLiked && !_isDisliked) {
+        _dbUpdateDislikes(1);
+      } else if (_isLiked && !_isDisliked) {
+        __dbSwapLikeDislike(true);
+      } else if (!_isLiked && _isDisliked) {
+        _dbUpdateDislikes(-1);
+      }
+
+      _isDisliked = !_isDisliked;
+      _isLiked = false;
+    });
+  }
+
   // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
-  Future<void> _dbLike() async {
+  // @param like, if true likes, false unlikes
+  Future<void> _dbUpdateLikes(int likesIncrement) async {
+    bool liked = likesIncrement > 0 ? true : false;
+
     var placeRef = db.collection('places').doc(widget.placeId);
     var unlockedPlaceRef = db
         .collection('users')
@@ -235,12 +260,13 @@ class _PlacePageState extends State<PlacePage> {
           if (!placeSnapshot.exists || !unlockedPlaceSnapshot.exists) {
             throw Exception('Place does not exist!');
           }
-          var newLikesCount = placeSnapshot.data()!['likes'] + 1 as int;
+          var newLikesCount =
+              placeSnapshot.data()!['likes'] + likesIncrement as int;
 
-          transaction.update(
-              placeRef, <String, dynamic>{'likes': newLikesCount}); //likes++
-          transaction.update(unlockedPlaceRef,
-              <String, dynamic>{'liked': true}); //liked == true
+          transaction
+              .update(placeRef, <String, dynamic>{'likes': newLikesCount});
+          transaction
+              .update(unlockedPlaceRef, <String, dynamic>{'liked': liked});
 
           return newLikesCount;
         })
@@ -248,16 +274,9 @@ class _PlacePageState extends State<PlacePage> {
         .catchError((Error error) => print('Failed to update likes: $error'));
   }
 
-  void dislike() {
-    setState(() {
-      _isDisliked = !_isDisliked;
-      _isLiked = false;
-    });
-    _dbDislike();  // backend num likes/dislikes update
+  Future<void> _dbUpdateDislikes(int dislikesIncrement) async {
+    bool disliked = dislikesIncrement > 0 ? true : false;
 
-  }
-
-  Future<void> _dbDislike() async {
     var placeRef = db.collection('places').doc(widget.placeId);
     var unlockedPlaceRef = db
         .collection('users')
@@ -273,12 +292,54 @@ class _PlacePageState extends State<PlacePage> {
           if (!placeSnapshot.exists || !unlockedPlaceSnapshot.exists) {
             throw Exception('Place does not exist!');
           }
-          var newLikesCount = placeSnapshot.data()!['dislikes'] + 1 as int;
+          var newDislikesCount =
+              placeSnapshot.data()!['dislikes'] + dislikesIncrement as int;
 
           transaction.update(
-              placeRef, <String, dynamic>{'dislikes': newLikesCount}); //likes++
+              placeRef, <String, dynamic>{'dislikes': newDislikesCount});
+          transaction.update(
+              unlockedPlaceRef, <String, dynamic>{'disliked': disliked});
+
+          return newDislikesCount;
+        })
+        .then((value) => print('Dislikes count updated to $value'))
+        .catchError(
+            (Error error) => print('Failed to update dislikes: $error'));
+  }
+
+  // @param fromLikeToDislike == true : add dislike and remove like and vice versa
+  Future<void> __dbSwapLikeDislike(bool fromLikeToDislike) async {
+    int likesUpdate = fromLikeToDislike ? -1 : 1;
+    int dislikesUpdate = fromLikeToDislike ? 1 : -1;
+
+    var placeRef = db.collection('places').doc(widget.placeId);
+    var unlockedPlaceRef = db
+        .collection('users')
+        .doc(userId)
+        .collection('unlockedPlaces')
+        .doc(widget.placeId);
+
+    return db
+        .runTransaction((transaction) async {
+          var placeSnapshot = await transaction.get(placeRef);
+          var unlockedPlaceSnapshot = await transaction.get(unlockedPlaceRef);
+
+          if (!placeSnapshot.exists || !unlockedPlaceSnapshot.exists) {
+            throw Exception('Place does not exist!');
+          }
+          var newLikesCount =
+              placeSnapshot.data()!['likes'] + likesUpdate as int;
+          var newDislikesCount =
+              placeSnapshot.data()!['dislikes'] + dislikesUpdate as int;
+
+          transaction
+              .update(placeRef, <String, dynamic>{'likes': newLikesCount});
+          transaction.update(
+              unlockedPlaceRef, <String, dynamic>{'liked': !fromLikeToDislike});
+          transaction.update(
+              placeRef, <String, dynamic>{'dislikes': newDislikesCount});
           transaction.update(unlockedPlaceRef,
-              <String, dynamic>{'disliked': true}); //liked == true
+              <String, dynamic>{'disliked': fromLikeToDislike});
 
           return newLikesCount;
         })
