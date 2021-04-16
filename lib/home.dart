@@ -1,12 +1,15 @@
 import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:hunt_app/add_place.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
-import 'package:flutter/material.dart';
+
+import 'add_place.dart';
 import 'api_key.dart';
-import 'package:hunt_app/place_page.dart';
+import 'nav.dart';
+import 'place_card.dart';
 
 // Center of the Google Map
 const initialPosition = LatLng(37.7786, -122.4375);
@@ -109,6 +112,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavBar(),
     );
   }
 }

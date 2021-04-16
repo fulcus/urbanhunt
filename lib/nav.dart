@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hunt_app/add_place.dart';
+import 'package:hunt_app/home.dart';
 
 
 class BottomNavBar extends StatefulWidget {
@@ -10,9 +12,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
   
   // Placeholder pages
   final List<Widget> _pages = [
+    HomePage(title: 'Hunt App'), // Map
     Container(color: Colors.white),  // Social
-    Container(color: Colors.orange), // Map
-    Container(color: Colors.green),  // Contribute
+    AddPlace(),  // Contribute
     Container(color: Colors.blue),   // Settings
   ];
 
@@ -38,12 +40,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
       type: BottomNavigationBarType.fixed,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Social'
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.explore),
           label: 'Map',
+        ),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Social'
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add),
@@ -58,7 +60,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
       onTap: (iconIndex) {
         setState(() {
           _curPageIndex = iconIndex;
-          Navigator.push(context, MaterialPageRoute(builder: (context) => _pages[_curPageIndex]));
+          // TODO avoid that same route is pushed twice (e.g. by clicking twice on map)
+          Navigator.push(context, MaterialPageRoute<void>(builder: (context) => _pages[_curPageIndex]));
         });
       },
     );
