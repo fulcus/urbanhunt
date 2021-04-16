@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:flutter/material.dart';
 import 'api_key.dart';
+import 'package:hunt_app/place_page.dart';
 
 // Center of the Google Map
 const initialPosition = LatLng(37.7786, -122.4375);
@@ -273,16 +274,25 @@ class StoreMap extends StatelessWidget {
       ),
       markers: documents
           .map((document) => Marker(
-                markerId: MarkerId(document.id),
-                icon: BitmapDescriptor.defaultMarkerWithHue(_pinkHue),
-                position: LatLng(
-                  document['location'].latitude as double,
-                  document['location'].longitude as double,
-                ),
-                infoWindow: InfoWindow(
+              markerId: MarkerId(document.id),
+              icon: BitmapDescriptor.defaultMarkerWithHue(_pinkHue),
+              position: LatLng(
+                document['location'].latitude as double,
+                document['location'].longitude as double,
+              ),
+              onTap: () {
+                // Update the state of the app
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => PlacePage(document),
+                  ),
+                );
+              }
+
+              /*infoWindow: InfoWindow(
                   title: document['name'] as String?,
                   snippet: document['address']['street'] as String?,
-                ),
+                ),*/
               ))
           .toSet(),
       onMapCreated: (mapController) {
@@ -324,8 +334,7 @@ Future<Position> _determinePosition() async {
       // Android's shouldShowRequestPermissionRationale
       // returned true. According to Android guidelines
       // your App should show an explanatory UI now.
-      return Future.error(
-          'Location permissions are denied');
+      return Future.error('Location permissions are denied');
     }
   }
 
@@ -333,4 +342,3 @@ Future<Position> _determinePosition() async {
   // continue accessing the position of the device.
   return await Geolocator.getCurrentPosition();
 }
-
