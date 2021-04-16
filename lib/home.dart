@@ -8,20 +8,31 @@ import 'package:google_maps_webservice/places.dart';
 
 import 'add_place.dart';
 import 'api_key.dart';
-import 'nav.dart';
+import 'navbar.dart';
 import 'place_card.dart';
 
 // Center of the Google Map
-const initialPosition = LatLng(37.7786, -122.4375);
+//const initialPosition = LatLng(37.7786, -122.4375);
 // Hue used by the Google Map Markers to match the theme
-const _pinkHue = 350.0;
+//const _pinkHue = 350.0;
 // Places API client used for Place Photos
-final _placesApiClient = GoogleMapsPlaces(apiKey: googleMapsApiKey);
+//final _placesApiClient = GoogleMapsPlaces(apiKey: googleMapsApiKey);
+
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: HomePage(),
+      bottomNavigationBar: Nav(),
+    );
+  }
+}
+
+
 
 class HomePage extends StatefulWidget {
-  const HomePage({required this.title});
 
-  final String title;
+  final String title = 'Hunt';
 
   @override
   State<StatefulWidget> createState() {
@@ -45,9 +56,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      /*appBar: AppBar(
         title: Text(widget.title),
-      ),
+      ),*/
       body: StreamBuilder<QuerySnapshot>(
         stream: _places,
         builder: (context, snapshot) {
@@ -62,7 +73,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               StoreMap(
                 documents: snapshot.data!.docs,
-                initialPosition: initialPosition,
+                initialPosition: LatLng(37.7786, -122.4375),
                 mapController: _mapController,
               ),
               StoreCarousel(
@@ -112,7 +123,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavBar(),
+      //bottomNavigationBar: BottomNavBar(),
+        //bottomNavigationBar: App(),
     );
   }
 }
@@ -279,7 +291,7 @@ class StoreMap extends StatelessWidget {
       markers: documents
           .map((document) => Marker(
               markerId: MarkerId(document.id),
-              icon: BitmapDescriptor.defaultMarkerWithHue(_pinkHue),
+              icon: BitmapDescriptor.defaultMarkerWithHue(350.0),
               position: LatLng(
                 document['location'].latitude as double,
                 document['location'].longitude as double,

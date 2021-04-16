@@ -159,7 +159,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         ),
       );
 
-      _pushPage(context, HomePage(title: 'Hunt App',));
+      _pushPage(context, HomePage());
 
     } catch (e) {
       Scaffold.of(context).showSnackBar(

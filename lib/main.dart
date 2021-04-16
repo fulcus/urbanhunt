@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hunt_app/place_card.dart';
 import './auth.dart';
-import './counter.dart';
-import './home.dart';
+import 'home.dart';
 
 
 Future<void> main() async {
@@ -19,10 +17,10 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Hunt Your Picture',
       //home: CounterHome(title: 'Counter'),
-      //home: const HomePage(title: 'Hunt App'),
-      home: Scaffold(
+      home: Home(),
+      /*home: Scaffold(
         body: AuthTypeSelector(),
-      ),
+      ),*/
       theme: ThemeData(
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.greenAccent[50],

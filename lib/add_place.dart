@@ -6,7 +6,7 @@ class AddPlace extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Page 1'),
+        title: Text('Contribute'),
       ),
       body: Center(
         child: ElevatedButton(
