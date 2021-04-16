@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/place_page.dart';
 import './auth.dart';
+import './counter.dart';
 import './home.dart';
 
 
@@ -18,6 +18,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hunt Your Picture',
+      //home: CounterHome(title: 'Counter'),
       //home: const HomePage(title: 'Hunt App'),
       home: PlacePage(
         placeData: PlaceData(
