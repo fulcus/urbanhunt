@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/explore.dart';
 import './auth.dart';
 import './counter.dart';
 import './home.dart';
@@ -16,11 +17,12 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hunt Your Picture',
+      home: Home(),
       //home: CounterHome(title: 'Counter'),
       //home: const HomePage(title: 'Hunt App'),
-      home: Scaffold(
+      /*home: Scaffold(
         body: AuthTypeSelector(),
-      ),
+      ),*/
       theme: ThemeData(
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.greenAccent[50],
