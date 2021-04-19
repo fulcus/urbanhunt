@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'add_place.dart';
+import 'contribute.dart';
+import 'gallery-form.dart';
 import 'home.dart';
 
 class Nav extends StatefulWidget {
@@ -100,10 +101,6 @@ class NavState extends State<Nav> {
   }
 }
 
-class TabNavigatorRoutes {
-  static const String root = '/';
-  static const String detail = '/detail';
-}
 
 class TabNavigator extends StatelessWidget {
   TabNavigator({required this.navigatorKey, required this.tabItem});
@@ -114,13 +111,15 @@ class TabNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child = HomePage();
-    if (tabItem == 'Map')
+    if (tabItem == 'Map') {
       child = HomePage();
-    else if (tabItem == 'Contribute')
-      child = AddPlace();
-    else if (tabItem == 'Social') {
+    } else if (tabItem == 'Contribute') {
+      child = Contribute();
+    } else if (tabItem == 'Social') {
       child = Container(color: Colors.blue);
-    } else if (tabItem == 'Settings') child = Container(color: Colors.red);
+    } else if (tabItem == 'Settings') {
+      child = FormDemo();
+    }
 
     return Navigator(
       key: navigatorKey,
