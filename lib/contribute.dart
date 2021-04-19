@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,37 +12,38 @@ import 'package:flutter/services.dart';
  * pick location: Widget
  * load image: Widget
  */
-final GlobalKey<ScaffoldMessengerState> _scaffoldMessangerKey =
+final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
 class Contribute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: _scaffoldMessangerKey,
+      key: _scaffoldMessengerKey,
       child: Scaffold(
         body: Padding(
             padding: EdgeInsets.fromLTRB(20, 50, 20, 0),
-            child: const TextFormFieldDemo()),
+            child: const AddPlaceForm()),
       ),
     );
   }
 }
 
-class TextFormFieldDemo extends StatefulWidget {
-  const TextFormFieldDemo({Key? key}) : super(key: key);
+class AddPlaceForm extends StatefulWidget {
+  const AddPlaceForm({Key? key}) : super(key: key);
 
   @override
-  TextFormFieldDemoState createState() => TextFormFieldDemoState();
+  AddPlaceFormState createState() => AddPlaceFormState();
 }
 
-class TextFormFieldDemoState extends State<TextFormFieldDemo> {
+class AddPlaceFormState extends State<AddPlaceForm> {
   var data = PlaceData();
 
-  late FocusNode _name, _lockedDescr, _unlockedDescr;
+  //late FocusNode _name, _lockedDescr, _unlockedDescr;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  /*
   @override
   void initState() {
     super.initState();
@@ -56,7 +58,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     _lockedDescr.dispose();
     _unlockedDescr.dispose();
     super.dispose();
-  }
+  }*/
 
   void _handleSubmitted() {
     final form = _formKey.currentState!;
@@ -73,8 +75,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   }
 
   void showInSnackBar(String value) {
-    _scaffoldMessangerKey.currentState!.hideCurrentSnackBar();
-    _scaffoldMessangerKey.currentState!.showSnackBar(SnackBar(
+    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
+    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
       content: Text(value),
     ));
   }
@@ -132,15 +134,21 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           children: [
-            sizedBoxSpace,
+            //sizedBoxSpace,
+            Text('Add A Place',
+                style: TextStyle(fontSize: 22), textAlign: TextAlign.center),
+            SizedBox(height: 44),
+
+            //sizedBoxSpace,
             TextFormField(
-              focusNode: _name,
+              //focusNode: _name,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 filled: true,
-                icon: const Icon(Icons.place),
+                icon: const Icon(Icons.place_outlined),
                 hintText: 'Mysterious Fountain',
+                helperText: 'Name of the new place',
                 labelText: 'Name',
               ),
               onSaved: (value) {
@@ -149,10 +157,28 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
               validator: _validateName,
             ),
             sizedBoxSpace,
-            TextFormField(
-              focusNode: _lockedDescr,
+            FormBuilderChoiceChip(
+              name: 'choice_chip',
+              alignment: WrapAlignment.spaceEvenly,
+              crossAxisAlignment: WrapCrossAlignment.center,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
+                border: InputBorder.none,
+                labelText: 'Select a category',
+              ),
+              options: [
+                FormBuilderFieldOption(value: 'Culture', child: Text('Culture')),
+                FormBuilderFieldOption(value: 'Nature', child: Text('Nature')),
+                FormBuilderFieldOption(value: 'Art', child: Text('Art')),
+                FormBuilderFieldOption(value: 'Sport', child: Text('Sport')),
+              ],
+            ),
+            sizedBoxSpace,
+            TextFormField(
+              //focusNode: _lockedDescr,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                filled: true,
+                icon: const Icon(Icons.lock_outline),
                 hintText: 'Might help out when thirsty of adventures',
                 helperText: 'Short description shown when place is locked',
                 labelText: 'Locked description',
@@ -165,9 +191,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
             ),
             sizedBoxSpace,
             TextFormField(
-              focusNode: _unlockedDescr,
+              //focusNode: _unlockedDescr,
+              textInputAction: TextInputAction.next,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
+                filled: true,
+                icon: const Icon(Icons.lock_open_outlined),
                 hintText: 'This fountain was built in 1891 by bla bla bla...',
                 helperText: 'Full description of the place',
                 labelText: 'Unlocked description',

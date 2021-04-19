@@ -12,6 +12,7 @@ dependencies:
   firebase_auth: ^1.1.0
   firebase_core: ^1.0.3  
   firebase_storage: ^8.0.3
+  flutter_form_builder: ^6.0.0-nullsafety.1
   flutter_signin_button: ^2.0.0
   geolocator: ^7.0.3
   google_maps_flutter: ^2.0.3

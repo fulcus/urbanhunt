@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'contribute.dart';
-import 'gallery-form.dart';
 import 'home.dart';
 
 class Nav extends StatefulWidget {
@@ -118,7 +117,7 @@ class TabNavigator extends StatelessWidget {
     } else if (tabItem == 'Social') {
       child = Container(color: Colors.blue);
     } else if (tabItem == 'Settings') {
-      child = FormDemo();
+      child = Container(color: Colors.red);
     }
 
     return Navigator(
