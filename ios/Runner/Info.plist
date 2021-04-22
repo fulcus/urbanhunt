@@ -4,6 +4,7 @@
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Finding Ice Cream stores near you</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>

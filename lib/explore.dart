@@ -12,8 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'counter.dart';
 
 
-// Hue used by the Google Map Markers to match the theme
-const _pinkHue = 350.0;
 final db = FirebaseFirestore.instance;
 bool loading = true;
 
@@ -149,53 +147,59 @@ class _HomeState extends State<Home> {
   }
 }
 
-class StoreMap extends StatelessWidget {
-  final String userId = 'Kd5combpKoh1gLYyYUyftiAwcbP2'; //get from auth (look for the right method to get id)
+class StoreMap extends StatefulWidget {
 
-  const StoreMap({
+  StoreMap({
     Key? key,
     required this.documents,
     required this.initialPosition,
     required this.mapController,
   }) : super(key: key);
 
+  final String userId = 'Kd5combpKoh1gLYyYUyftiAwcbP2'; //get from auth (look for the right method to get id)
   final List<DocumentSnapshot> documents;
   final LatLng initialPosition;
   final Completer<GoogleMapController> mapController;
+
+  @override
+  _StoreMapState createState() => _StoreMapState();
+}
+
+class _StoreMapState extends State<StoreMap> {
+
+  Set<Marker> customMarkers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _setCustomMarkers();
+  }
 
   @override
   Widget build(BuildContext context) {
     if(loading == false) {
       return GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: initialPosition,
+          target: widget.initialPosition,
           zoom: 12,
         ),
-        markers: documents
-            .map((document) => Marker(
-          markerId: MarkerId(document.id),
-          icon:  BitmapDescriptor.defaultMarkerWithHue(_pinkHue), //_assignIcon(document),
-          position: LatLng(
-            document['location'].latitude as double,
-            document['location'].longitude as double,
-          ),
-        ))
-            .toSet(),
+        markers: customMarkers,
         onMapCreated: (mapController) {
-          this.mapController.complete(mapController);
+          widget.mapController.complete(mapController);
         },
+        padding: EdgeInsets.only(top: 680.0, left: 310.0), //+ MediaQuery.of(context).padding -> safe area
         myLocationEnabled: true,
-        padding: EdgeInsets.only(top: 680.0),
         myLocationButtonEnabled: true,
         compassEnabled: true,
 
         mapToolbarEnabled: false,
-        //zoomControlsEnabled: false,
+        zoomControlsEnabled: false,
+        //indoorViewEnabled: true, => we might need it
       );
     }
     else {
-      return CircularProgressIndicator(
-        
+      return Center(
+        child: CircularProgressIndicator(),
       );
     }
   }
@@ -207,7 +211,7 @@ class StoreMap extends StatelessWidget {
     //prendi tutti i posti e vedi se il current document è sbloccato o bloccato
 
     await db.collection('users')
-        .doc(userId)
+        .doc(widget.userId)
         .collection('unlockedPlaces')
         .doc(currentPlace)
         .get()
@@ -223,6 +227,61 @@ class StoreMap extends StatelessWidget {
     return icon;
   }
 
+  Future<void> _setCustomMarkers() async {
+    var markers = <Marker>{};
+    var check = true;
+
+    late BitmapDescriptor unlockedImg;
+    late BitmapDescriptor lockedImg;
+
+
+    unlockedImg = await _createMarkerImageFromAsset('assets/images/open-lock.png');
+    lockedImg = await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
+
+    for (var document in widget.documents) {
+
+      check = await _checkDocInCollection(document);
+      if (check) {
+        markers.add(Marker(
+          markerId: MarkerId(document.id),
+          icon: unlockedImg,
+          position: LatLng(
+            document['location'].latitude as double,
+            document['location'].longitude as double,
+          ),
+        ));
+      }
+      else {
+        markers.add(Marker(
+          markerId: MarkerId(document.id),
+          icon: lockedImg,
+          position: LatLng(
+            document['location'].latitude as double,
+            document['location'].longitude as double,
+          ),
+        ));
+      }
+    }
+    customMarkers = markers;
+  }
+
+  Future <BitmapDescriptor> _createMarkerImageFromAsset(String iconPath) async {
+    return await BitmapDescriptor.fromAssetImage(ImageConfiguration(), iconPath);
+  }
+
+  Future<bool> _checkDocInCollection(DocumentSnapshot doc) async {
+    final snapShot = await db.collection('users')
+                             .doc(widget.userId)
+                             .collection('unlockedPlaces')
+                             .doc(doc.id)
+                             .get();
+    if (!snapShot.exists) {
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
 
   //Function to be called when the user wants to open the selected place in Google Maps.
   //Arguments -> latitude and longitude of the place
