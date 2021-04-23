@@ -204,29 +204,6 @@ class _StoreMapState extends State<StoreMap> {
     }
   }
 
-  Future<BitmapDescriptor> _assignIcon(DocumentSnapshot document) async {
-    var currentPlace = document.id;
-    late Future<BitmapDescriptor> icon;
-
-    //prendi tutti i posti e vedi se il current document è sbloccato o bloccato
-
-    await db.collection('users')
-        .doc(widget.userId)
-        .collection('unlockedPlaces')
-        .doc(currentPlace)
-        .get()
-        .then((documentSnapshot) {
-      if (documentSnapshot.exists) {
-        icon = BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(48, 48)), 'assets/images/open-lock.png');
-      }
-      else {
-        icon = BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(48, 48)), 'assets/images/locked-padlock.png');
-      }
-    });
-
-    return icon;
-  }
-
   Future<void> _setCustomMarkers() async {
     var markers = <Marker>{};
     var check = true;
