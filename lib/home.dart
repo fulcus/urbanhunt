@@ -28,10 +28,7 @@ class Home extends StatelessWidget {
   }
 }
 
-
-
 class HomePage extends StatefulWidget {
-
   final String title = 'Hunt';
 
   @override
@@ -124,7 +121,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       //bottomNavigationBar: BottomNavBar(),
-        //bottomNavigationBar: App(),
+      //bottomNavigationBar: App(),
     );
   }
 }
@@ -300,7 +297,7 @@ class StoreMap extends StatelessWidget {
                 // Update the state of the app
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (context) => PlacePage(document),
+                    builder: (context) => PlaceCard(document),
                   ),
                 );
               }
