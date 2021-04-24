@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 /*
  * name: Text
@@ -38,6 +41,9 @@ class AddPlaceForm extends StatefulWidget {
 
 class AddPlaceFormState extends State<AddPlaceForm> {
   var data = PlaceData();
+  File? _image;
+  final picker = ImagePicker();
+
 
   //late FocusNode _name, _lockedDescr, _unlockedDescr;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
@@ -207,6 +213,21 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               validator: _validateUnlockedDescr,
             ),
             sizedBoxSpace,
+
+            Center(
+              child: _image == null
+                  ? Text('No image selected.')
+                  : Image.file(_image!),
+            ),
+            sizedBoxSpace,
+
+            FloatingActionButton(
+              onPressed: getImage,
+              tooltip: 'Pick Image',
+              child: Icon(Icons.add_a_photo),
+            ),
+
+            sizedBoxSpace,
             Center(
               child: ElevatedButton(
                 child: Text('Submit'),
@@ -249,6 +270,20 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
     await places.add(data);
   }
+
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
 }
 
 class PlaceData {

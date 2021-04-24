@@ -2,7 +2,8 @@
     package="dev.flutter.hunt_app">
    <application
         android:label="hunt_app"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"> <!--added for image picker-->
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
