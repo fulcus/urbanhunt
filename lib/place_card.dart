@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 final Map<String, Color> categoryColors = {};
 final db = FirebaseFirestore.instance;
@@ -174,6 +175,7 @@ class _PlacePageState extends State<PlacePage> {
               Text(widget.name,
                   style:
                       TextStyle(fontSize: 18.0, fontWeight: FontWeight.w900)),
+              MyButton(latitude: widget.latitude, longitude: widget.longitude),
               // Sep
               SizedBox(height: 4.0),
               // Address
@@ -365,5 +367,48 @@ class _PlacePageState extends State<PlacePage> {
     // var (userLat, userLong) = db.query("users", user.id, "curCoords");
     // return api.distance(userLat, userLong, latitude, longitude);
     return 1.425623; // to be rounded and string-formatted
+  }
+}
+
+class MyButton extends StatelessWidget {
+
+  const MyButton({
+    Key? key,
+    required this.latitude,
+    required this.longitude,
+  }) : super(key: key);
+
+  final double latitude;
+  final double longitude;
+
+  @override
+  Widget build(BuildContext context) {
+    // The GestureDetector wraps the button.
+    return GestureDetector(
+      // When the child is tapped, show a snackbar.
+      onTap: () {
+        openMap(latitude, longitude);
+      },
+      // The custom button
+      child: Container(
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).buttonColor,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Text('Google Maps'),
+      ),
+    );
+  }
+
+  //Function to be called when the user wants to open the selected place in Google Maps.
+  //Arguments -> latitude and longitude of the place
+  static Future<void> openMap(double latitude, double longitude) async {
+    var googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
+    } else {
+      throw 'Could not open the map.';
+    }
   }
 }
