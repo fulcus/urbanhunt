@@ -43,7 +43,7 @@ class PlaceCard extends StatefulWidget {
     descriptionUnlocked = document['unlockedDescr'] as String;
     latitude = document['location'].latitude as double;
     longitude = document['location'].longitude as double;
-    imagePath = 'res/A.png'; //document['imgpath'] as String;
+    imagePath = 'assets/images/A.png'; //document['imgpath'] as String;
     likes = document['likes'] as int;
     dislikes = document['dislikes'] as int;
   }

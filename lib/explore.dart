@@ -6,36 +6,45 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:hunt_app/home.dart';
+import 'package:hunt_app/place_card.dart';
 
+import 'navbar.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
 bool loading = true;
 
-class Home extends StatefulWidget {
+class Home extends StatelessWidget {
   @override
-  _HomeState createState() => _HomeState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: HomePage(),
+      bottomNavigationBar: Nav(),
+    );
+  }
 }
 
-class _HomeState extends State<Home> {
+class HomePage extends StatefulWidget {
+  final String title = 'Hunt';
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   late Stream<QuerySnapshot> _places;
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();
 
   double _initLat = 0.0;
   double _initLng = 0.0;
-  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
 
     //retrieve all the places
-    _places = db
-        .collection('places')
-        .orderBy('name')
-        .snapshots();
+    _places = db.collection('places').orderBy('name').snapshots();
 
     //retrieve the user's unlocked places
     _unlockedPlaces = db
@@ -95,12 +104,6 @@ class _HomeState extends State<Home> {
     return await Geolocator.getCurrentPosition();
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,38 +117,18 @@ class _HomeState extends State<Home> {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
                 if (!snapshot.hasData || !snapshot2.hasData) {
-                  return Center(child: CircularProgressIndicator(),);
-                }
-                return
-                  StoreMap(
-                    places: snapshot.data!.docs,
-                    unlockedPlaces: snapshot2.data!.docs,
-                    initialPosition: LatLng(_initLat, _initLng),
-                    mapController: _mapController,
+                  return Center(
+                    child: CircularProgressIndicator(),
                   );
-              }
-          );
+                }
+                return StoreMap(
+                  places: snapshot.data!.docs,
+                  unlockedPlaces: snapshot2.data!.docs,
+                  initialPosition: LatLng(_initLat, _initLng),
+                  mapController: _mapController,
+                );
+              });
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Contribute',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Social'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
       ),
     );
   }
@@ -173,13 +156,15 @@ class _StoreMapState extends State<StoreMap> {
   Set<Marker> customMarkers = {};
   double _currentCameraBearing = 0.0;
   double _currentCameraTilt = 0.0;
-  double _currentLat = initialPosition.latitude;
-  double _currentLng = initialPosition.longitude;
+  double _currentLat = 0.0;
+  double _currentLng = 0.0;
   double _currentZoom = 12.0;
 
   @override
   void initState() {
     super.initState();
+    _currentLat = widget.initialPosition.latitude;
+    _currentLng = widget.initialPosition.longitude;
     _setCustomMarkers();
   }
 
@@ -217,7 +202,7 @@ class _StoreMapState extends State<StoreMap> {
             ),
           ),
         ),
-        if(_currentCameraBearing != 0.0)
+        if (_currentCameraBearing != 0.0)
           Padding(
             padding: EdgeInsets.only(top: 630.0, left: 350.0),
             child: CircleAvatar(
@@ -288,31 +273,47 @@ class _StoreMapState extends State<StoreMap> {
         await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
 
     for (var document in widget.places) {
-      if(widget.unlockedPlaces.where((element) => element.id == document.id).isEmpty) {
+      if (widget.unlockedPlaces
+          .where((element) => element.id == document.id)
+          .isEmpty) {
         markers.add(Marker(
-          markerId: MarkerId(document.id),
-          icon: lockedImg,
-          position: LatLng(
-            document['location'].latitude as double,
-            document['location'].longitude as double,
-          ),
-        ));
+            markerId: MarkerId(document.id),
+            icon: lockedImg,
+            position: LatLng(
+              document['location'].latitude as double,
+              document['location'].longitude as double,
+            ),
+            onTap: () {
+              // Update the state of the app
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => PlaceCard(document),
+                ),
+              );
+            }));
       } else {
         markers.add(Marker(
-          markerId: MarkerId(document.id),
-          icon: unlockedImg,
-          position: LatLng(
-            document['location'].latitude as double,
-            document['location'].longitude as double,
-          ),
-        ));
+            markerId: MarkerId(document.id),
+            icon: unlockedImg,
+            position: LatLng(
+              document['location'].latitude as double,
+              document['location'].longitude as double,
+            ),
+            onTap: () {
+              // Update the state of the app
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => PlaceCard(document),
+                ),
+              );
+            }));
       }
     }
     customMarkers = markers;
   }
 
   Future<BitmapDescriptor> _createMarkerImageFromAsset(String iconPath) async {
-    return await BitmapDescriptor.fromAssetImage(ImageConfiguration(), iconPath);
+    return await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(), iconPath);
   }
-
 }

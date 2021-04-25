@@ -29,8 +29,5 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
-    - res/A.png
-    - res/B.png
-    - res/C.png
   uses-material-design: true
 

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'contribute.dart';
-import 'home.dart';
+import 'explore.dart';
 
 class Nav extends StatefulWidget {
   @override
