@@ -1,210 +1,81 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final Map<String, Color> categoryColors = {};
+// Firebase db instance
 final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
 
-class PlacePage extends StatefulWidget {
+// map category tag to its color
+final Map<String, Color> categoryColors = {};
+
+class PlaceCard extends StatefulWidget {
   late DocumentSnapshot document;
 
   late String placeId;
   late String name;
-  late List categories; // tags
-
-  late String descriptionUnlocked;
-  late String descriptionLocked;
-
-  late String imagePathUnlocked;
-  late String imagePathLocked;
+  late String imagePath;
 
   late Map<String, dynamic> address;
   late double latitude;
   late double longitude;
+
+  late List<String> categories;
+  late String descriptionUnlocked;
+  late String descriptionLocked;
+
   late int likes;
   late int dislikes;
 
-  PlacePage(DocumentSnapshot document, {Key? key}) : super(key: key) {
+  PlaceCard(DocumentSnapshot document, {Key? key}) : super(key: key) {
     this.document = document;
     placeId = document.id;
     name = document['name'] as String;
     address = document['address'] as Map<String, dynamic>;
-    categories = document['categories'] as List;
+    categories =
+        (document['categories'] as List).map((dynamic e) => e.toString()).toList();
     descriptionLocked = document['lockedDescr'] as String;
     descriptionUnlocked = document['unlockedDescr'] as String;
     latitude = document['location'].latitude as double;
     longitude = document['location'].longitude as double;
-    imagePathUnlocked = document['imgpath'] as String;
-    imagePathLocked = 'PathLocked';
+    imagePath = 'res/A.png'; //document['imgpath'] as String;
     likes = document['likes'] as int;
     dislikes = document['dislikes'] as int;
   }
 
   @override
-  _PlacePageState createState() => _PlacePageState();
+  _PlaceCardState createState() => _PlaceCardState(true, false, false);
+  // isLocked = !db.users[userId][unlockedPlacesIds].contains(this.id)
+  // isLiked = db.users[userId][likedPlacesIds].contains(this.id)
+  // isDisliked = db.users[userId][dislikedPlacesIds].contains(this.id)
+
+  double distanceKm() {
+    // userId = backend.getCurUserId();
+    // var (userLat, userLong) = db.query("users", user.id, "curCoords");
+    // return api.distance(userLat, userLong, latitude, longitude);
+    return 1.425623; // to be rounded and string-formatted
+  }
 }
 
-class _PlacePageState extends State<PlacePage> {
+class _PlaceCardState extends State<PlaceCard> {
   bool _isLocked = true;
   bool _isLiked = false;
   bool _isDisliked = false;
 
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-
-    String imagePath;
-    String description;
-
-    if (_isLocked) {
-      imagePath = widget.imagePathLocked;
-      description = widget.descriptionLocked;
-    } else {
-      imagePath = widget.imagePathUnlocked;
-      description = widget.descriptionUnlocked;
-    }
-
-    Icon likeIcon = Icon(Icons.arrow_drop_up,
-        color: _isLiked ? Colors.green[600] : Colors.grey[400]);
-    Icon dislikeIcon = Icon(Icons.arrow_drop_down,
-        color: _isDisliked ? Colors.red[600] : Colors.grey[400]);
-
-    // Tags boxes
-    List<Widget> tags = [];
-    for (int i = 0; i < widget.categories.length; i++) {
-      tags.add(Container(
-        margin: EdgeInsets.only(right: 6.0),
-        padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-        child: Text(widget.categories[i] as String,
-            style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w600,
-                color: Colors.white)),
-        decoration: BoxDecoration(
-          color: categoryColors[widget.categories[i]] ?? Colors.blue[300],
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-      ));
-    }
-
-    // Topbar (arrow back to prev page)
-    Widget topbar = Container(
-      margin: EdgeInsets.only(top: 20.0),
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 56.0,
-      child: Row(
-        children: <Widget>[
-          IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          Spacer(),
-          // other icons...
-        ],
-      ),
-    );
-
-    // Content
-    Widget content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // Sep
-        SizedBox(height: 8.0),
-        // Image
-        Stack(
-          children: <Widget>[
-            ShaderMask(
-              shaderCallback: (rect) => LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.center,
-                colors: [Colors.black, Colors.transparent],
-              ).createShader(rect),
-              blendMode: BlendMode.darken,
-              child: Image.asset(imagePath, fit: BoxFit.cover),
-              // child: Container(
-              //   decoration: BoxDecoration(
-              //     image: DecorationImage(
-              //       image: AssetImage(imagePath),
-              //       fit: BoxFit.cover,
-              //       colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken),
-              //     ),
-              //   ),
-              // ),
-            ),
-            topbar,
-          ],
-        ),
-        // Pad
-        Padding(
-          padding: EdgeInsets.only(top: 4.0, left: 32.0, right: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Below Image: Like/Dislike and Category tags
-              Row(
-                children: <Widget>[
-                  // Like Dislike stats
-                  GestureDetector(onTap: like, child: likeIcon),
-                  Text((widget.likes + (_isLiked ? 1 : 0)).toString(),
-                      style: TextStyle(
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.green[600])),
-                  SizedBox(width: 4.0),
-                  GestureDetector(onTap: dislike, child: dislikeIcon),
-                  Text((widget.dislikes + (_isDisliked ? 1 : 0)).toString(),
-                      style: TextStyle(
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.red[600])),
-                  // Sep
-                  Spacer(),
-                  // Category tags
-                  Row(children: tags),
-                ],
-              ),
-              // Sep
-              SizedBox(height: 12.0),
-              // Name
-              Text(widget.name,
-                  style:
-                      TextStyle(fontSize: 18.0, fontWeight: FontWeight.w900)),
-              MyButton(latitude: widget.latitude, longitude: widget.longitude),
-              // Sep
-              SizedBox(height: 4.0),
-              // Address
-              Text(widget.address['street'] as String,
-                  style: TextStyle(fontSize: 14.0)),
-              // Sep
-              SizedBox(height: 4.0),
-              // Distance
-              Text(distanceKm().toStringAsFixed(2) + ' km',
-                  style: TextStyle(
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black45)),
-              // Sep
-              SizedBox(height: 8.0),
-              // Description
-              Text(description, style: TextStyle(fontSize: 12.0)),
-              // Sep
-              SizedBox(height: 32.0),
-            ],
-          ),
-        ),
-      ],
-    );
-
-    return Scaffold(body: SingleChildScrollView(child: content));
+  _PlaceCardState(bool isLocked, bool isLiked, bool isDisliked) {
+    _isLocked = isLocked;
+    _isLiked = isLiked;
+    _isDisliked = isDisliked;
   }
 
-  void unlock() {
+  // Interactions
+  void tryUnlock() {
+    // if (should_unlock)
     setState(() {
       _isLocked = false;
     });
@@ -351,10 +222,8 @@ class _PlacePageState extends State<PlacePage> {
   }
 
   Future<void> _dbUnlockPlace() async {
-    /*
-    All places have actually been already downloaded, so not need to get it again.
-    Only need to update UI with new info and write "unlocking" to db.
-     */
+    // All places have actually been already downloaded, so not need to get it again.
+    // Only need to update UI with new info and write 'unlocking' to db.
     var unlockedPlaces =
         db.collection('users').doc(userId).collection('unlockedPlaces');
     var data = <String, dynamic>{'liked': false, 'disliked': false};
@@ -362,11 +231,256 @@ class _PlacePageState extends State<PlacePage> {
     return await unlockedPlaces.doc(widget.placeId).set(data);
   }
 
-  double distanceKm() {
-    // userId = backend.getCurUserId();
-    // var (userLat, userLong) = db.query("users", user.id, "curCoords");
-    // return api.distance(userLat, userLong, latitude, longitude);
-    return 1.425623; // to be rounded and string-formatted
+  // Frontend
+  Widget topBar() {
+    Widget scrollHint = Container(
+      width: 28.0,
+      height: 4.0,
+      decoration: BoxDecoration(
+        color: Colors.blueGrey[100],
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+      ),
+    );
+
+    Widget closeIcon = IconButton(
+      icon: Icon(
+        Icons.close_rounded,
+        color: Colors.grey,
+        size: 18.0,
+      ),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    return Container(
+      width: double.infinity,
+      height: 24.0,
+      child: Row(
+        children: <Widget>[
+          Expanded(child: Container()),
+          Expanded(
+              child: Container(
+            alignment: Alignment.center,
+            child: scrollHint,
+          )),
+          Expanded(
+              child: Container(
+            alignment: Alignment.centerRight,
+            child: closeIcon,
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget imageBannerLocked() {
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Container(
+          width: double.infinity,
+          height: 150.0,
+          alignment: Alignment.center,
+          child: Stack(
+            children: <Widget>[
+              ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.center,
+                  colors: [Colors.black, Colors.transparent],
+                ).createShader(rect),
+                blendMode: BlendMode.darken,
+                child:
+                    Center(child: Image.asset(widget.imagePath, height: 150.0)),
+              ),
+              ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                  child: Container(
+                    color: Colors.grey.withOpacity(0.1),
+                    alignment: Alignment.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+            child: IconButton(
+              icon: Icon(Icons.lock, color: Colors.black),
+              onPressed: tryUnlock,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget imageBannerUnlocked() {
+    return Container(
+      width: double.infinity,
+      height: 150.0,
+      alignment: Alignment.center,
+      child: ShaderMask(
+        shaderCallback: (rect) => LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.center,
+          colors: [Colors.black, Colors.transparent],
+        ).createShader(rect),
+        blendMode: BlendMode.darken,
+        child: Image.asset(widget.imagePath, height: 150.0),
+      ),
+    );
+  }
+
+  List<Widget> categoriesTags() {
+    List<Widget> tags = [];
+
+    var textStyle = TextStyle(
+      fontSize: 12.0,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    );
+
+    for (var i = 0; i < widget.categories.length; i++) {
+      tags.add(Container(
+        margin: EdgeInsets.only(right: 6.0),
+        padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+        child: Text(widget.categories[i], style: textStyle),
+        decoration: BoxDecoration(
+          color: categoryColors[widget.categories[i]] ?? Colors.blue[300],
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+      ));
+    }
+
+    return tags;
+  }
+
+  // Build
+  @override
+  Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
+
+    String description;
+    Widget imageBanner;
+
+    if (_isLocked) {
+      description = widget.descriptionLocked;
+      imageBanner = imageBannerLocked();
+    } else {
+      description = widget.descriptionUnlocked;
+      imageBanner = imageBannerUnlocked();
+    }
+
+    var likeOn = _isLiked ? Colors.green[600] : Colors.grey[400];
+    var dislikeOn = _isDisliked ? Colors.red[600] : Colors.grey[400];
+
+    var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
+    var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);
+
+    // Content
+    Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        topBar(),
+        // Image
+        imageBanner,
+        // Below Image: Place info
+        Padding(
+          padding: EdgeInsets.only(top: 8.0, left: 32.0, right: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Like/Dislike and Category tags
+              Row(
+                children: <Widget>[
+                  // Like Dislike stats
+                  GestureDetector(onTap: like, child: likeIcon),
+                  SizedBox(width: 4.0),
+                  Text(
+                    (widget.likes + (_isLiked ? 1 : 0)).toString(),
+                    style: TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green[600]),
+                  ),
+                  SizedBox(width: 16.0),
+                  GestureDetector(onTap: dislike, child: dislikeIcon),
+                  SizedBox(width: 4.0),
+                  Text(
+                    (widget.dislikes + (_isDisliked ? 1 : 0)).toString(),
+                    style: TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red[600]),
+                  ),
+                  // Sep
+                  Spacer(),
+                  // Category tags
+                  Row(children: categoriesTags()),
+                ],
+              ),
+              // Sep
+              SizedBox(height: 12.0),
+              // Name
+              Text(
+                widget.name,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              // Sep
+              SizedBox(height: 4.0),
+              // Address
+              Text(widget.address['street'] as String,
+                  style: TextStyle(fontSize: 14.0)),
+              // Sep
+              SizedBox(height: 4.0),
+              // Distance
+              Text(
+                widget.distanceKm().toStringAsFixed(2) + ' km',
+                style: TextStyle(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black45),
+              ),
+              // Sep
+              SizedBox(height: 8.0),
+              // Description
+              Text(description, style: TextStyle(fontSize: 12.0)),
+              // Sep
+              SizedBox(height: 32.0),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return DraggableScrollableSheet(
+      minChildSize: 0.44,
+      initialChildSize: 0.44,
+      builder: (context, scrollController) {
+        return Material(
+          elevation: 10,
+          shadowColor: Colors.black,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: content,
+          ),
+        );
+      },
+    );
   }
 }
 

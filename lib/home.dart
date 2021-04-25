@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_webservice/places.dart';
 
-import 'contribute.dart';
+import 'add_place.dart';
+import 'api_key.dart';
 import 'navbar.dart';
 import 'place_card.dart';
 
@@ -26,10 +28,7 @@ class Home extends StatelessWidget {
   }
 }
 
-
-
 class HomePage extends StatefulWidget {
-
   final String title = 'Hunt';
 
   @override
@@ -54,6 +53,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /*appBar: AppBar(
+        title: Text(widget.title),
+      ),*/
       body: StreamBuilder<QuerySnapshot>(
         stream: _places,
         builder: (context, snapshot) {
@@ -79,6 +81,47 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text(
+                'My profile',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                textScaleFactor: 2.0,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.green,
+              ),
+            ),
+            ListTile(
+              title: Text('Add Place'),
+              onTap: () {
+                // Update the state of the app
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (context) => AddPlace()),
+                );
+
+                // Then close the drawer
+                //Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      //bottomNavigationBar: BottomNavBar(),
+      //bottomNavigationBar: App(),
     );
   }
 }
@@ -254,7 +297,7 @@ class StoreMap extends StatelessWidget {
                 // Update the state of the app
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (context) => PlacePage(document),
+                    builder: (context) => PlaceCard(document),
                   ),
                 );
               }
