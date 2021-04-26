@@ -5,8 +5,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'api_key.dart';
 
 /*
  * name: Text
@@ -36,13 +39,14 @@ class Contribute extends StatelessWidget {
 
 class AddPlaceForm extends StatefulWidget {
   const AddPlaceForm({Key? key}) : super(key: key);
+  static final kInitialPosition = LatLng(-33.8567844, 151.213108);
 
   @override
   AddPlaceFormState createState() => AddPlaceFormState();
 }
 
 class AddPlaceFormState extends State<AddPlaceForm> {
-  var data = PlaceData();
+  final data = PlaceData();
   File? _image;
   final picker = ImagePicker();
 
@@ -198,11 +202,11 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 helperText: 'Short description shown when place is locked',
                 labelText: 'Locked description',
               ),
+              maxLines: 1,
               onSaved: (value) {
                 data.lockedDescr = value!;
               },
               validator: _validateLockedDescr,
-              maxLines: 1,
             ),
             sizedBoxSpace,
             TextFormField(
@@ -237,6 +241,71 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             ),
 
             sizedBoxSpace,
+
+            ElevatedButton(
+              child: Text('Select Place Location'),
+              onPressed: () {
+                Navigator.push<void>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return PlacePicker(
+                        apiKey: googleMapsApiKey,
+                        initialPosition: AddPlaceForm.kInitialPosition,
+                        useCurrentLocation: true,
+                        selectInitialPosition: true,
+
+                        //usePlaceDetailSearch: true,
+                        onPlacePicked: (result) {
+                          data.selectedLocation = result;
+                          Navigator.of(context).pop();
+                          setState(() {});
+                        },
+                        //forceSearchOnZoomChanged: true,
+                        //automaticallyImplyAppBarLeading: false,
+                        //autocompleteLanguage: "ko",
+                        //region: 'au',
+                        //selectInitialPosition: true,
+                        // selectedPlaceWidgetBuilder: (_, selectedPlace, state, isSearchBarFocused) {
+                        //   print("state: $state, isSearchBarFocused: $isSearchBarFocused");
+                        //   return isSearchBarFocused
+                        //       ? Container()
+                        //       : FloatingCard(
+                        //           bottomPosition: 0.0, // MediaQuery.of(context) will cause rebuild. See MediaQuery document for the information.
+                        //           leftPosition: 0.0,
+                        //           rightPosition: 0.0,
+                        //           width: 500,
+                        //           borderRadius: BorderRadius.circular(12.0),
+                        //           child: state == SearchingState.Searching
+                        //               ? Center(child: CircularProgressIndicator())
+                        //               : RaisedButton(
+                        //                   child: Text("Pick Here"),
+                        //                   onPressed: () {
+                        //                     // IMPORTANT: You MUST manage selectedPlace data yourself as using this build will not invoke onPlacePicker as
+                        //                     //            this will override default 'Select here' Button.
+                        //                     print("do something with [selectedPlace] data");
+                        //                     Navigator.of(context).pop();
+                        //                   },
+                        //                 ),
+                        //         );
+                        // },
+                        // pinBuilder: (context, state) {
+                        //   if (state == PinState.Idle) {
+                        //     return Icon(Icons.favorite_border);
+                        //   } else {
+                        //     return Icon(Icons.favorite);
+                        //   }
+                        // },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            sizedBoxSpace,
+            data.selectedLocation == null ? Container() : Text(data.selectedLocation!.formattedAddress ?? ''),
+            sizedBoxSpace,
+
             Center(
               child: ElevatedButton(
                 child: Text('Submit'),
@@ -244,6 +313,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               ),
             ),
             sizedBoxSpace,
+
           ],
         ),
       ),
@@ -286,7 +356,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       'unlockedDescr': placeData.unlockedDescr,
       'name': placeData.name,
       'dislikes': dislikes,
-      'location': location,
+      'location': placeData.selectedLocation!.geometry!.location,
       'likes': likes
     };
 
@@ -294,11 +364,11 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   Future<String> uploadFile(File _image) async {
-    Reference storageReference =
+    var storageReference =
         FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
     await storageReference.putFile(_image);
     print('File Uploaded');
-    String returnURL = '';
+    var returnURL = '';
     await storageReference.getDownloadURL().then((fileURL) {
       returnURL = fileURL;
     });
@@ -307,6 +377,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 }
 
 class PlaceData {
+  late PickResult? selectedLocation = null;
   late int zip;
   late double latitude, longitude;
   late String city, state, street, imgpath, lockedDescr, unlockedDescr, name;
