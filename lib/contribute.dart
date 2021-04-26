@@ -72,6 +72,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       _autoValidateMode =
           AutovalidateMode.always; // Start validating on every change.
       showInSnackBar('Error in form');
+      form.save();
     } else {
       form.save();
       addPlace(data);
@@ -86,6 +87,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       content: Text(value),
     ));
   }
+
+  //todo use built in validators https://pub.dev/packages/flutter_form_builder
 
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
@@ -164,13 +167,13 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               validator: _validateName,
             ),
             sizedBoxSpace,
-            FormBuilderChoiceChip(
-              name: 'choice_chip',
-              alignment: WrapAlignment.spaceEvenly,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            FormBuilderCheckboxGroup(
+              name: 'category_selector',
+              //alignment: WrapAlignment.spaceEvenly,
+              //crossAxisAlignment: WrapCrossAlignment.center,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                labelText: 'Select a category',
+                labelText: 'Select categories',
               ),
               options: [
                 FormBuilderFieldOption(
@@ -179,6 +182,10 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 FormBuilderFieldOption(value: 'Art', child: Text('Art')),
                 FormBuilderFieldOption(value: 'Sport', child: Text('Sport')),
               ],
+              onSaved: (value) {
+                data.categories = value as List<String>;
+                //print('value of categories: ' + value.toString() + value.runtimeType.toString());
+              },
             ),
             sizedBoxSpace,
             TextFormField(
@@ -259,7 +266,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     int zip = 20100, dislikes = 0, likes = 0;
     double latitude = 45.485044, longitude = 9.202816;
     var places = FirebaseFirestore.instance.collection('places');
-    String imageURL = await uploadFile(_image!) as String;
+    String imageURL = await uploadFile(_image!) as String; // should put this somewhere else and assign placeData.imgpath
 
     var city = 'Milan',
         state = 'Italy',
@@ -269,11 +276,11 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         unlockedDescr = 'Less interesting facts',
         name = 'Secret Door',
         location = GeoPoint(latitude, longitude);
-    var categories = ['culture']; // todo select more than one
+    var categories = ['culture'];
 
     var data = <String, dynamic>{
       'address': {'zip': zip, 'city': city, 'state': state, 'street': street},
-      'categories': categories,
+      'categories': placeData.categories,
       'imgpath': imageURL,
       'lockedDescr': placeData.lockedDescr,
       'unlockedDescr': placeData.unlockedDescr,
