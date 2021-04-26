@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 
 /*
  * name: Text
@@ -44,11 +46,10 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   File? _image;
   final picker = ImagePicker();
 
-  //late FocusNode _name, _lockedDescr, _unlockedDescr;
+  late FocusNode _name, _lockedDescr, _unlockedDescr;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  /*
   @override
   void initState() {
     super.initState();
@@ -63,7 +64,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     _lockedDescr.dispose();
     _unlockedDescr.dispose();
     super.dispose();
-  }*/
+  }
 
   void _handleSubmitted() {
     final form = _formKey.currentState!;
@@ -73,7 +74,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       showInSnackBar('Error in form');
     } else {
       form.save();
-      //addPlace(data);
+      addPlace(data);
       print(data.name + data.lockedDescr + data.unlockedDescr);
       showInSnackBar('Added Place');
     }
@@ -146,7 +147,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
             //sizedBoxSpace,
             TextFormField(
-              //focusNode: _name,
+              focusNode: _name,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
@@ -158,6 +159,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               ),
               onSaved: (value) {
                 data.name = value!;
+                print('value of name: ' + data.name);
               },
               validator: _validateName,
             ),
@@ -180,7 +182,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             ),
             sizedBoxSpace,
             TextFormField(
-              //focusNode: _lockedDescr,
+              focusNode: _lockedDescr,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 filled: true,
@@ -197,7 +199,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             ),
             sizedBoxSpace,
             TextFormField(
-              //focusNode: _unlockedDescr,
+              focusNode: _unlockedDescr,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 filled: true,
@@ -241,9 +243,23 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     );
   }
 
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
   Future<void> addPlace(PlaceData placeData) async {
     int zip = 20100, dislikes = 0, likes = 0;
     double latitude = 45.485044, longitude = 9.202816;
+    var places = FirebaseFirestore.instance.collection('places');
+    String imageURL = await uploadFile(_image!) as String;
 
     var city = 'Milan',
         state = 'Italy',
@@ -253,13 +269,12 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         unlockedDescr = 'Less interesting facts',
         name = 'Secret Door',
         location = GeoPoint(latitude, longitude);
-    var categories = ['culture'];
+    var categories = ['culture']; // todo select more than one
 
-    var places = FirebaseFirestore.instance.collection('places');
     var data = <String, dynamic>{
       'address': {'zip': zip, 'city': city, 'state': state, 'street': street},
       'categories': categories,
-      'imgpath': imgpath,
+      'imgpath': imageURL,
       'lockedDescr': placeData.lockedDescr,
       'unlockedDescr': placeData.unlockedDescr,
       'name': placeData.name,
@@ -271,16 +286,16 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     await places.add(data);
   }
 
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
+  Future<String> uploadFile(File _image) async {
+    Reference storageReference =
+        FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
+    await storageReference.putFile(_image);
+    print('File Uploaded');
+    String returnURL = '';
+    await storageReference.getDownloadURL().then((fileURL) {
+      returnURL = fileURL;
     });
+    return returnURL;
   }
 }
 

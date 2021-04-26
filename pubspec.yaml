@@ -19,7 +19,7 @@ dependencies:
   google_sign_in: ^5.0.2
   image_picker: ^0.7.4
   location: ^4.1.1
-  url_launcher: 6.0.3
+  url_launcher: ^6.0.3
 
 dev_dependencies:
   flutter_test:
