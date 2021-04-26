@@ -44,7 +44,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   File? _image;
   final picker = ImagePicker();
 
-
   //late FocusNode _name, _lockedDescr, _unlockedDescr;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -172,7 +171,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 labelText: 'Select a category',
               ),
               options: [
-                FormBuilderFieldOption(value: 'Culture', child: Text('Culture')),
+                FormBuilderFieldOption(
+                    value: 'Culture', child: Text('Culture')),
                 FormBuilderFieldOption(value: 'Nature', child: Text('Nature')),
                 FormBuilderFieldOption(value: 'Art', child: Text('Art')),
                 FormBuilderFieldOption(value: 'Sport', child: Text('Sport')),
@@ -271,7 +271,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     await places.add(data);
   }
 
-
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -283,7 +282,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       }
     });
   }
-
 }
 
 class PlaceData {

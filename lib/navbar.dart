@@ -10,10 +10,10 @@ class Nav extends StatefulWidget {
 }
 
 class NavState extends State<Nav> {
-  String _currentPage = 'Map';
-  List<String> pageKeys = ['Map', 'Contribute', 'Social', 'Settings'];
+  String _currentPage = 'Explore';
+  List<String> pageKeys = ['Explore', 'Contribute', 'Social', 'Settings'];
   final Map<String, GlobalKey<NavigatorState>> _navigatorKeys = {
-    'Map': GlobalKey<NavigatorState>(),
+    'Explore': GlobalKey<NavigatorState>(),
     'Contribute': GlobalKey<NavigatorState>(),
     'Social': GlobalKey<NavigatorState>(),
     'Settings': GlobalKey<NavigatorState>(),
@@ -38,8 +38,8 @@ class NavState extends State<Nav> {
         final isFirstRouteInCurrentTab =
             !await _navigatorKeys[_currentPage]!.currentState!.maybePop();
         if (isFirstRouteInCurrentTab) {
-          if (_currentPage != 'Map') {
-            _selectTab('Map', 1);
+          if (_currentPage != 'Explore') {
+            _selectTab('Explore', 1);
 
             return false;
           }
@@ -49,7 +49,7 @@ class NavState extends State<Nav> {
       },
       child: Scaffold(
         body: Stack(children: <Widget>[
-          _buildOffstageNavigator('Map'),
+          _buildOffstageNavigator('Explore'),
           _buildOffstageNavigator('Contribute'),
           _buildOffstageNavigator('Social'),
           _buildOffstageNavigator('Settings'),
@@ -64,7 +64,7 @@ class NavState extends State<Nav> {
             BottomNavigationBarItem(
               icon: Icon(Icons.explore_outlined),
               activeIcon: Icon(Icons.explore),
-              label: 'Map',
+              label: 'Explore',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.add_circle_outline),
@@ -100,7 +100,6 @@ class NavState extends State<Nav> {
   }
 }
 
-
 class TabNavigator extends StatelessWidget {
   TabNavigator({required this.navigatorKey, required this.tabItem});
 
@@ -109,9 +108,9 @@ class TabNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = HomePage();
-    if (tabItem == 'Map') {
-      child = HomePage();
+    Widget child = Explore();
+    if (tabItem == 'Explore') {
+      child = Explore();
     } else if (tabItem == 'Contribute') {
       child = Contribute();
     } else if (tabItem == 'Social') {

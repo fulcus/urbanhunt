@@ -18,20 +18,18 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: HomePage(),
+      body: Explore(),
       bottomNavigationBar: Nav(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  final String title = 'Hunt';
-
+class Explore extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _ExploreState createState() => _ExploreState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ExploreState extends State<Explore> {
   late Stream<QuerySnapshot> _places;
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();

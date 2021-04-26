@@ -151,7 +151,8 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
       final User user = (await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
-      )).user!;
+      ))
+          .user!;
 
       Scaffold.of(context).showSnackBar(
         SnackBar(
@@ -159,8 +160,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         ),
       );
 
-      _pushPage(context, HomePage());
-
+      _pushPage(context, Home());
     } catch (e) {
       Scaffold.of(context).showSnackBar(
         const SnackBar(

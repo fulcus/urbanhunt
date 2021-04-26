@@ -6,31 +6,6 @@ import 'package:flutter_signin_button/button_builder.dart';
 import './register_page.dart';
 import './signin_page.dart';
 
-/*
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // Uncomment this to use the auth emulator for testing
-  // await FirebaseAuth.instance.useEmulator('http://localhost:9099');
-  runApp(AuthExampleApp());
-}
-
-/// The entry point of the application.
-///
-/// Returns a [MaterialApp].
-class AuthExampleApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Firebase Example App',
-      theme: ThemeData.dark(),
-      home: Scaffold(
-        body: AuthTypeSelector(),
-      ),
-    );
-  }
-}*/
-
 /// Provides a UI to select a authentication type page
 class AuthTypeSelector extends StatelessWidget {
   // Navigates to a new page
