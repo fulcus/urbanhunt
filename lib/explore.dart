@@ -41,16 +41,6 @@ class _ExploreState extends State<Explore> {
   void initState() {
     super.initState();
 
-    //retrieve all the places
-    _places = db.collection('places').orderBy('name').snapshots();
-
-    //retrieve the user's unlocked places
-    _unlockedPlaces = db
-        .collection('users')
-        .doc(userId)
-        .collection('unlockedPlaces')
-        .snapshots();
-
     //retrieve the user's initial position
     _determinePosition().then((value) {
       setState(() {
@@ -59,6 +49,18 @@ class _ExploreState extends State<Explore> {
         loading = false;
       });
     });
+
+    //retrieve all the places
+    _places = db.collection('places')
+        .orderBy('name')
+        .snapshots();
+
+    //retrieve the user's unlocked places
+    _unlockedPlaces = db
+        .collection('users')
+        .doc(userId)
+        .collection('unlockedPlaces')
+        .snapshots();
   }
 
   /// Determine the current position of the device.
@@ -156,7 +158,7 @@ class _StoreMapState extends State<StoreMap> {
   double _currentCameraTilt = 0.0;
   double _currentLat = 0.0;
   double _currentLng = 0.0;
-  double _currentZoom = 12.0;
+  double _currentZoom = 16.0;
 
   @override
   void initState() {
@@ -173,7 +175,7 @@ class _StoreMapState extends State<StoreMap> {
         GoogleMap(
           initialCameraPosition: CameraPosition(
             target: widget.initialPosition,
-            zoom: 12,
+            zoom: 16,
           ),
           markers: customMarkers,
           onMapCreated: (mapController) {
@@ -190,9 +192,9 @@ class _StoreMapState extends State<StoreMap> {
           //indoorViewEnabled: true, => we might need it
         ),
         Padding(
-          padding: EdgeInsets.only(top: 680.0, left: 350.0),
+          padding: EdgeInsets.only(top: 680.0, left: 330.0),
           child: CircleAvatar(
-            backgroundColor: Colors.amber,
+            backgroundColor: Colors.lightBlueAccent,
             child: IconButton(
               icon: Icon(Icons.my_location),
               color: Colors.black,
@@ -202,9 +204,9 @@ class _StoreMapState extends State<StoreMap> {
         ),
         if (_currentCameraBearing != 0.0)
           Padding(
-            padding: EdgeInsets.only(top: 630.0, left: 350.0),
+            padding: EdgeInsets.only(top: 630.0, left: 330.0),
             child: CircleAvatar(
-              backgroundColor: Colors.amber,
+              backgroundColor: Colors.lightBlueAccent,
               child: IconButton(
                 icon: Icon(Icons.explore),
                 color: Colors.black,
@@ -232,7 +234,7 @@ class _StoreMapState extends State<StoreMap> {
   Future<void> _setCurrentLocation() async {
     var currentLocation = await Geolocator.getCurrentPosition();
     var cPosition = CameraPosition(
-      zoom: 12,
+      zoom: 16,
       bearing: _currentCameraBearing,
       tilt: _currentCameraTilt,
       target: LatLng(currentLocation.latitude, currentLocation.longitude),
@@ -271,9 +273,10 @@ class _StoreMapState extends State<StoreMap> {
         await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
 
     for (var document in widget.places) {
-      if (widget.unlockedPlaces
-          .where((element) => element.id == document.id)
-          .isEmpty) {
+      //retrieve the place from the unlockedPlaces collection, if exists
+      var current = widget.unlockedPlaces.where((element) => element.id == document.id).toList();
+
+      if (current.isEmpty) {
         markers.add(Marker(
             markerId: MarkerId(document.id),
             icon: lockedImg,
@@ -285,7 +288,8 @@ class _StoreMapState extends State<StoreMap> {
               // Update the state of the app
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (context) => PlaceCard(document),
+                  //if isLocked==true then isLiked == false and isDisliked == false
+                  builder: (context) => PlaceCard(document, true, false, false),
                 ),
               );
             }));
@@ -301,7 +305,9 @@ class _StoreMapState extends State<StoreMap> {
               // Update the state of the app
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (context) => PlaceCard(document),
+                  //passa anche un booleano per dire se è locked o meno
+                  //(static, la calcolo all'inzio e poi si aggiorna ogni volta che apro la PlaceCard)
+                  builder: (context) => PlaceCard(document, false, current[0]['liked'] as bool, current[0]['disliked'] as bool),
                 ),
               );
             }));

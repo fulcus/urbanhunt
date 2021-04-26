@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Firebase db instance
@@ -16,6 +17,9 @@ final Map<String, Color> categoryColors = {};
 
 class PlaceCard extends StatefulWidget {
   late DocumentSnapshot document;
+  late bool isLocked;
+  late bool isLiked;
+  late bool isDisliked;
 
   late String placeId;
   late String name;
@@ -32,8 +36,12 @@ class PlaceCard extends StatefulWidget {
   late int likes;
   late int dislikes;
 
-  PlaceCard(DocumentSnapshot document, {Key? key}) : super(key: key) {
+  PlaceCard(DocumentSnapshot document, bool isLocked, bool isLiked, bool isDisliked, {Key? key}) : super(key: key) {
     this.document = document;
+    this.isLocked = isLocked;
+    this.isLiked = isLiked;
+    this.isDisliked = isDisliked;
+
     placeId = document.id;
     name = document['name'] as String;
     address = document['address'] as Map<String, dynamic>;
@@ -49,17 +57,8 @@ class PlaceCard extends StatefulWidget {
   }
 
   @override
-  _PlaceCardState createState() => _PlaceCardState(true, false, false);
-  // isLocked = !db.users[userId][unlockedPlacesIds].contains(this.id)
-  // isLiked = db.users[userId][likedPlacesIds].contains(this.id)
-  // isDisliked = db.users[userId][dislikedPlacesIds].contains(this.id)
+  _PlaceCardState createState() => _PlaceCardState(isLocked, isLiked, isDisliked);
 
-  double distanceKm() {
-    // userId = backend.getCurUserId();
-    // var (userLat, userLong) = db.query("users", user.id, "curCoords");
-    // return api.distance(userLat, userLong, latitude, longitude);
-    return 1.425623; // to be rounded and string-formatted
-  }
 }
 
 class _PlaceCardState extends State<PlaceCard> {
@@ -67,56 +66,88 @@ class _PlaceCardState extends State<PlaceCard> {
   bool _isLiked = false;
   bool _isDisliked = false;
 
+  double _distance = 0;
+  String _distanceUnit = ' km';
+
   _PlaceCardState(bool isLocked, bool isLiked, bool isDisliked) {
     _isLocked = isLocked;
     _isLiked = isLiked;
     _isDisliked = isDisliked;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _computeDistanceKm();
+  }
+
+  Future<void> _computeDistanceKm() async {
+    var currentPos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    setState(() {});
+    var distance = Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude, widget.latitude, widget.longitude);
+    if(distance >= 1000) {
+      _distance = distance/1000;
+    } else {
+      _distance = distance;
+      _distanceUnit = ' m';
+    }
+  }
+
   // Interactions
-  void tryUnlock() {
-    // if (should_unlock)
-    setState(() {
-      _isLocked = false;
-    });
+  Future<void> tryUnlock() async {
+    var currentPos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    if(Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude, widget.latitude, widget.longitude) <= 15) {
+      setState(() {
+        _isLocked = false;
+        setState(() {
+          _dbUnlockPlace();
+        });
+        //update marker icon => markerId is document.id
+        //TODO update the UI: marker icon in Explore, likes and img in PlaceCard
+      });
+    }
   }
 
   // todo check if db calls are successful
 
   void like() {
-    setState(() {
-      if (!_isLiked && !_isDisliked) {
-        _dbUpdateLikes(1);
-      } else if (_isLiked && !_isDisliked) {
-        _dbUpdateLikes(-1);
-      } else if (!_isLiked && _isDisliked) {
-        __dbSwapLikeDislike(false);
-      }
+    if(!_isLocked) {
+      setState(() {
+        if (!_isLiked && !_isDisliked) {
+          _dbUpdateLikes(1);
+        } else if (_isLiked && !_isDisliked) {
+          _dbUpdateLikes(-1);
+        } else if (!_isLiked && _isDisliked) {
+          __dbSwapLikeDislike(false);
+        }
 
-      _isLiked = !_isLiked;
-      _isDisliked = false;
-    });
+        _isLiked = !_isLiked;
+        _isDisliked = false;
+      });
+    }
   }
 
   void dislike() {
-    setState(() {
-      if (!_isLiked && !_isDisliked) {
-        _dbUpdateDislikes(1);
-      } else if (_isLiked && !_isDisliked) {
-        __dbSwapLikeDislike(true);
-      } else if (!_isLiked && _isDisliked) {
-        _dbUpdateDislikes(-1);
-      }
+    if(!_isLocked) {
+      setState(() {
+        if (!_isLiked && !_isDisliked) {
+          _dbUpdateDislikes(1);
+        } else if (_isLiked && !_isDisliked) {
+          __dbSwapLikeDislike(true);
+        } else if (!_isLiked && _isDisliked) {
+          _dbUpdateDislikes(-1);
+        }
 
-      _isDisliked = !_isDisliked;
-      _isLiked = false;
-    });
+        _isDisliked = !_isDisliked;
+        _isLiked = false;
+      });
+    }
   }
 
   // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
   // @param like, if true likes, false unlikes
   Future<void> _dbUpdateLikes(int likesIncrement) async {
-    bool liked = likesIncrement > 0 ? true : false;
+    var liked = likesIncrement > 0 ? true : false;
 
     var placeRef = db.collection('places').doc(widget.placeId);
     var unlockedPlaceRef = db
@@ -148,7 +179,7 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   Future<void> _dbUpdateDislikes(int dislikesIncrement) async {
-    bool disliked = dislikesIncrement > 0 ? true : false;
+    var disliked = dislikesIncrement > 0 ? true : false;
 
     var placeRef = db.collection('places').doc(widget.placeId);
     var unlockedPlaceRef = db
@@ -448,12 +479,15 @@ class _PlaceCardState extends State<PlaceCard> {
               SizedBox(height: 4.0),
               // Distance
               Text(
-                widget.distanceKm().toStringAsFixed(2) + ' km',
+                _distance.toStringAsFixed(0) + _distanceUnit,
                 style: TextStyle(
                     fontSize: 10.0,
                     fontWeight: FontWeight.w900,
                     color: Colors.black45),
               ),
+              SizedBox(height: 4.0),
+              // Open in Google Maps button
+              MyButton(latitude: widget.latitude, longitude: widget.longitude),
               // Sep
               SizedBox(height: 8.0),
               // Description
@@ -519,10 +553,10 @@ class MyButton extends StatelessWidget {
   //Arguments -> latitude and longitude of the place
   static Future<void> openMap(double latitude, double longitude) async {
     var googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
-    if (await canLaunch(googleUrl)) {
+    //if (await canLaunch(googleUrl)) { //the canLaunch method doesn't work with API 30 Android11
       await launch(googleUrl);
-    } else {
+    /*} else {
       throw 'Could not open the map.';
-    }
+    }*/
   }
 }
