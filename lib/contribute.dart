@@ -11,15 +11,6 @@ import 'package:path/path.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'api_key.dart';
 
-/*
- * name: Text
- * lockedDescr: Text
- * unlockedDescr: Text
- * categories: Options
- * address*: Text
- * pick location: Widget
- * load image: Widget
- */
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
@@ -29,9 +20,7 @@ class Contribute extends StatelessWidget {
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Scaffold(
-        body: Padding(
-            padding: EdgeInsets.fromLTRB(20, 50, 20, 0),
-            child: const AddPlaceForm()),
+        body: const AddPlaceForm(),
       ),
     );
   }
@@ -147,12 +136,10 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           children: [
-            //sizedBoxSpace,
+            SizedBox(height: 70.0),
             Text('Add A Place',
                 style: TextStyle(fontSize: 22), textAlign: TextAlign.center),
             SizedBox(height: 44),
-
-            //sizedBoxSpace,
             TextFormField(
               focusNode: _name,
               textInputAction: TextInputAction.next,
@@ -176,6 +163,12 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               //alignment: WrapAlignment.spaceEvenly,
               //crossAxisAlignment: WrapCrossAlignment.center,
               decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: EdgeInsets.only(bottom: 100), // add padding to adjust icon
+                  child: Icon(Icons.category_outlined),
+                ),
+                //icon: Icon(Icons.category_outlined),
+                labelStyle: TextStyle(),
                 border: InputBorder.none,
                 labelText: 'Select categories',
               ),
@@ -226,86 +219,42 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               validator: _validateUnlockedDescr,
             ),
             sizedBoxSpace,
-
             Center(
               child: _image == null
                   ? Text('No image selected.')
-                  : Image.file(_image!),
+                  : InkWell(
+                      onTap: () {
+                        setState(() {
+                          _image = null;
+                        });
+                      },
+                      child: Container(
+                        height: 100,
+                        width: 100,
+                        child: Image.file(
+                          _image!,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
             ),
             sizedBoxSpace,
-
-            FloatingActionButton(
+            ElevatedButton.icon(
               onPressed: getImage,
-              tooltip: 'Pick Image',
-              child: Icon(Icons.add_a_photo),
-            ),
-
-            sizedBoxSpace,
-
-            ElevatedButton(
-              child: Text('Select Place Location'),
-              onPressed: () {
-                Navigator.push<void>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return PlacePicker(
-                        apiKey: googleMapsApiKey,
-                        initialPosition: AddPlaceForm.kInitialPosition,
-                        useCurrentLocation: true,
-                        selectInitialPosition: true,
-
-                        //usePlaceDetailSearch: true,
-                        onPlacePicked: (result) {
-                          data.selectedLocation = result;
-                          Navigator.of(context).pop();
-                          setState(() {});
-                        },
-                        //forceSearchOnZoomChanged: true,
-                        //automaticallyImplyAppBarLeading: false,
-                        //autocompleteLanguage: "ko",
-                        //region: 'au',
-                        //selectInitialPosition: true,
-                        // selectedPlaceWidgetBuilder: (_, selectedPlace, state, isSearchBarFocused) {
-                        //   print("state: $state, isSearchBarFocused: $isSearchBarFocused");
-                        //   return isSearchBarFocused
-                        //       ? Container()
-                        //       : FloatingCard(
-                        //           bottomPosition: 0.0, // MediaQuery.of(context) will cause rebuild. See MediaQuery document for the information.
-                        //           leftPosition: 0.0,
-                        //           rightPosition: 0.0,
-                        //           width: 500,
-                        //           borderRadius: BorderRadius.circular(12.0),
-                        //           child: state == SearchingState.Searching
-                        //               ? Center(child: CircularProgressIndicator())
-                        //               : RaisedButton(
-                        //                   child: Text("Pick Here"),
-                        //                   onPressed: () {
-                        //                     // IMPORTANT: You MUST manage selectedPlace data yourself as using this build will not invoke onPlacePicker as
-                        //                     //            this will override default 'Select here' Button.
-                        //                     print("do something with [selectedPlace] data");
-                        //                     Navigator.of(context).pop();
-                        //                   },
-                        //                 ),
-                        //         );
-                        // },
-                        // pinBuilder: (context, state) {
-                        //   if (state == PinState.Idle) {
-                        //     return Icon(Icons.favorite_border);
-                        //   } else {
-                        //     return Icon(Icons.favorite);
-                        //   }
-                        // },
-                      );
-                    },
-                  ),
-                );
-              },
+              label: Text('Choose a picture'),
+              icon: Icon(Icons.add_a_photo),
             ),
             sizedBoxSpace,
-            data.selectedLocation == null ? Container() : Text(data.selectedLocation!.formattedAddress ?? ''),
+            ElevatedButton.icon(
+              label: Text('Select Place Location'),
+              icon: Icon(Icons.pin_drop),
+              onPressed: () => openLocationPicker(context),
+            ),
             sizedBoxSpace,
-
+            data.selectedLocation == null
+                ? Container()
+                : Text(data.selectedLocation!.formattedAddress ?? ''),
+            sizedBoxSpace,
             Center(
               child: ElevatedButton(
                 child: Text('Submit'),
@@ -313,9 +262,70 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               ),
             ),
             sizedBoxSpace,
-
           ],
         ),
+      ),
+    );
+  }
+
+  void openLocationPicker(BuildContext context) {
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0.0),
+            body: PlacePicker(
+              apiKey: googleMapsApiKey,
+              initialPosition: AddPlaceForm.kInitialPosition,
+              useCurrentLocation: true,
+              selectInitialPosition: true,
+
+              //usePlaceDetailSearch: true,
+              onPlacePicked: (result) {
+                data.selectedLocation = result;
+                Navigator.of(context).pop();
+                setState(() {});
+              },
+              //forceSearchOnZoomChanged: true,
+              //automaticallyImplyAppBarLeading: false,
+              //autocompleteLanguage: "ko",
+              //region: 'au',
+              //selectInitialPosition: true,
+              // selectedPlaceWidgetBuilder: (_, selectedPlace, state, isSearchBarFocused) {
+              //   print("state: $state, isSearchBarFocused: $isSearchBarFocused");
+              //   return isSearchBarFocused
+              //       ? Container()
+              //       : FloatingCard(
+              //           bottomPosition: 0.0, // MediaQuery.of(context) will cause rebuild. See MediaQuery document for the information.
+              //           leftPosition: 0.0,
+              //           rightPosition: 0.0,
+              //           width: 500,
+              //           borderRadius: BorderRadius.circular(12.0),
+              //           child: state == SearchingState.Searching
+              //               ? Center(child: CircularProgressIndicator())
+              //               : RaisedButton(
+              //                   child: Text("Pick Here"),
+              //                   onPressed: () {
+              //                     // IMPORTANT: You MUST manage selectedPlace data yourself as using this build will not invoke onPlacePicker as
+              //                     //            this will override default 'Select here' Button.
+              //                     print("do something with [selectedPlace] data");
+              //                     Navigator.of(context).pop();
+              //                   },
+              //                 ),
+              //         );
+              // },
+              // pinBuilder: (context, state) {
+              //   if (state == PinState.Idle) {
+              //     return Icon(Icons.favorite_border);
+              //   } else {
+              //     return Icon(Icons.favorite);
+              //   }
+              // },
+            ),
+          );
+        },
       ),
     );
   }
@@ -336,7 +346,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     int zip = 20100, dislikes = 0, likes = 0;
     double latitude = 45.485044, longitude = 9.202816;
     var places = FirebaseFirestore.instance.collection('places');
-    String imageURL = await uploadFile(_image!) as String; // should put this somewhere else and assign placeData.imgpath
+    String imageURL = await uploadFile(_image!)
+        as String; // should put this somewhere else and assign placeData.imgpath
 
     var city = 'Milan',
         state = 'Italy',
@@ -384,3 +395,50 @@ class PlaceData {
   late GeoPoint location; // vedere se passare GeoLoc vs long lat
   late List<String> categories = [];
 }
+
+/*
+class MultiSelectChip extends StatefulWidget {
+  final List<String> reportList;
+  final Function(List<String>) onSelectionChanged;
+
+  MultiSelectChip(this.reportList, {required this.onSelectionChanged});
+
+  @override
+  _MultiSelectChipState createState() => _MultiSelectChipState();
+}
+
+class _MultiSelectChipState extends State<MultiSelectChip> {
+  // String selectedChoice = "";
+  List<String> selectedChoices = [];
+
+  List<Widget> _buildChoiceList() {
+    List<Widget> choices = [];
+
+    widget.reportList.forEach((item) {
+      choices.add(Container(
+        padding: const EdgeInsets.all(2.0),
+        child: ChoiceChip(
+          label: Text(item),
+          selected: selectedChoices.contains(item),
+          onSelected: (selected) {
+            setState(() {
+              selectedChoices.contains(item)
+                  ? selectedChoices.remove(item)
+                  : selectedChoices.add(item);
+              widget.onSelectionChanged(selectedChoices);
+            });
+          },
+        ),
+      ));
+    });
+
+    return choices;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      children: _buildChoiceList(),
+    );
+  }
+}*/
