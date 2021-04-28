@@ -66,6 +66,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
           AutovalidateMode.always; // Start validating on every change.
       showInSnackBar('Error in form');
       form.save();
+      print(data.categories.toString());
     } else {
       form.save();
       addPlace(data);
@@ -158,6 +159,16 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               validator: _validateName,
             ),
             sizedBoxSpace,
+            MultiSelectChip(
+              ['Culture', 'Art', 'Nature', 'Food'],
+              onSelectionChanged: (selectedList) {
+                setState(() {
+                  data.categories = selectedList;
+                });
+              },
+            ),
+
+            /*
             FormBuilderCheckboxGroup(
               name: 'category_selector',
               //alignment: WrapAlignment.spaceEvenly,
@@ -183,7 +194,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 data.categories = value as List<String>;
                 //print('value of categories: ' + value.toString() + value.runtimeType.toString());
               },
-            ),
+            ),*/
             sizedBoxSpace,
             TextFormField(
               focusNode: _lockedDescr,
@@ -233,7 +244,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                         width: 100,
                         child: Image.file(
                           _image!,
-                          fit: BoxFit.fill,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -246,7 +257,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             ),
             sizedBoxSpace,
             ElevatedButton.icon(
-              label: Text('Select Place Location'),
+              label: Text('Select place location'),
               icon: Icon(Icons.pin_drop),
               onPressed: () => openLocationPicker(context),
             ),
@@ -285,8 +296,11 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               //usePlaceDetailSearch: true,
               onPlacePicked: (result) {
                 data.selectedLocation = result;
+                data.location = GeoPoint(result.geometry!.location.lat, result.geometry!.location.lng);
                 Navigator.of(context).pop();
-                setState(() {});
+                print('print location: ');
+                print(data.selectedLocation!.geometry!.location);
+                //setState(() {});
               },
               //forceSearchOnZoomChanged: true,
               //automaticallyImplyAppBarLeading: false,
@@ -343,21 +357,14 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   Future<void> addPlace(PlaceData placeData) async {
-    int zip = 20100, dislikes = 0, likes = 0;
-    double latitude = 45.485044, longitude = 9.202816;
     var places = FirebaseFirestore.instance.collection('places');
-    String imageURL = await uploadFile(_image!)
-        as String; // should put this somewhere else and assign placeData.imgpath
+    var imageURL = await uploadFile(_image!); // should put this somewhere else and assign placeData.imgpath
+
+    int zip = 20100;
 
     var city = 'Milan',
         state = 'Italy',
-        street = 'Piazza Duca d\'Aosta, 1',
-        imgpath = 'images/secret_door',
-        lockedDescr = 'Some interesting facts',
-        unlockedDescr = 'Less interesting facts',
-        name = 'Secret Door',
-        location = GeoPoint(latitude, longitude);
-    var categories = ['culture'];
+        street = 'Piazza Duca d\'Aosta, 1';
 
     var data = <String, dynamic>{
       'address': {'zip': zip, 'city': city, 'state': state, 'street': street},
@@ -366,9 +373,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       'lockedDescr': placeData.lockedDescr,
       'unlockedDescr': placeData.unlockedDescr,
       'name': placeData.name,
-      'dislikes': dislikes,
-      'location': placeData.selectedLocation!.geometry!.location,
-      'likes': likes
+      'dislikes': 0,
+      'location': placeData.location,
+      'likes': 0
     };
 
     await places.add(data);
@@ -392,11 +399,10 @@ class PlaceData {
   late int zip;
   late double latitude, longitude;
   late String city, state, street, imgpath, lockedDescr, unlockedDescr, name;
-  late GeoPoint location; // vedere se passare GeoLoc vs long lat
+  late GeoPoint location;
   late List<String> categories = [];
 }
 
-/*
 class MultiSelectChip extends StatefulWidget {
   final List<String> reportList;
   final Function(List<String>) onSelectionChanged;
@@ -416,7 +422,6 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
 
     widget.reportList.forEach((item) {
       choices.add(Container(
-        padding: const EdgeInsets.all(2.0),
         child: ChoiceChip(
           label: Text(item),
           selected: selectedChoices.contains(item),
@@ -437,8 +442,17 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: _buildChoiceList(),
+    return InputDecorator(
+      decoration: InputDecoration(
+          icon: Icon(Icons.category_outlined),
+          labelStyle: TextStyle(fontSize: 18, height: 0),
+          labelText: 'Select a category',
+          border: InputBorder.none),
+      child: Wrap(
+        children: _buildChoiceList(),
+        alignment: WrapAlignment.spaceEvenly,
+        runAlignment: WrapAlignment.spaceEvenly,
+      ),
     );
   }
-}*/
+}
