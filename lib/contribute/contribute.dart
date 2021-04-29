@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
-import 'api_key.dart';
+import '../api_key.dart';
+import 'contribute_thankyou.dart';
 
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -65,13 +65,19 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       _autoValidateMode =
           AutovalidateMode.always; // Start validating on every change.
       showInSnackBar('Error in form');
-      form.save();
-      print(data.categories.toString());
+      form.save(); // ?
+      // debugging
+      Navigator.of(_formKey.currentState!.context)
+          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
     } else {
       form.save();
       addPlace(data);
       print(data.name + data.lockedDescr + data.unlockedDescr);
-      showInSnackBar('Added Place');
+      Navigator.of(_formKey.currentState!.context)
+          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+      //showInSnackBar('Added Place');
+      // todo clear form or something to present brand new form
+      form.reset();
     }
   }
 
@@ -158,15 +164,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               },
               validator: _validateName,
             ),
-            sizedBoxSpace,
-            MultiSelectChip(
-              ['Culture', 'Art', 'Nature', 'Food'],
-              onSelectionChanged: (selectedList) {
-                setState(() {
-                  data.categories = selectedList;
-                });
-              },
-            ),
 
             /*
             FormBuilderCheckboxGroup(
@@ -230,6 +227,15 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               validator: _validateUnlockedDescr,
             ),
             sizedBoxSpace,
+            MultiSelectChip(
+              ['Culture', 'Art', 'Nature', 'Food'],
+              onSelectionChanged: (selectedList) {
+                setState(() {
+                  data.categories = selectedList;
+                });
+              },
+            ),
+            sizedBoxSpace,
             Center(
               child: _image == null
                   ? Text('No image selected.')
@@ -286,8 +292,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       MaterialPageRoute(
         builder: (context) {
           return Scaffold(
-            extendBodyBehindAppBar: true,
             // create transparent appBar to offset search bar
+            extendBodyBehindAppBar: true,
             appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0.0),
             body: PlacePicker(
               apiKey: googleMapsApiKey,
@@ -303,7 +309,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                       result.geometry!.location.lng);
                   data.street = result.formattedAddress ?? '';
 
-                  result.addressComponents!.forEach((item) => print(item.shortName)); //todo assign or remove zip city state
+                  result.addressComponents!.forEach((item) => print(
+                      item.shortName)); //todo assign or remove zip city state
                   //data.zip;
                   //data.city;
                   //data.country;
@@ -366,7 +373,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
   Future<void> addPlace(PlaceData placeData) async {
     var places = FirebaseFirestore.instance.collection('places');
-    var imageURL = await uploadFile(_image!); // should put this somewhere else and assign placeData.imgpath
+    var imageURL = await uploadFile(
+        _image!); // should put this somewhere else and assign placeData.imgpath
 
     int zip = 0;
 
@@ -454,6 +462,10 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
   Widget build(BuildContext context) {
     return InputDecorator(
       decoration: InputDecoration(
+          /*prefixIcon: Padding(
+            padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
+            child: Icon(Icons.category_outlined),
+          ),*/
           icon: Icon(Icons.category_outlined),
           labelStyle: TextStyle(fontSize: 18, height: 0),
           labelText: 'Select a category',
