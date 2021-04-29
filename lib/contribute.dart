@@ -256,15 +256,16 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               icon: Icon(Icons.add_a_photo),
             ),
             sizedBoxSpace,
+            data.selectedLocation == null
+                ? Container()
+                : Text(
+                    data.selectedLocation!.formattedAddress ?? 'No location'),
+            sizedBoxSpace,
             ElevatedButton.icon(
               label: Text('Select place location'),
               icon: Icon(Icons.pin_drop),
               onPressed: () => openLocationPicker(context),
             ),
-            sizedBoxSpace,
-            data.selectedLocation == null
-                ? Container()
-                : Text(data.selectedLocation!.formattedAddress ?? ''),
             sizedBoxSpace,
             Center(
               child: ElevatedButton(
@@ -286,6 +287,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         builder: (context) {
           return Scaffold(
             extendBodyBehindAppBar: true,
+            // create transparent appBar to offset search bar
             appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0.0),
             body: PlacePicker(
               apiKey: googleMapsApiKey,
@@ -295,12 +297,18 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
               //usePlaceDetailSearch: true,
               onPlacePicked: (result) {
-                data.selectedLocation = result;
-                data.location = GeoPoint(result.geometry!.location.lat, result.geometry!.location.lng);
+                setState(() {
+                  data.selectedLocation = result;
+                  data.location = GeoPoint(result.geometry!.location.lat,
+                      result.geometry!.location.lng);
+                  data.street = result.formattedAddress ?? '';
+
+                  result.addressComponents!.forEach((item) => print(item.shortName)); //todo assign or remove zip city state
+                  //data.zip;
+                  //data.city;
+                  //data.country;
+                });
                 Navigator.of(context).pop();
-                print('print location: ');
-                print(data.selectedLocation!.geometry!.location);
-                //setState(() {});
               },
               //forceSearchOnZoomChanged: true,
               //automaticallyImplyAppBarLeading: false,
@@ -360,14 +368,17 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     var places = FirebaseFirestore.instance.collection('places');
     var imageURL = await uploadFile(_image!); // should put this somewhere else and assign placeData.imgpath
 
-    int zip = 20100;
+    int zip = 0;
 
-    var city = 'Milan',
-        state = 'Italy',
-        street = 'Piazza Duca d\'Aosta, 1';
+    var city = 'Empty', state = 'Empty';
 
     var data = <String, dynamic>{
-      'address': {'zip': zip, 'city': city, 'state': state, 'street': street},
+      'address': {
+        'zip': zip,
+        'city': city,
+        'state': state,
+        'street': placeData.street
+      },
       'categories': placeData.categories,
       'imgpath': imageURL,
       'lockedDescr': placeData.lockedDescr,
@@ -397,8 +408,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 class PlaceData {
   late PickResult? selectedLocation = null;
   late int zip;
-  late double latitude, longitude;
-  late String city, state, street, imgpath, lockedDescr, unlockedDescr, name;
+  late String city, country, street, imgpath, lockedDescr, unlockedDescr, name;
   late GeoPoint location;
   late List<String> categories = [];
 }
