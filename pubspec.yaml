@@ -16,10 +16,11 @@ dependencies:
   flutter_signin_button: ^2.0.0
   geolocator: ^7.0.3
   google_maps_flutter: ^2.0.3
+  google_maps_place_picker: ^2.0.0-nullsafety.3
   google_sign_in: ^5.0.2
   image_picker: ^0.7.4
   location: ^4.1.1
-  url_launcher: 6.0.3
+  url_launcher: ^6.0.3
 
 dev_dependencies:
   flutter_test:

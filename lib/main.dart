@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'auth.dart';
+import 'explore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,11 +17,12 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Hunt Your Picture',
       home: Scaffold(
+        //body: Home(),
         body: AuthTypeSelector(),
       ),
       theme: ThemeData(
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.greenAccent[50],
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.blueAccent[50],
       ),
     );
   }
