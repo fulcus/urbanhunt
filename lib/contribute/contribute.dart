@@ -20,6 +20,16 @@ class Contribute extends StatelessWidget {
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Scaffold(
+        /*
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(80),
+          child: AppBar(
+            iconTheme: IconThemeData(color: Colors.white),
+            title: const Text('Saved Suggestions',
+                style: TextStyle(color: Colors.white)),
+            backgroundColor: Colors.pink,
+          ),
+        ),*/
         body: const AddPlaceForm(),
       ),
     );
@@ -59,79 +69,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     super.dispose();
   }
 
-  void _handleSubmitted() {
-    final form = _formKey.currentState!;
-    if (!form.validate()) {
-      _autoValidateMode =
-          AutovalidateMode.always; // Start validating on every change.
-      showInSnackBar('Error in form');
-      form.save(); // ?
-      // debugging
-      Navigator.of(_formKey.currentState!.context)
-          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
-    } else {
-      form.save();
-      addPlace(data);
-      print(data.name + data.lockedDescr + data.unlockedDescr);
-      Navigator.of(_formKey.currentState!.context)
-          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
-      //showInSnackBar('Added Place');
-      // todo clear form or something to present brand new form
-      form.reset();
-    }
-  }
-
-  void showInSnackBar(String value) {
-    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
-    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-      content: Text(value),
-    ));
-  }
-
-  //todo use built in validators https://pub.dev/packages/flutter_form_builder
-
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name is required';
-    }
-    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
-    if (!nameExp.hasMatch(value)) {
-      return 'Please enter only alphabetical characters';
-    }*/
-    if (value.length > 50) {
-      return 'Name is too long, use at most 50 characters';
-    }
-    return null;
-  }
-
-  String? _validateLockedDescr(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Locked description is required';
-    }
-    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
-    if (!nameExp.hasMatch(value)) {
-      return 'Please enter only alphabetical characters';
-    }*/
-    if (value.length > 150) {
-      return 'Locked description is too long, use at most 150 characters';
-    }
-    return null;
-  }
-
-  String? _validateUnlockedDescr(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Unlocked description is required';
-    }
-    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
-    if (!nameExp.hasMatch(value)) {
-      return 'Please enter only alphabetical characters';
-    }*/
-    if (value.length > 500) {
-      return 'Unlocked description is too long, use at most 500 characters';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     const sizedBoxSpace = SizedBox(height: 24);
@@ -164,34 +101,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               },
               validator: _validateName,
             ),
-
-            /*
-            FormBuilderCheckboxGroup(
-              name: 'category_selector',
-              //alignment: WrapAlignment.spaceEvenly,
-              //crossAxisAlignment: WrapCrossAlignment.center,
-              decoration: InputDecoration(
-                prefixIcon: Padding(
-                  padding: EdgeInsets.only(bottom: 100), // add padding to adjust icon
-                  child: Icon(Icons.category_outlined),
-                ),
-                //icon: Icon(Icons.category_outlined),
-                labelStyle: TextStyle(),
-                border: InputBorder.none,
-                labelText: 'Select categories',
-              ),
-              options: [
-                FormBuilderFieldOption(
-                    value: 'Culture', child: Text('Culture')),
-                FormBuilderFieldOption(value: 'Nature', child: Text('Nature')),
-                FormBuilderFieldOption(value: 'Art', child: Text('Art')),
-                FormBuilderFieldOption(value: 'Sport', child: Text('Sport')),
-              ],
-              onSaved: (value) {
-                data.categories = value as List<String>;
-                //print('value of categories: ' + value.toString() + value.runtimeType.toString());
-              },
-            ),*/
             sizedBoxSpace,
             TextFormField(
               focusNode: _lockedDescr,
@@ -256,10 +165,29 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                     ),
             ),
             sizedBoxSpace,
-            ElevatedButton.icon(
+            TextButton.icon(
               onPressed: getImage,
               label: Text('Choose a picture'),
               icon: Icon(Icons.add_a_photo),
+              style: ButtonStyle(
+                  //elevation: MaterialStateProperty.all<double>(10),
+                  padding: MaterialStateProperty.all<EdgeInsets>(
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                  overlayColor: MaterialStateProperty.resolveWith(
+                    (states) {
+                      return states.contains(MaterialState.pressed)
+                          ? Colors.blue[50]
+                          : null;
+                    },
+                  ),
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          side: BorderSide(color: Colors.blue)))),
             ),
             sizedBoxSpace,
             data.selectedLocation == null
@@ -267,10 +195,29 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 : Text(
                     data.selectedLocation!.formattedAddress ?? 'No location'),
             sizedBoxSpace,
-            ElevatedButton.icon(
+            TextButton.icon(
               label: Text('Select place location'),
               icon: Icon(Icons.pin_drop),
               onPressed: () => openLocationPicker(context),
+              style: ButtonStyle(
+                  //elevation: MaterialStateProperty.all<double>(10),
+                  padding: MaterialStateProperty.all<EdgeInsets>(
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                  overlayColor: MaterialStateProperty.resolveWith(
+                    (states) {
+                      return states.contains(MaterialState.pressed)
+                          ? Colors.blue[50]
+                          : null;
+                    },
+                  ),
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          side: BorderSide(color: Colors.blue)))),
             ),
             sizedBoxSpace,
             Center(
@@ -284,6 +231,71 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         ),
       ),
     );
+  }
+
+  void _handleSubmitted() {
+    final form = _formKey.currentState!;
+    if (!form.validate()) {
+      _autoValidateMode =
+          AutovalidateMode.always; // Start validating on every change.
+      showInSnackBar('Error in form');
+      form.save(); // ?
+      // debugging
+      Navigator.of(_formKey.currentState!.context)
+          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+    } else {
+      form.save();
+      addPlace(data);
+      print(data.name + data.lockedDescr + data.unlockedDescr);
+      Navigator.of(_formKey.currentState!.context)
+          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+      //showInSnackBar('Added Place');
+      // todo clear form or something to present brand new form
+      form.reset();
+    }
+  }
+
+  void showInSnackBar(String value) {
+    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
+    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
+      content: Text(value),
+    ));
+  }
+
+  //todo use built in validators https://pub.dev/packages/flutter_form_builder
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
+    if (!nameExp.hasMatch(value)) {
+      return 'Please enter only alphabetical characters';
+    }*/
+    if (value.length > 50) {
+      return 'Name is too long, use at most 50 characters';
+    }
+    return null;
+  }
+
+  String? _validateLockedDescr(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Locked description is required';
+    }
+    if (value.length > 150) {
+      return 'Locked description is too long, use at most 150 characters';
+    }
+    return null;
+  }
+
+  String? _validateUnlockedDescr(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Unlocked description is required';
+    }
+    if (value.length > 500) {
+      return 'Unlocked description is too long, use at most 500 characters';
+    }
+    return null;
   }
 
   void openLocationPicker(BuildContext context) {
@@ -304,16 +316,24 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               //usePlaceDetailSearch: true,
               onPlacePicked: (result) {
                 setState(() {
-                  data.selectedLocation = result;
-                  data.location = GeoPoint(result.geometry!.location.lat,
-                      result.geometry!.location.lng);
-                  data.street = result.formattedAddress ?? '';
+                  try {
+                    data.selectedLocation = result;
+                    data.location = GeoPoint(result.geometry!.location.lat,
+                        result.geometry!.location.lng);
+                    data.street = result.formattedAddress ?? '';
 
-                  result.addressComponents!.forEach((item) => print(
-                      item.shortName)); //todo assign or remove zip city state
-                  //data.zip;
-                  //data.city;
-                  //data.country;
+                    //is street, zip, city, country necessary?
+                    result.addressComponents!.asMap().forEach((i, item) {
+                      print('$i :' + item.shortName);
+                    });
+
+                    data.city = result.addressComponents![2].shortName;
+                    data.country =
+                        result.addressComponents![6].shortName; // IT for Italy
+                    data.zip = int.parse(result.addressComponents![7].longName);
+                  } on Exception catch (exception) {
+                    print(exception);
+                  }
                 });
                 Navigator.of(context).pop();
               },
@@ -384,7 +404,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       'address': {
         'zip': zip,
         'city': city,
-        'state': state,
+        'country': state,
         'street': placeData.street
       },
       'categories': placeData.categories,
