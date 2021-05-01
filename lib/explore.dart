@@ -6,8 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:hunt_app/place_card.dart';
 
+import 'package:hunt_app/place_card.dart';
 import 'navbar.dart';
 
 final db = FirebaseFirestore.instance;
@@ -51,9 +51,7 @@ class _ExploreState extends State<Explore> {
     });
 
     //retrieve all the places
-    _places = db.collection('places')
-        .orderBy('name')
-        .snapshots();
+    _places = db.collection('places').orderBy('name').snapshots();
 
     //retrieve the user's unlocked places
     _unlockedPlaces = db
@@ -153,73 +151,121 @@ class StoreMap extends StatefulWidget {
 }
 
 class _StoreMapState extends State<StoreMap> {
-  Set<Marker> customMarkers = {};
+  late Set<Marker> customMarkers;
+  late BitmapDescriptor _markerIconUnlocked;
+  late BitmapDescriptor _markerIconLocked;
   double _currentCameraBearing = 0.0;
   double _currentCameraTilt = 0.0;
   double _currentLat = 0.0;
   double _currentLng = 0.0;
   double _currentZoom = 16.0;
+  PlaceCard? _placeCard;
 
   @override
   void initState() {
     super.initState();
     _currentLat = widget.initialPosition.latitude;
     _currentLng = widget.initialPosition.longitude;
-    _setCustomMarkers();
+    _setupCustomMarkers();
+  }
+
+  Future<void> _setupCustomMarkers() async {
+    // create all markers with the correct starting icon (locked / unlocked)
+    customMarkers = {};
+
+    _markerIconUnlocked =
+        await _createMarkerImageFromAsset('assets/images/open-lock.png');
+    _markerIconLocked =
+        await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
+
+    for (var document in widget.places) {
+      // retrieve the place from the unlockedPlaces collection, if present
+      var current = widget.unlockedPlaces
+          .where((element) => element.id == document.id)
+          .toList();
+
+      bool isLocked = current.isEmpty;
+
+      customMarkers.add(Marker(
+        markerId: MarkerId(document.id),
+        icon: isLocked ? _markerIconLocked : _markerIconUnlocked,
+        position: LatLng(
+          document['location'].latitude as double,
+          document['location'].longitude as double,
+        ),
+        onTap: () {
+          _onMarkerTap(document);
+        },
+      ));
+    }
+  }
+
+  Future<BitmapDescriptor> _createMarkerImageFromAsset(String iconPath) async {
+    return await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(), iconPath);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loading == false) {
-      return Stack(children: [
-        GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: widget.initialPosition,
-            zoom: 16,
-          ),
-          markers: customMarkers,
-          onMapCreated: (mapController) {
-            widget.mapController.complete(mapController);
-            setState(() {});
-          },
-          onCameraMove: _updateCameraInfo,
-          myLocationEnabled: true,
-
-          compassEnabled: false,
-          myLocationButtonEnabled: false,
-          mapToolbarEnabled: false,
-          zoomControlsEnabled: false,
-          //indoorViewEnabled: true, => we might need it
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 680.0, left: 330.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.lightBlueAccent,
-            child: IconButton(
-              icon: Icon(Icons.my_location),
-              color: Colors.black,
-              onPressed: _setCurrentLocation,
-            ),
-          ),
-        ),
-        if (_currentCameraBearing != 0.0)
-          Padding(
-            padding: EdgeInsets.only(top: 630.0, left: 330.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.lightBlueAccent,
-              child: IconButton(
-                icon: Icon(Icons.explore),
-                color: Colors.black,
-                onPressed: _rotateNorth,
-              ),
-            ),
-          )
-      ]);
-    } else {
+    if (loading) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
+
+    Widget gmap = GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: widget.initialPosition,
+        zoom: 16,
+      ),
+      markers: customMarkers,
+      onMapCreated: (mapController) {
+        widget.mapController.complete(mapController);
+        setState(() {});
+      },
+      onCameraMove: _updateCameraInfo,
+      myLocationEnabled: true,
+
+      compassEnabled: true,
+      myLocationButtonEnabled: true,
+      mapToolbarEnabled: true,
+      zoomControlsEnabled: true,
+      //indoorViewEnabled: true,  // we might need it
+    );
+
+    Widget locate = Padding(
+      padding: EdgeInsets.only(top: 680.0, left: 330.0),
+      child: CircleAvatar(
+        backgroundColor: Colors.lightBlueAccent,
+        child: IconButton(
+          icon: Icon(Icons.my_location),
+          color: Colors.black,
+          onPressed: _setCurrentLocation,
+        ),
+      ),
+    );
+
+    Widget rotate = Padding(
+      padding: EdgeInsets.only(top: 630.0, left: 330.0),
+      child: CircleAvatar(
+        backgroundColor: Colors.lightBlueAccent,
+        child: IconButton(
+          icon: Icon(Icons.explore),
+          color: Colors.black,
+          onPressed: _rotateNorth,
+        ),
+      ),
+    );
+
+    List<Widget> children = <Widget>[gmap, locate];
+    if (_currentCameraBearing != 0.0) {
+      children.add(rotate);
+    }
+    if (_placeCard != null) {
+      children.add(_placeCard as PlaceCard);
+    }
+
+    return Stack(children: children);
   }
 
   void _updateCameraInfo(CameraPosition cameraPosition) {
@@ -229,6 +275,46 @@ class _StoreMapState extends State<StoreMap> {
     _currentLng = cameraPosition.target.longitude;
     _currentZoom = cameraPosition.zoom;
     setState(() {});
+  }
+
+  void _onMarkerTap(DocumentSnapshot document) {
+    setState(() {
+      // if not present among unlocked -> locked
+      var current = widget.unlockedPlaces
+          .where((element) => element.id == document.id)
+          .toList();
+      bool isLocked = current.isEmpty;
+
+      // update markerIcon to match place locked/unlocked and set place card
+      bool isLiked = false;
+      bool isDisliked = false;
+
+      if (!isLocked) {
+        isLiked = current[0]['liked'] as bool;
+        isDisliked = current[0]['disliked'] as bool;
+      }
+
+      customMarkers.add(Marker(
+        markerId: MarkerId(document.id),
+        icon: isLocked ? _markerIconLocked : _markerIconUnlocked,
+        position: LatLng(
+          document['location'].latitude as double,
+          document['location'].longitude as double,
+        ),
+        onTap: () {
+          _onMarkerTap(document);
+        },
+      ));
+
+      _placeCard =
+          PlaceCard(document, isLocked, isLiked, isDisliked, _onCardClose);
+    });
+  }
+
+  void _onCardClose() {
+    setState(() {
+      _placeCard = null;
+    });
   }
 
   Future<void> _setCurrentLocation() async {
@@ -259,65 +345,5 @@ class _StoreMapState extends State<StoreMap> {
         .then((value) {
       setState(() {});
     });
-  }
-
-  Future<void> _setCustomMarkers() async {
-    var markers = <Marker>{};
-
-    late BitmapDescriptor unlockedImg;
-    late BitmapDescriptor lockedImg;
-
-    unlockedImg =
-        await _createMarkerImageFromAsset('assets/images/open-lock.png');
-    lockedImg =
-        await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
-
-    for (var document in widget.places) {
-      //retrieve the place from the unlockedPlaces collection, if exists
-      var current = widget.unlockedPlaces.where((element) => element.id == document.id).toList();
-
-      if (current.isEmpty) {
-        markers.add(Marker(
-            markerId: MarkerId(document.id),
-            icon: lockedImg,
-            position: LatLng(
-              document['location'].latitude as double,
-              document['location'].longitude as double,
-            ),
-            onTap: () {
-              // Update the state of the app
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  //if isLocked==true then isLiked == false and isDisliked == false
-                  builder: (context) => PlaceCard(document, true, false, false),
-                ),
-              );
-            }));
-      } else {
-        markers.add(Marker(
-            markerId: MarkerId(document.id),
-            icon: unlockedImg,
-            position: LatLng(
-              document['location'].latitude as double,
-              document['location'].longitude as double,
-            ),
-            onTap: () {
-              // Update the state of the app
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  //passa anche un booleano per dire se è locked o meno
-                  //(static, la calcolo all'inzio e poi si aggiorna ogni volta che apro la PlaceCard)
-                  builder: (context) => PlaceCard(document, false, current[0]['liked'] as bool, current[0]['disliked'] as bool),
-                ),
-              );
-            }));
-      }
-    }
-    customMarkers = markers;
-  }
-
-  Future<BitmapDescriptor> _createMarkerImageFromAsset(String iconPath) async {
-    return await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(), iconPath);
   }
 }

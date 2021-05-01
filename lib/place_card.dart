@@ -36,17 +36,26 @@ class PlaceCard extends StatefulWidget {
   late int likes;
   late int dislikes;
 
-  PlaceCard(DocumentSnapshot document, bool isLocked, bool isLiked, bool isDisliked, {Key? key}) : super(key: key) {
+  late void Function()? onCardClose;
+
+  PlaceCard(DocumentSnapshot document, bool isLocked, bool isLiked,
+      bool isDisliked, void Function()? onCardClose,
+      {Key? key})
+      : super(key: key) {
     this.document = document;
+
     this.isLocked = isLocked;
     this.isLiked = isLiked;
     this.isDisliked = isDisliked;
 
+    this.onCardClose = onCardClose;
+
     placeId = document.id;
     name = document['name'] as String;
     address = document['address'] as Map<String, dynamic>;
-    categories =
-        (document['categories'] as List).map((dynamic e) => e.toString()).toList();
+    categories = (document['categories'] as List)
+        .map((dynamic e) => e.toString())
+        .toList();
     descriptionLocked = document['lockedDescr'] as String;
     descriptionUnlocked = document['unlockedDescr'] as String;
     latitude = document['location'].latitude as double;
@@ -57,8 +66,8 @@ class PlaceCard extends StatefulWidget {
   }
 
   @override
-  _PlaceCardState createState() => _PlaceCardState(isLocked, isLiked, isDisliked);
-
+  _PlaceCardState createState() =>
+      _PlaceCardState(isLocked, isLiked, isDisliked);
 }
 
 class _PlaceCardState extends State<PlaceCard> {
@@ -82,11 +91,13 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   Future<void> _computeDistanceKm() async {
-    var currentPos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    var currentPos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
     setState(() {});
-    var distance = Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude, widget.latitude, widget.longitude);
-    if(distance >= 1000) {
-      _distance = distance/1000;
+    var distance = Geolocator.distanceBetween(currentPos.latitude,
+        currentPos.longitude, widget.latitude, widget.longitude);
+    if (distance >= 1000) {
+      _distance = distance / 1000;
     } else {
       _distance = distance;
       _distanceUnit = ' m';
@@ -95,8 +106,11 @@ class _PlaceCardState extends State<PlaceCard> {
 
   // Interactions
   Future<void> tryUnlock() async {
-    var currentPos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-    if(Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude, widget.latitude, widget.longitude) <= 15) {
+    var currentPos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
+    if (Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude,
+            widget.latitude, widget.longitude) <=
+        1500000000) {
       setState(() {
         _isLocked = false;
         setState(() {
@@ -111,7 +125,7 @@ class _PlaceCardState extends State<PlaceCard> {
   // todo check if db calls are successful
 
   void like() {
-    if(!_isLocked) {
+    if (!_isLocked) {
       setState(() {
         if (!_isLiked && !_isDisliked) {
           _dbUpdateLikes(1);
@@ -128,7 +142,7 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   void dislike() {
-    if(!_isLocked) {
+    if (!_isLocked) {
       setState(() {
         if (!_isLiked && !_isDisliked) {
           _dbUpdateDislikes(1);
@@ -279,9 +293,7 @@ class _PlaceCardState extends State<PlaceCard> {
         color: Colors.grey,
         size: 18.0,
       ),
-      onPressed: () {
-        Navigator.pop(context);
-      },
+      onPressed: widget.onCardClose,
     );
 
     return Container(
@@ -422,6 +434,7 @@ class _PlaceCardState extends State<PlaceCard> {
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        // scroll hint and close button
         topBar(),
         // Image
         imageBanner,
@@ -461,7 +474,14 @@ class _PlaceCardState extends State<PlaceCard> {
                 ],
               ),
               // Sep
-              SizedBox(height: 12.0),
+              SizedBox(height: 6.0),
+              // Open directions in Google Maps
+              GmapButton(
+                latitude: widget.latitude,
+                longitude: widget.longitude,
+              ),
+              // Sep
+              SizedBox(height: 6.0),
               // Name
               Text(
                 widget.name,
@@ -473,21 +493,24 @@ class _PlaceCardState extends State<PlaceCard> {
               // Sep
               SizedBox(height: 4.0),
               // Address
-              Text(widget.address['street'] as String,
-                  style: TextStyle(fontSize: 14.0)),
+              Text(
+                widget.address['street'] as String,
+                style: TextStyle(
+                  fontSize: 14.0,
+                ),
+              ),
               // Sep
               SizedBox(height: 4.0),
               // Distance
               Text(
                 _distance.toStringAsFixed(0) + _distanceUnit,
                 style: TextStyle(
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black45),
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black45,
+                ),
               ),
               SizedBox(height: 4.0),
-              // Open in Google Maps button
-              MyButton(latitude: widget.latitude, longitude: widget.longitude),
               // Sep
               SizedBox(height: 8.0),
               // Description
@@ -502,7 +525,7 @@ class _PlaceCardState extends State<PlaceCard> {
 
     return DraggableScrollableSheet(
       minChildSize: 0.44,
-      initialChildSize: 0.44,
+      initialChildSize: 0.60,
       builder: (context, scrollController) {
         return Material(
           elevation: 10,
@@ -518,9 +541,8 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 }
 
-class MyButton extends StatelessWidget {
-
-  const MyButton({
+class GmapButton extends StatelessWidget {
+  const GmapButton({
     Key? key,
     required this.latitude,
     required this.longitude,
@@ -531,30 +553,43 @@ class MyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The GestureDetector wraps the button.
+    var color = Colors.blue[600] ?? Colors.blue;
+
     return GestureDetector(
-      // When the child is tapped, show a snackbar.
+      child: Container(
+        width: 72.0,
+        decoration: BoxDecoration(
+            border: Border.all(color: color),
+            borderRadius: BorderRadius.all(Radius.circular(20))),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(width: 3.0),
+            Icon(Icons.navigation, color: color),
+            SizedBox(width: 2.0),
+            Text(
+              'Start',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w400,
+                fontSize: 15.0,
+              ),
+            ),
+          ],
+        ),
+      ),
       onTap: () {
         openMap(latitude, longitude);
       },
-      // The custom button
-      child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).buttonColor,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Text('Google Maps'),
-      ),
     );
   }
 
   //Function to be called when the user wants to open the selected place in Google Maps.
   //Arguments -> latitude and longitude of the place
-  static Future<void> openMap(double latitude, double longitude) async {
-    var googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+  static Future<void> openMap(double lat, double lng) async {
+    var googleUrl = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
     //if (await canLaunch(googleUrl)) { //the canLaunch method doesn't work with API 30 Android11
-      await launch(googleUrl);
+    await launch(googleUrl);
     /*} else {
       throw 'Could not open the map.';
     }*/
