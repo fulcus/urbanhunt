@@ -158,7 +158,7 @@ class _StoreMapState extends State<StoreMap> {
   double _currentCameraTilt = 0.0;
   double _currentLat = 0.0;
   double _currentLng = 0.0;
-  double _currentZoom = 16.0;
+  double _currentZoom = 14.0;
 
   @override
   void initState() {
@@ -175,7 +175,7 @@ class _StoreMapState extends State<StoreMap> {
         GoogleMap(
           initialCameraPosition: CameraPosition(
             target: widget.initialPosition,
-            zoom: 16,
+            zoom: 14,
           ),
           markers: customMarkers,
           onMapCreated: (mapController) {
@@ -234,7 +234,7 @@ class _StoreMapState extends State<StoreMap> {
   Future<void> _setCurrentLocation() async {
     var currentLocation = await Geolocator.getCurrentPosition();
     var cPosition = CameraPosition(
-      zoom: 16,
+      zoom: 14,
       bearing: _currentCameraBearing,
       tilt: _currentCameraTilt,
       target: LatLng(currentLocation.latitude, currentLocation.longitude),
