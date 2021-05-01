@@ -60,7 +60,7 @@ class PlaceCard extends StatefulWidget {
     descriptionUnlocked = document['unlockedDescr'] as String;
     latitude = document['location'].latitude as double;
     longitude = document['location'].longitude as double;
-    imagePath = 'assets/images/A.png'; //document['imgpath'] as String;
+    imagePath = document['imgpath'] as String;
     likes = document['likes'] as int;
     dislikes = document['dislikes'] as int;
   }
@@ -335,7 +335,7 @@ class _PlaceCardState extends State<PlaceCard> {
                 ).createShader(rect),
                 blendMode: BlendMode.darken,
                 child:
-                    Center(child: Image.asset(widget.imagePath, height: 150.0)),
+                    Center(child: Image.network(widget.imagePath, height: 150.0)),
               ),
               ClipRRect(
                 child: BackdropFilter(
@@ -378,7 +378,7 @@ class _PlaceCardState extends State<PlaceCard> {
           colors: [Colors.black, Colors.transparent],
         ).createShader(rect),
         blendMode: BlendMode.darken,
-        child: Image.asset(widget.imagePath, height: 150.0),
+        child: Image.network(widget.imagePath, height: 150.0),
       ),
     );
   }
