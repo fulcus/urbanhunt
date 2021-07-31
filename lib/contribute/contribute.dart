@@ -49,7 +49,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   File? _image;
   final picker = ImagePicker();
 
-  late FocusNode _name, _lockedDescr, _unlockedDescr;
+  late FocusNode _name, _lockedDescription, _unlockedDescription;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -57,15 +57,15 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   void initState() {
     super.initState();
     _name = FocusNode();
-    _lockedDescr = FocusNode();
-    _unlockedDescr = FocusNode();
+    _lockedDescription = FocusNode();
+    _unlockedDescription = FocusNode();
   }
 
   @override
   void dispose() {
     _name.dispose();
-    _lockedDescr.dispose();
-    _unlockedDescr.dispose();
+    _lockedDescription.dispose();
+    _unlockedDescription.dispose();
     super.dispose();
   }
 
@@ -73,164 +73,178 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   Widget build(BuildContext context) {
     const sizedBoxSpace = SizedBox(height: 24);
 
-    return Form(
-      key: _formKey,
-      autovalidateMode: _autoValidateMode,
-      child: Scrollbar(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          children: [
-            SizedBox(height: 70.0),
-            Text('Add A Place',
-                style: TextStyle(fontSize: 22), textAlign: TextAlign.center),
-            SizedBox(height: 44),
-            TextFormField(
-              focusNode: _name,
-              textInputAction: TextInputAction.next,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                filled: true,
-                icon: const Icon(Icons.place_outlined),
-                hintText: 'Mysterious Fountain',
-                helperText: 'Name of the new place',
-                labelText: 'Name',
+    return GestureDetector(
+      onTap: () {
+        _unfocus(context);
+      },
+      child: Form(
+        key: _formKey,
+        autovalidateMode: _autoValidateMode,
+        child: Scrollbar(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            children: [
+              SizedBox(height: 70.0),
+              Text('Add new place',
+                  style: TextStyle(fontSize: 22), textAlign: TextAlign.center),
+              SizedBox(height: 44),
+              TextFormField(
+                focusNode: _name,
+                textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  filled: true,
+                  icon: const Icon(Icons.place_outlined),
+                  hintText: 'Add name',
+                  //helperText: 'Name of the new place',
+                  labelText: 'Name',
+                ),
+                onSaved: (value) {
+                  data.name = value!;
+                  print('value of name: ' + data.name);
+                },
+                validator: _validateName,
               ),
-              onSaved: (value) {
-                data.name = value!;
-                print('value of name: ' + data.name);
-              },
-              validator: _validateName,
-            ),
-            sizedBoxSpace,
-            TextFormField(
-              focusNode: _lockedDescr,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                filled: true,
-                icon: const Icon(Icons.lock_outline),
-                hintText: 'Might help out when thirsty of adventures',
-                helperText: 'Short description shown when place is locked',
-                labelText: 'Locked description',
+              sizedBoxSpace,
+              TextFormField(
+                focusNode: _lockedDescription,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  filled: true,
+                  icon: const Icon(Icons.lock_outline),
+                  hintText: 'Add short description',
+                  //helperText: 'Short description shown when place is locked',
+                  labelText: 'Locked place description',
+                ),
+                maxLines: 1,
+                onSaved: (value) {
+                  data.lockedDescription = value!;
+                },
+                validator: _validateLockedDescr,
               ),
-              maxLines: 1,
-              onSaved: (value) {
-                data.lockedDescr = value!;
-              },
-              validator: _validateLockedDescr,
-            ),
-            sizedBoxSpace,
-            TextFormField(
-              focusNode: _unlockedDescr,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                filled: true,
-                icon: const Icon(Icons.lock_open_outlined),
-                hintText: 'This fountain was built in 1891 by bla bla bla...',
-                helperText: 'Full description of the place',
-                labelText: 'Unlocked description',
+              sizedBoxSpace,
+              TextFormField(
+                focusNode: _unlockedDescription,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  filled: true,
+                  icon: const Icon(Icons.lock_open_outlined),
+                  hintText: 'Add long description',
+                  //helperText: 'Full description of the place',
+                  labelText: 'Unlocked place description',
+                ),
+                maxLines: 3,
+                onSaved: (value) {
+                  data.unlockedDescription = value!;
+                },
+                validator: _validateUnlockedDescr,
               ),
-              maxLines: 3,
-              onSaved: (value) {
-                data.unlockedDescr = value!;
-              },
-              validator: _validateUnlockedDescr,
-            ),
-            sizedBoxSpace,
-            MultiSelectChip(
-              ['Culture', 'Art', 'Nature', 'Food'],
-              onSelectionChanged: (selectedList) {
-                setState(() {
-                  data.categories = selectedList;
-                });
-              },
-            ),
-            sizedBoxSpace,
-            Center(
-              child: _image == null
-                  ? Text('No image selected.')
-                  : InkWell(
-                      onTap: () {
-                        setState(() {
-                          _image = null;
-                        });
-                      },
-                      child: Container(
-                        height: 100,
-                        width: 100,
-                        child: Image.file(
-                          _image!,
-                          fit: BoxFit.cover,
+              sizedBoxSpace,
+              MultiSelectChip(
+                ['Culture', 'Art', 'Nature', 'Food'],
+                onSelectionChanged: (selectedList) {
+                  setState(() {
+                    data.categories = selectedList;
+                    _unfocus(context);
+                  });
+                },
+              ),
+              sizedBoxSpace,
+              Center(
+                child: _image == null
+                    ? Text('No image selected.')
+                    : InkWell(
+                        onTap: () {
+                          setState(() {
+                            _image = null;
+                          });
+                        },
+                        child: Container(
+                          height: 100,
+                          width: 100,
+                          child: Image.file(
+                            _image!,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    ),
-            ),
-            sizedBoxSpace,
-            TextButton.icon(
-              onPressed: getImage,
-              label: Text('Choose a picture'),
-              icon: Icon(Icons.add_a_photo),
-              style: ButtonStyle(
-                  //elevation: MaterialStateProperty.all<double>(10),
-                  padding: MaterialStateProperty.all<EdgeInsets>(
-                      EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-                  overlayColor: MaterialStateProperty.resolveWith(
-                    (states) {
-                      return states.contains(MaterialState.pressed)
-                          ? Colors.blue[50]
-                          : null;
-                    },
-                  ),
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue[800]!),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          side: BorderSide(color: Colors.blue)))),
-            ),
-            sizedBoxSpace,
-            data.selectedLocation == null
-                ? Container()
-                : Text(
-                    data.selectedLocation!.formattedAddress ?? 'No location'),
-            sizedBoxSpace,
-            TextButton.icon(
-              label: Text('Select place location'),
-              icon: Icon(Icons.pin_drop),
-              onPressed: () => openLocationPicker(context),
-              style: ButtonStyle(
-                  //elevation: MaterialStateProperty.all<double>(10),
-                  padding: MaterialStateProperty.all<EdgeInsets>(
-                      EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-                  overlayColor: MaterialStateProperty.resolveWith(
-                    (states) {
-                      return states.contains(MaterialState.pressed)
-                          ? Colors.blue[50]
-                          : null;
-                    },
-                  ),
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue[800]!),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          side: BorderSide(color: Colors.blue)))),
-            ),
-            sizedBoxSpace,
-            Center(
-              child: ElevatedButton(
-                child: Text('Submit'),
-                onPressed: _handleSubmitted,
               ),
-            ),
-            sizedBoxSpace,
-          ],
+              sizedBoxSpace,
+              TextButton.icon(
+                onPressed: getImage,
+                label: Text('Choose a picture'),
+                icon: Icon(Icons.add_a_photo),
+                style: ButtonStyle(
+                    //elevation: MaterialStateProperty.all<double>(10),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                    overlayColor: MaterialStateProperty.resolveWith(
+                      (states) {
+                        return states.contains(MaterialState.pressed)
+                            ? Colors.blue[50]
+                            : null;
+                      },
+                    ),
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            side: BorderSide(color: Colors.blue)))),
+              ),
+              sizedBoxSpace,
+              data.selectedLocation == null
+                  ? Container()
+                  : Text(
+                      data.selectedLocation!.formattedAddress ?? 'No location'),
+              sizedBoxSpace,
+              TextButton.icon(
+                label: Text('Select place location'),
+                icon: Icon(Icons.pin_drop),
+                onPressed: () => openLocationPicker(context),
+                style: ButtonStyle(
+                    //elevation: MaterialStateProperty.all<double>(10),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                    overlayColor: MaterialStateProperty.resolveWith(
+                      (states) {
+                        return states.contains(MaterialState.pressed)
+                            ? Colors.blue[50]
+                            : null;
+                      },
+                    ),
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            side: BorderSide(color: Colors.blue)))),
+              ),
+              sizedBoxSpace,
+              Center(
+                child: ElevatedButton(
+                  child: Text('Submit'),
+                  onPressed: _handleSubmitted,
+                ),
+              ),
+              sizedBoxSpace,
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _unfocus(BuildContext context) {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
   }
 
   void _handleSubmitted() {
@@ -246,7 +260,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     } else {
       form.save();
       addPlace(data);
-      print(data.name + data.lockedDescr + data.unlockedDescr);
+      print(data.name + data.lockedDescription + data.unlockedDescription);
       Navigator.of(_formKey.currentState!.context)
           .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
       //showInSnackBar('Added Place');
@@ -409,8 +423,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       },
       'categories': placeData.categories,
       'imgpath': imageURL,
-      'lockedDescr': placeData.lockedDescr,
-      'unlockedDescr': placeData.unlockedDescr,
+      'lockedDescr': placeData.lockedDescription,
+      'unlockedDescr': placeData.unlockedDescription,
       'name': placeData.name,
       'dislikes': 0,
       'location': placeData.location,
@@ -436,7 +450,13 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 class PlaceData {
   late PickResult? selectedLocation = null;
   late int zip;
-  late String city, country, street, imgpath, lockedDescr, unlockedDescr, name;
+  late String city,
+      country,
+      street,
+      imgPath,
+      lockedDescription,
+      unlockedDescription,
+      name;
   late GeoPoint location;
   late List<String> categories = [];
 }
@@ -453,7 +473,23 @@ class MultiSelectChip extends StatefulWidget {
 
 class _MultiSelectChipState extends State<MultiSelectChip> {
   // String selectedChoice = "";
+  //late FocusNode focusNode;
   List<String> selectedChoices = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    //focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    //focusNode.dispose();
+
+    super.dispose();
+  }
 
   List<Widget> _buildChoiceList() {
     List<Widget> choices = [];

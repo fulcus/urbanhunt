@@ -8,17 +8,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cloud_firestore: ^1.0.5
-  firebase_auth: ^1.1.0
+  cloud_firestore: ^2.4.0
+  firebase_auth: ^3.0.1
   firebase_core: ^1.0.3
-  firebase_storage: ^8.0.3
+  firebase_storage: ^10.0.1
   flutter_form_builder: ^6.0.0-nullsafety.1
   flutter_signin_button: ^2.0.0
   geolocator: ^7.0.3
   google_maps_flutter: ^2.0.3
   google_maps_place_picker: ^2.0.0-nullsafety.3
   google_sign_in: ^5.0.2
-  image_picker: ^0.7.4
+  image_picker: ^0.8.2
   location: ^4.1.1
   url_launcher: ^6.0.3
 

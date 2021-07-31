@@ -229,7 +229,7 @@ class _StoreMapState extends State<StoreMap> {
       compassEnabled: true,
       myLocationButtonEnabled: true,
       mapToolbarEnabled: true,
-      zoomControlsEnabled: true,
+      zoomControlsEnabled: false,
       //indoorViewEnabled: true,  // we might need it
     );
 
