@@ -4,15 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hunt_app/contribute/place_data.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
-import 'package:google_maps_place_picker/google_maps_place_picker.dart';
-import '../api_key.dart';
-import 'contribute_thankyou.dart';
+import 'package:place_picker/place_picker.dart';
+import 'package:hunt_app/api_key.dart';
+import 'package:hunt_app/contribute/thankyou.dart';
 
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
+GlobalKey<ScaffoldMessengerState>();
 
 class Contribute extends StatelessWidget {
   @override
@@ -20,16 +20,6 @@ class Contribute extends StatelessWidget {
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Scaffold(
-        /*
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(80),
-          child: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
-            title: const Text('Saved Suggestions',
-                style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.pink,
-          ),
-        ),*/
         body: const AddPlaceForm(),
       ),
     );
@@ -38,7 +28,6 @@ class Contribute extends StatelessWidget {
 
 class AddPlaceForm extends StatefulWidget {
   const AddPlaceForm({Key? key}) : super(key: key);
-  static final kInitialPosition = LatLng(-33.8567844, 151.213108);
 
   @override
   AddPlaceFormState createState() => AddPlaceFormState();
@@ -154,71 +143,71 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 child: _image == null
                     ? Text('No image selected.')
                     : InkWell(
-                        onTap: () {
-                          setState(() {
-                            _image = null;
-                          });
-                        },
-                        child: Container(
-                          height: 100,
-                          width: 100,
-                          child: Image.file(
-                            _image!,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
+                  onTap: () {
+                    setState(() {
+                      _image = null;
+                    });
+                  },
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    child: Image.file(
+                      _image!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
               sizedBoxSpace,
               TextButton.icon(
-                onPressed: getImage,
+                onPressed: () => getImage(data),
                 label: Text('Choose a picture'),
                 icon: Icon(Icons.add_a_photo),
                 style: ButtonStyle(
-                    //elevation: MaterialStateProperty.all<double>(10),
+                  //elevation: MaterialStateProperty.all<double>(10),
                     padding: MaterialStateProperty.all<EdgeInsets>(
                         EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
                     overlayColor: MaterialStateProperty.resolveWith(
-                      (states) {
+                          (states) {
                         return states.contains(MaterialState.pressed)
                             ? Colors.blue[50]
                             : null;
                       },
                     ),
                     foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                    MaterialStateProperty.all<Color>(Colors.blue[800]!),
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
+                    MaterialStateProperty.all<Color>(Colors.white),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                             side: BorderSide(color: Colors.blue)))),
               ),
               sizedBoxSpace,
-              data.selectedLocation == null
+              data.pickedLocation == null
                   ? Container()
                   : Text(
-                      data.selectedLocation!.formattedAddress ?? 'No location'),
+                  data.pickedLocation!.formattedAddress ?? 'No location'),
               sizedBoxSpace,
               TextButton.icon(
                 label: Text('Select place location'),
                 icon: Icon(Icons.pin_drop),
                 onPressed: () => openLocationPicker(context),
                 style: ButtonStyle(
-                    //elevation: MaterialStateProperty.all<double>(10),
+                  //elevation: MaterialStateProperty.all<double>(10),
                     padding: MaterialStateProperty.all<EdgeInsets>(
                         EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
                     overlayColor: MaterialStateProperty.resolveWith(
-                      (states) {
+                          (states) {
                         return states.contains(MaterialState.pressed)
                             ? Colors.blue[50]
                             : null;
                       },
                     ),
                     foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                    MaterialStateProperty.all<Color>(Colors.blue[800]!),
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
+                    MaterialStateProperty.all<Color>(Colors.white),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
@@ -259,13 +248,15 @@ class AddPlaceFormState extends State<AddPlaceForm> {
           .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
     } else {
       form.save();
-      addPlace(data);
+      data.addPlace();
       print(data.name + data.lockedDescription + data.unlockedDescription);
       Navigator.of(_formKey.currentState!.context)
           .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
       //showInSnackBar('Added Place');
       // todo clear form or something to present brand new form
       form.reset();
+      _image = null;
+      //todo clear multichoice
     }
   }
 
@@ -312,153 +303,56 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     return null;
   }
 
-  void openLocationPicker(BuildContext context) {
-    Navigator.push<void>(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return Scaffold(
-            // create transparent appBar to offset search bar
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0.0),
-            body: PlacePicker(
-              apiKey: googleMapsApiKey,
-              initialPosition: AddPlaceForm.kInitialPosition,
-              useCurrentLocation: true,
-              selectInitialPosition: true,
-
-              //usePlaceDetailSearch: true,
-              onPlacePicked: (result) {
-                setState(() {
-                  try {
-                    data.selectedLocation = result;
-                    data.location = GeoPoint(result.geometry!.location.lat,
-                        result.geometry!.location.lng);
-                    data.street = result.formattedAddress ?? '';
-
-                    //is street, zip, city, country necessary?
-                    result.addressComponents!.asMap().forEach((i, item) {
-                      print('$i :' + item.shortName);
-                    });
-
-                    data.city = result.addressComponents![2].shortName;
-                    data.country =
-                        result.addressComponents![6].shortName; // IT for Italy
-                    data.zip = int.parse(result.addressComponents![7].longName);
-                  } on Exception catch (exception) {
-                    print(exception);
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-              //forceSearchOnZoomChanged: true,
-              //automaticallyImplyAppBarLeading: false,
-              //autocompleteLanguage: "ko",
-              //region: 'au',
-              //selectInitialPosition: true,
-              // selectedPlaceWidgetBuilder: (_, selectedPlace, state, isSearchBarFocused) {
-              //   print("state: $state, isSearchBarFocused: $isSearchBarFocused");
-              //   return isSearchBarFocused
-              //       ? Container()
-              //       : FloatingCard(
-              //           bottomPosition: 0.0, // MediaQuery.of(context) will cause rebuild. See MediaQuery document for the information.
-              //           leftPosition: 0.0,
-              //           rightPosition: 0.0,
-              //           width: 500,
-              //           borderRadius: BorderRadius.circular(12.0),
-              //           child: state == SearchingState.Searching
-              //               ? Center(child: CircularProgressIndicator())
-              //               : RaisedButton(
-              //                   child: Text("Pick Here"),
-              //                   onPressed: () {
-              //                     // IMPORTANT: You MUST manage selectedPlace data yourself as using this build will not invoke onPlacePicker as
-              //                     //            this will override default 'Select here' Button.
-              //                     print("do something with [selectedPlace] data");
-              //                     Navigator.of(context).pop();
-              //                   },
-              //                 ),
-              //         );
-              // },
-              // pinBuilder: (context, state) {
-              //   if (state == PinState.Idle) {
-              //     return Icon(Icons.favorite_border);
-              //   } else {
-              //     return Icon(Icons.favorite);
-              //   }
-              // },
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
+  Future<void> openLocationPicker(BuildContext context) async {
+    LocationResult? result = await Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) =>
+            Scaffold(
+                primary: true,
+                appBar: AppBar(),
+                body: PlacePicker(
+                  googleMapsApiKey,
+                ))));
     setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
+      try {
+        data.pickedLocation = result!;
+        data.location =
+            GeoPoint(result.latLng!.latitude, result.latLng!.longitude);
+        data.street = result.name!;
+        print('formattedAddress: ' + result.formattedAddress!);
+
+        //is street, city, country necessary?
+
+        data.city = result.city!.name!;
+        data.country = result.country!.name!;
+      } on Exception catch (exception) {
+        print(exception);
       }
     });
   }
 
-  Future<void> addPlace(PlaceData placeData) async {
-    var places = FirebaseFirestore.instance.collection('places');
-    var imageURL = await uploadFile(
-        _image!); // should put this somewhere else and assign placeData.imgpath
-
-    int zip = 0;
-
-    var city = 'Empty', state = 'Empty';
-
-    var data = <String, dynamic>{
-      'address': {
-        'zip': zip,
-        'city': city,
-        'country': state,
-        'street': placeData.street
-      },
-      'categories': placeData.categories,
-      'imgpath': imageURL,
-      'lockedDescr': placeData.lockedDescription,
-      'unlockedDescr': placeData.unlockedDescription,
-      'name': placeData.name,
-      'dislikes': 0,
-      'location': placeData.location,
-      'likes': 0
-    };
-
-    await places.add(data);
-  }
-
-  Future<String> uploadFile(File _image) async {
-    var storageReference =
-        FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
-    await storageReference.putFile(_image);
-    print('File Uploaded');
-    var returnURL = '';
-    await storageReference.getDownloadURL().then((fileURL) {
-      returnURL = fileURL;
-    });
-    return returnURL;
+  Future<void> getImage(PlaceData data) async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) {
+      print('No image selected.');
+    } else {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      data.imageURL= await uploadFile(_image!);
+    }
   }
 }
 
-class PlaceData {
-  late PickResult? selectedLocation = null;
-  late int zip;
-  late String city,
-      country,
-      street,
-      imgPath,
-      lockedDescription,
-      unlockedDescription,
-      name;
-  late GeoPoint location;
-  late List<String> categories = [];
+Future<String> uploadFile(File _image) async {
+  var storageReference =
+  FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
+  await storageReference.putFile(_image);
+  print('File Uploaded');
+  var returnURL = '';
+  await storageReference.getDownloadURL().then((fileURL) {
+    returnURL = fileURL;
+  });
+  return returnURL;
 }
 
 class MultiSelectChip extends StatefulWidget {
@@ -479,15 +373,28 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
   @override
   void initState() {
     super.initState();
-
-    //focusNode = FocusNode();
   }
-
+  @override
+  Widget build(BuildContext context) {
+    return InputDecorator(
+      decoration: InputDecoration(
+        /*prefixIcon: Padding(
+            padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
+            child: Icon(Icons.category_outlined),
+          ),*/
+          icon: Icon(Icons.category_outlined),
+          labelStyle: TextStyle(fontSize: 18, height: 0),
+          labelText: 'Select a category',
+          border: InputBorder.none),
+      child: Wrap(
+        children: _buildChoiceList(),
+        alignment: WrapAlignment.spaceEvenly,
+        runAlignment: WrapAlignment.spaceEvenly,
+      ),
+    );
+  }
   @override
   void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    //focusNode.dispose();
-
     super.dispose();
   }
 
@@ -513,24 +420,11 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
 
     return choices;
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return InputDecorator(
-      decoration: InputDecoration(
-          /*prefixIcon: Padding(
-            padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
-            child: Icon(Icons.category_outlined),
-          ),*/
-          icon: Icon(Icons.category_outlined),
-          labelStyle: TextStyle(fontSize: 18, height: 0),
-          labelText: 'Select a category',
-          border: InputBorder.none),
-      child: Wrap(
-        children: _buildChoiceList(),
-        alignment: WrapAlignment.spaceEvenly,
-        runAlignment: WrapAlignment.spaceEvenly,
-      ),
-    );
+  
+  void clearChoices() {
+    setState(() {
+      selectedChoices.clear();
+    });
   }
+
 }

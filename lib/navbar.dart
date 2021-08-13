@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:hunt_app/contribute/contribute.dart';
+import 'package:hunt_app/contribute/form.dart';
 import 'package:hunt_app/explore.dart';
 
 class Nav extends StatefulWidget {
