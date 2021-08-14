@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:hunt_app/contribute/form.dart';
 import 'package:hunt_app/explore.dart';
+import 'package:hunt_app/profile.dart';
 
 class Nav extends StatefulWidget {
   @override
@@ -11,12 +12,12 @@ class Nav extends StatefulWidget {
 
 class NavState extends State<Nav> {
   String _currentPage = 'Explore';
-  List<String> pageKeys = ['Explore', 'Contribute', 'Social', 'Settings'];
+  List<String> pageKeys = ['Explore', 'Contribute', 'Social', 'Profile'];
   final Map<String, GlobalKey<NavigatorState>> _navigatorKeys = {
     'Explore': GlobalKey<NavigatorState>(),
     'Contribute': GlobalKey<NavigatorState>(),
     'Social': GlobalKey<NavigatorState>(),
-    'Settings': GlobalKey<NavigatorState>(),
+    'Profile': GlobalKey<NavigatorState>(),
   };
   int _selectedIndex = 0;
 
@@ -52,7 +53,7 @@ class NavState extends State<Nav> {
           _buildOffstageNavigator('Explore'),
           _buildOffstageNavigator('Contribute'),
           _buildOffstageNavigator('Social'),
-          _buildOffstageNavigator('Settings'),
+          _buildOffstageNavigator('Profile'),
         ]),
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: Colors.blueAccent,
@@ -77,9 +78,9 @@ class NavState extends State<Nav> {
               label: 'Social',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: Icon(Icons.person_outlined),
+              activeIcon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
           type: BottomNavigationBarType.fixed,
@@ -115,8 +116,8 @@ class TabNavigator extends StatelessWidget {
       child = Contribute();
     } else if (tabItem == 'Social') {
       child = Container(color: Colors.blue);
-    } else if (tabItem == 'Settings') {
-      child = Container(color: Colors.red);
+    } else if (tabItem == 'Profile') {
+      child = Profile();
     }
 
     return Navigator(
