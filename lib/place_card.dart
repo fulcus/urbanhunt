@@ -109,8 +109,7 @@ class _PlaceCardState extends State<PlaceCard> {
     var currentPos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.best);
     if (Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude,
-            widget.latitude, widget.longitude) <=
-        1500000000) {
+            widget.latitude, widget.longitude) <= 15) {
       setState(() {
         _isLocked = false;
         setState(() {
@@ -416,7 +415,7 @@ class _PlaceCardState extends State<PlaceCard> {
     String description;
     Widget imageBanner;
 
-    if (_isLocked) {
+    if (widget.isLocked) {
       description = widget.descriptionLocked;
       imageBanner = imageBannerLocked();
     } else {
@@ -424,8 +423,8 @@ class _PlaceCardState extends State<PlaceCard> {
       imageBanner = imageBannerUnlocked();
     }
 
-    var likeOn = _isLiked ? Colors.green[600] : Colors.grey[400];
-    var dislikeOn = _isDisliked ? Colors.red[600] : Colors.grey[400];
+    var likeOn = widget.isLiked ? Colors.green[600] : Colors.grey[400];
+    var dislikeOn = widget.isDisliked ? Colors.red[600] : Colors.grey[400];
 
     var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
     var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);

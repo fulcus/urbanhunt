@@ -21,6 +21,7 @@ dependencies:
   location: ^4.1.1
   place_picker: ^0.9.19-nullsafety
   url_launcher: ^6.0.3
+  settings_ui: ^1.0.0
 
 dev_dependencies:
   flutter_test:
