@@ -27,7 +27,7 @@ class ContributeThankYou extends StatelessWidget {
           SizedBox(height: 28),
           ElevatedButton.icon(
               onPressed: () => Navigator.of(context).pop(),
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               label: Text('Add more'),
               style: ButtonStyle(
                   //elevation: MaterialStateProperty.all<double>(10),

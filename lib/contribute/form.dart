@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +19,7 @@ class Contribute extends StatelessWidget {
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Scaffold(
+        //appBar: AppBar(title: Text('Add new place')),
         body: const AddPlaceForm(),
       ),
     );
@@ -37,10 +37,88 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   final data = PlaceData();
   File? _image;
   final picker = ImagePicker();
+  late MultiSelectChip _multiChoice;
 
   late FocusNode _name, _lockedDescription, _unlockedDescription;
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  void _handleSubmitted() {
+    final form = _formKey.currentState!;
+    if (!form.validate()) {
+      _autoValidateMode =
+          AutovalidateMode.always; // Start validating on every change.
+      _showInSnackBar('Error in form');
+      form.save(); // ?
+      // todo only for debugging
+      Navigator.of(_formKey.currentState!.context)
+          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+      resetForm(form);
+    } else {
+      form.save();
+      data.addPlace();
+      print(data.name + data.lockedDescription + data.unlockedDescription);
+      Navigator.of(_formKey.currentState!.context)
+          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+      //showInSnackBar('Added Place');
+      // todo clear form or something to present brand new form
+      resetForm(form);
+    }
+  }
+
+  void resetForm(FormState form) {
+    form.reset();
+    _image = null;
+  }
+
+  void _unfocus(BuildContext context) {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
+  }
+
+  void _showInSnackBar(String value) {
+    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
+    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
+      content: Text(value),
+    ));
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
+    if (!nameExp.hasMatch(value)) {
+      return 'Please enter only alphabetical characters';
+    }*/
+    if (value.length > 50) {
+      return 'Name is too long, use at most 50 characters';
+    }
+    return null;
+  }
+
+  String? _validateLockedDescr(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Locked description is required';
+    }
+    if (value.length > 150) {
+      return 'Locked description is too long, use at most 150 characters';
+    }
+    return null;
+  }
+
+  String? _validateUnlockedDescr(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Unlocked description is required';
+    }
+    if (value.length > 500) {
+      return 'Unlocked description is too long, use at most 500 characters';
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -61,6 +139,15 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   @override
   Widget build(BuildContext context) {
     const sizedBoxSpace = SizedBox(height: 24);
+    _multiChoice = MultiSelectChip(
+      ['Culture', 'Art', 'Nature', 'Food'],
+      onSelectionChanged: (selectedList) {
+        setState(() {
+          data.categories = selectedList;
+          _unfocus(context);
+        });
+      },
+    );
 
     return GestureDetector(
       onTap: () {
@@ -74,7 +161,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
               SizedBox(height: 70.0),
-              Text('Add new place',
+              const Text('Add new place',
                   style: TextStyle(fontSize: 22), textAlign: TextAlign.center),
               SizedBox(height: 44),
               TextFormField(
@@ -129,40 +216,65 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 validator: _validateUnlockedDescr,
               ),
               sizedBoxSpace,
-              MultiSelectChip(
-                ['Culture', 'Art', 'Nature', 'Food'],
-                onSelectionChanged: (selectedList) {
-                  setState(() {
-                    data.categories = selectedList;
-                    _unfocus(context);
-                  });
-                },
-              ),
+              _multiChoice,
               sizedBoxSpace,
+              /*Center(
+                child: _image == null
+                    ? const Text('No image selected.')
+                    : InkWell(
+                        onTap: () {
+                          setState(() {
+                            _image = null;
+                          });
+                        },
+                        child: Container(
+                          height: 100,
+                          width: 100,
+                          child: Image.file(
+                            _image!,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+              ),*/
               Center(
                 child: _image == null
-                    ? Text('No image selected.')
-                    : InkWell(
-                  onTap: () {
-                    setState(() {
-                      _image = null;
-                    });
-                  },
-                  child: Container(
-                    height: 100,
-                    width: 100,
-                    child: Image.file(
-                      _image!,
-                      fit: BoxFit.cover,
+                    ? const Text('No image selected.')
+                    : Stack(
+                  children: <Widget>[
+                    Container(
+                      height: 200,
+                      width: 200,
+                      child: Image.file(
+                        _image!,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            setState(() {
+                              _image = null;
+                            });
+                          });
+                        },
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               sizedBoxSpace,
               TextButton.icon(
                 onPressed: () => getImage(data),
-                label: Text('Choose a picture'),
-                icon: Icon(Icons.add_a_photo),
+                label: const Text('Choose a picture'),
+                icon: const Icon(Icons.add_a_photo),
                 style: ButtonStyle(
                   //elevation: MaterialStateProperty.all<double>(10),
                     padding: MaterialStateProperty.all<EdgeInsets>(
@@ -190,8 +302,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                   data.pickedLocation!.formattedAddress ?? 'No location'),
               sizedBoxSpace,
               TextButton.icon(
-                label: Text('Select place location'),
-                icon: Icon(Icons.pin_drop),
+                label: const Text('Select place location'),
+                icon: const Icon(Icons.pin_drop),
                 onPressed: () => openLocationPicker(context),
                 style: ButtonStyle(
                   //elevation: MaterialStateProperty.all<double>(10),
@@ -216,7 +328,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               sizedBoxSpace,
               Center(
                 child: ElevatedButton(
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                   onPressed: _handleSubmitted,
                 ),
               ),
@@ -228,80 +340,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     );
   }
 
-  void _unfocus(BuildContext context) {
-    FocusScopeNode currentFocus = FocusScope.of(context);
-
-    if (!currentFocus.hasPrimaryFocus) {
-      currentFocus.unfocus();
-    }
-  }
-
-  void _handleSubmitted() {
-    final form = _formKey.currentState!;
-    if (!form.validate()) {
-      _autoValidateMode =
-          AutovalidateMode.always; // Start validating on every change.
-      showInSnackBar('Error in form');
-      form.save(); // ?
-      // debugging
-      Navigator.of(_formKey.currentState!.context)
-          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
-    } else {
-      form.save();
-      data.addPlace();
-      print(data.name + data.lockedDescription + data.unlockedDescription);
-      Navigator.of(_formKey.currentState!.context)
-          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
-      //showInSnackBar('Added Place');
-      // todo clear form or something to present brand new form
-      form.reset();
-      _image = null;
-      //todo clear multichoice
-    }
-  }
-
-  void showInSnackBar(String value) {
-    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
-    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-      content: Text(value),
-    ));
-  }
-
   //todo use built in validators https://pub.dev/packages/flutter_form_builder
-
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name is required';
-    }
-    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
-    if (!nameExp.hasMatch(value)) {
-      return 'Please enter only alphabetical characters';
-    }*/
-    if (value.length > 50) {
-      return 'Name is too long, use at most 50 characters';
-    }
-    return null;
-  }
-
-  String? _validateLockedDescr(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Locked description is required';
-    }
-    if (value.length > 150) {
-      return 'Locked description is too long, use at most 150 characters';
-    }
-    return null;
-  }
-
-  String? _validateUnlockedDescr(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Unlocked description is required';
-    }
-    if (value.length > 500) {
-      return 'Unlocked description is too long, use at most 500 characters';
-    }
-    return null;
-  }
 
   Future<void> openLocationPicker(BuildContext context) async {
     LocationResult? result = await Navigator.of(context).push(MaterialPageRoute(
@@ -318,10 +357,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         data.location =
             GeoPoint(result.latLng!.latitude, result.latLng!.longitude);
         data.street = result.name!;
-        print('formattedAddress: ' + result.formattedAddress!);
-
-        //is street, city, country necessary?
-
         data.city = result.city!.name!;
         data.country = result.country!.name!;
       } on Exception catch (exception) {
@@ -338,7 +373,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       setState(() {
         _image = File(pickedFile.path);
       });
-      data.imageURL= await uploadFile(_image!);
+      data.imageURL = await uploadFile(_image!);
     }
   }
 }
@@ -366,23 +401,22 @@ class MultiSelectChip extends StatefulWidget {
 }
 
 class _MultiSelectChipState extends State<MultiSelectChip> {
-  // String selectedChoice = "";
-  //late FocusNode focusNode;
-  List<String> selectedChoices = [];
+  final List<String> _selectedChoices = [];
 
   @override
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return InputDecorator(
       decoration: InputDecoration(
-        /*prefixIcon: Padding(
-            padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
-            child: Icon(Icons.category_outlined),
-          ),*/
-          icon: Icon(Icons.category_outlined),
+        // prefixIcon: Padding(
+        //   padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
+        //   child: Icon(Icons.category_outlined),
+        // ),
+          icon: const Icon(Icons.category_outlined),
           labelStyle: TextStyle(fontSize: 18, height: 0),
           labelText: 'Select a category',
           border: InputBorder.none),
@@ -393,6 +427,7 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
       ),
     );
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -405,26 +440,24 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
       choices.add(Container(
         child: ChoiceChip(
           label: Text(item),
-          selected: selectedChoices.contains(item),
+          selected: _selectedChoices.contains(item),
           onSelected: (selected) {
             setState(() {
-              selectedChoices.contains(item)
-                  ? selectedChoices.remove(item)
-                  : selectedChoices.add(item);
-              widget.onSelectionChanged(selectedChoices);
+              _selectedChoices.contains(item)
+                  ? _selectedChoices.remove(item)
+                  : _selectedChoices.add(item);
+              widget.onSelectionChanged(_selectedChoices);
             });
           },
         ),
       ));
     });
-
     return choices;
   }
-  
-  void clearChoices() {
+
+  void clear() {
     setState(() {
-      selectedChoices.clear();
+      _selectedChoices.clear();
     });
   }
-
 }
