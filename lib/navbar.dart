@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hunt_app/contribute/form.dart';
 import 'package:hunt_app/explore.dart';
 import 'package:hunt_app/profile.dart';
+import 'package:hunt_app/leaderboard.dart';
 
 class Nav extends StatefulWidget {
   @override
@@ -115,7 +116,7 @@ class TabNavigator extends StatelessWidget {
     } else if (tabItem == 'Contribute') {
       child = Contribute();
     } else if (tabItem == 'Social') {
-      child = Container(color: Colors.blue);
+      child = LeaderBoard();
     } else if (tabItem == 'Profile') {
       child = Profile();
     }
