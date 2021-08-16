@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Unlock distance threshold
-const double UNLOCK_DISTANCE_THRESHOLD = 15.0; // km
+const double UNLOCK_RANGE_METERS = 15000000000.0;
 
 // Firebase db instance
 final db = FirebaseFirestore.instance;
@@ -76,7 +76,7 @@ class _PlaceCardState extends State<PlaceCard> {
   double _distance = 0.0;
   String _distanceUnit = ' km';
 
-  _PlaceCardState() {}
+  _PlaceCardState();
 
   @override
   void initState() {
@@ -84,36 +84,47 @@ class _PlaceCardState extends State<PlaceCard> {
     _updateDistance();
   }
 
-  Future<void> _updateDistance() async {
-    var currentPos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best);
-    var distance = Geolocator.distanceBetween(
-      currentPos.latitude,
-      currentPos.longitude,
-      widget.latitude,
-      widget.longitude,
-    );
+  void _updateDistance() {
+    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((pos) {
+      setState(() {
+        var distance = Geolocator.distanceBetween(
+            pos.latitude, pos.longitude, widget.latitude, widget.longitude);
 
-    if (distance > 999.0) {
-      _distance = distance / 1000.0;
-      _distanceUnit = ' km';
-    } else {
-      _distance = distance;
-      _distanceUnit = ' m';
-    }
+        if (distance > 999.0) {
+          _distance = distance / 1000.0;
+          _distanceUnit = ' km';
+        } else {
+          _distance = distance;
+          _distanceUnit = ' m';
+        }
+      });
+    });
   }
 
   // Interactions
-  Future<void> tryUnlock() async {
-    _updateDistance();
-
-    if (_distance < UNLOCK_DISTANCE_THRESHOLD) {
+  void tryUnlock() {
+    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((pos) {
       setState(() {
-        widget.isLocked = false;
-        _dbUnlockPlace();
-        // somehow trigger update for marker icon with unlocked icon (for marker with id document.id)
+        var distance = Geolocator.distanceBetween(
+            pos.latitude, pos.longitude, widget.latitude, widget.longitude);
+
+        if (distance > 999.0) {
+          _distance = distance / 1000.0;
+          _distanceUnit = ' km';
+        } else {
+          _distance = distance;
+          _distanceUnit = ' m';
+        }
+
+        if (widget.isLocked && distance < UNLOCK_RANGE_METERS) {
+          widget.isLocked = false;
+          _dbUnlockPlace();
+          // somehow trigger update for marker icon with unlocked icon (for marker with id document.id)
+        }
       });
-    }
+    });
   }
 
   // todo check if db calls are successful
