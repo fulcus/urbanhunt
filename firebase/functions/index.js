@@ -5,7 +5,7 @@ admin.initializeApp();
 const db = admin.firestore();
 
 exports.addUser = functions.auth.user().onCreate((user) => {
-  db.collection("users").doc(user.uid).set({ score: 0 });
+  db.collection("users").doc(user.uid).set({ score: 0, username: 'default' });
 });
 
 exports.unlockPlacePoints = functions.firestore
@@ -15,7 +15,7 @@ exports.unlockPlacePoints = functions.firestore
     docRef.update({ score: admin.firestore.FieldValue.increment(1) });
   });
 
-  exports.addPlacePoints = functions.firestore
+exports.addPlacePoints = functions.firestore
   .document("places/{placeId}")
   .onCreate((snapshot, context) => {
     const docRef = db.collection("users").doc(context.auth.uid);

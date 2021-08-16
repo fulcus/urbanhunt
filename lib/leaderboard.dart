@@ -11,7 +11,7 @@ class LeaderBoard extends StatefulWidget {
 }
 
 class _LeaderBoardState extends State<LeaderBoard> {
-  late Stream<QuerySnapshot> _users;
+  late Stream<QuerySnapshot> _bestUsers;
   late User _myUser;
   Color _rowColor = Colors.transparent;
   int _position = 0;
@@ -21,18 +21,17 @@ class _LeaderBoardState extends State<LeaderBoard> {
   void initState() {
     super.initState();
 
-    _users = db
+    // get 10 best players
+    _bestUsers = db
         .collection('users')
         .orderBy('score', descending: true)
-        .limit(10)
-        .snapshots(); // get 10 best
-    _myUser = FirebaseAuth
-        .instance.currentUser!; // check if uid can be shared across widgets
+        .limit(5)
+        .snapshots();
+    _myUser = FirebaseAuth.instance.currentUser!;
   }
 
   @override
   Widget build(BuildContext context) {
-    var r = const TextStyle(color: Colors.purpleAccent, fontSize: 34);
     return Stack(
       children: <Widget>[
         Scaffold(
@@ -68,7 +67,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
               ),
               Flexible(
                   child: StreamBuilder<QuerySnapshot>(
-                      stream: _users,
+                      stream: _bestUsers,
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           _position = 0;
@@ -81,7 +80,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                                 print(index);
                                 // highlight my user
                                 if (currListUser.id == _myUser.uid) {
-                                  _rowColor = Colors.lightBlue;
+                                  _rowColor = Colors.orangeAccent;
                                   _myUserInTop = true;
                                 } else {
                                   _rowColor = Colors.transparent;
@@ -114,9 +113,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
   }
 }
 
-// todo | pos | pic? | username | points |
+// todo | pos | pic? | username | points | lock icon |
 
-// Row that contains pic, text, medal, button
+// Row of leaderboard that contains pic, text, medal, button
 class LeaderBoardRow extends StatelessWidget {
   final String username, score;
   final int position;
@@ -129,7 +128,7 @@ class LeaderBoardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
       child: InkWell(
         child: Container(
           decoration: BoxDecoration(
@@ -151,8 +150,39 @@ class LeaderBoardRow extends StatelessWidget {
                 color: rowColor,
                 child: Row(
                   children: <Widget>[
+                    position == 0
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 7, right: 4),
+                            child: Text('🥇',
+                                style: const TextStyle(fontSize: 34)),
+                          )
+                        : position == 1
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 7, right: 4),
+                                child: Text('🥈',
+                                    style: const TextStyle(fontSize: 34)),
+                              )
+                            : position == 2
+                                ? Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 7, right: 4),
+                                    child: Text('🥉',
+                                        style: const TextStyle(fontSize: 34)),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 20, right: 20),
+                                    child: Text((position + 1).toString(),
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          foreground: Paint()
+                                            ..style = PaintingStyle.stroke
+                                            ..strokeWidth = 1
+                                            ..color = Colors.blue[700]!,
+                                        ))),
                     Padding(
-                      padding: const EdgeInsets.only(top: 10.0, left: 15.0),
+                      padding: const EdgeInsets.only(top: 10, bottom: 10),
                       child: Row(
                         children: <Widget>[
                           CircleAvatar(
@@ -168,7 +198,7 @@ class LeaderBoardRow extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 20.0, top: 10.0),
+                      padding: const EdgeInsets.only(left: 20.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,26 +210,21 @@ class LeaderBoardRow extends StatelessWidget {
                                 style: TextStyle(
                                     color: Colors.deepPurple,
                                     fontWeight: FontWeight.w500),
-                                maxLines: 6,
-                              )),
-                          Text("Points: " + score),
-                        ],
+                                maxLines: 2,
+                              ))],
                       ),
                     ),
                     Flexible(child: Container()),
-                    position == 0
-                        ? Text('🥇', style: const TextStyle(fontSize: 34))
-                        : position == 1
-                            ? Text(
-                                '🥈',
-                                style: const TextStyle(fontSize: 34),
-                              )
-                            : position == 2
-                                ? Text(
-                                    '🥉',
-                                    style: const TextStyle(fontSize: 34),
-                                  )
-                                : Text(''),
+                    Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Row(children: [
+                        Text(
+                          score,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        Icon(Icons.lock)
+                      ]),
+                    )
                     // Padding(
                     //   padding:
                     //       EdgeInsets.only(left: 20.0, top: 13.0, right: 20.0),
