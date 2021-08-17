@@ -23,8 +23,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _success = false;
-  String _userEmail = '';
+  String _errorMessage = 'Registration failed';
+  bool? _success;
+  User? user;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +47,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     validator: (String? value) {
                       if (value!.isEmpty) {
                         return 'Please enter some text';
+                      }
+                      if (value.contains(' ')) {
+                        return 'No spaces allowed in username';
                       }
                       return null;
                     },
@@ -78,23 +82,40 @@ class _RegisterPageState extends State<RegisterPage> {
                       icon: Icons.person_add,
                       backgroundColor: Colors.blueGrey,
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await _register();
+                        var isUnique =
+                            await _isUsernameUnique(_usernameController.text);
+                        if (!isUnique) {
+                          setState(() {
+                            _success = false;
+                            _errorMessage = 'Username already exists';
+                          });
+                        } else {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await _register().then((_) =>
+                                  _addUserToDB(_usernameController.text));
+                            } on FirebaseAuthException catch (e) {
+                              setState(() {
+                                _success = false;
+                                _errorMessage =
+                                    e.message ?? 'Registration failed';
+                              });
+                              print('Failed with error code: ${e.code}');
+                              print(e.message);
+                            }
+                          }
                         }
                       },
                       text: 'Register',
                     ),
                   ),
                   Container(
-                    alignment: Alignment.center,
-                    /*child: Text(_success == null
-                        ? ''
-                        : (_success
-                            ? 'Successfully registered $_userEmail'
-                            : 'Registration failed')),*/
-                    child: Text(
-                        _success ? 'Successfully registered $_userEmail' : ''),
-                  )
+                      alignment: Alignment.center,
+                      child: Text(_success == null
+                          ? ''
+                          : (_success!
+                              ? 'Successfully registered'
+                              : _errorMessage)))
                 ],
               ),
             ),
@@ -111,16 +132,26 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  // todo server side check of uniqueness
+  Future<bool> _isUsernameUnique(String username) async {
+    final username = await db
+        .collection('users')
+        .where('username', isEqualTo: _usernameController.text)
+        .get();
+    return username.docs.isEmpty;
+  }
+
   // Example code for registration.
   Future<void> _register() async {
-    final user = (await _auth.createUserWithEmailAndPassword(
+    user = (await _auth.createUserWithEmailAndPassword(
       email: _emailController.text,
       password: _passwordController.text,
     ))
         .user;
+  }
 
-    //save username to firestore User object and db field
-    // todo check username uniqueness
+  //save username to firestore User object and db field
+  /*
     await user
         ?.updateDisplayName(_usernameController.text)
         .then((value) => db
@@ -138,5 +169,27 @@ class _RegisterPageState extends State<RegisterPage> {
     });
     //upload pic to storage
     //await user?.updatePhotoURL(user.uid); // photoURL is uid
+  }
+*/
+
+  Future<void> _addUserToDB(String username) async {
+    // add username to user object
+    //await user!.updateDisplayName(_usernameController.text); // useless
+
+    // add username to database
+    await db
+        .collection("users")
+        .doc(user!.uid)
+        .set(<String, dynamic>{'score': 0, 'username': username}).then((_) {
+      setState(() {
+        _success = true;
+      });
+    }).catchError((Error error) {
+      setState(() {
+        _success = false;
+        _errorMessage = error.toString();
+      });
+      print(error.stackTrace);
+    });
   }
 }
