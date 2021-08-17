@@ -207,15 +207,25 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       var path = '${user!.uid}${extension(image.path)}';
       print('path ' + path);
-      await FirebaseStorage.instance
-          .ref()
-          .child('images/profile/$path')
-          .putFile(image);
+      var storageRef =
+          FirebaseStorage.instance.ref().child('images/profile/$path');
+      await storageRef.putFile(image);
+      print('File Uploaded');
+
+      var returnURL = '';
+      await storageRef.getDownloadURL().then((fileURL) {
+        returnURL = fileURL;
+        print('returnURL $returnURL');
+      });
+      await db
+          .collection('users')
+          .doc(user!.uid)
+          .update({'imageURL': returnURL});
+      print('URL stored');
     } on FirebaseException catch (e) {
       printErrorMessage(e.message!);
       print(e.stackTrace);
     }
-    print('File Uploaded');
   }
 
   // todo server side check of uniqueness
@@ -237,15 +247,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _addUserToDB(String username) async {
     try {
-      await db
-          .collection("users")
-          .doc(user!.uid)
-          .set(<String, dynamic>{'score': 0, 'username': username}).then((_) {
+      await db.collection("users").doc(user!.uid).set(<String, dynamic>{
+        'imageURL': '',
+        'score': 0,
+        'username': username
+      }).then((_) {
         setState(() {
           _success = true;
         });
       });
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       printErrorMessage(e.toString());
       print(e);
     }

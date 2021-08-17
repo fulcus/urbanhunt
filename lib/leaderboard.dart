@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,7 +27,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
     _bestUsers = db
         .collection('users')
         .orderBy('score', descending: true)
-        .limit(10)
+        .limit(5)
         .snapshots();
     _myUser = FirebaseAuth.instance.currentUser!;
   }
@@ -44,14 +46,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 margin: EdgeInsets.only(left: 15.0, top: 10.0),
                 child: RichText(
                     text: TextSpan(
-                        text: 'Leader',
+                        text: "Leader",
                         style: TextStyle(
                             color: Colors.deepPurple,
                             fontSize: 30.0,
                             fontWeight: FontWeight.bold),
                         children: [
                       TextSpan(
-                          text: 'Board',
+                          text: "Board",
                           style: TextStyle(
                               color: Colors.pink,
                               fontSize: 30.0,
@@ -59,7 +61,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     ])),
               ),
               Padding(
-                padding: EdgeInsets.only(left: 15, bottom: 5),
+                padding: EdgeInsets.only(left: 15.0),
                 child: Text(
                   'Global Rank Board: ',
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -95,6 +97,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                                 }
                                 return LeaderBoardRow(
                                     currListUser.get('username').toString(),
+                                    currListUser.get('imageURL').toString(),
                                     currListUser.get('score').toString(),
                                     _position,
                                     _rowColor);
@@ -115,11 +118,17 @@ class _LeaderBoardState extends State<LeaderBoard> {
 
 // Row of leaderboard that contains pic, text, medal, button
 class LeaderBoardRow extends StatelessWidget {
-  final String username, score;
+  final String username, imageURL, score;
   final int position;
   final Color rowColor;
-
-  LeaderBoardRow(this.username, this.score, this.position, this.rowColor,
+  
+// currListUser.get('username').toString(),
+// currListUser.get('imageURL').toString(),
+// currListUser.get('score').toString(),
+// _position,
+// _rowColor);
+  LeaderBoardRow(
+      this.username, this.imageURL, this.score, this.position, this.rowColor,
       {Key? key})
       : super(key: key);
 
@@ -130,6 +139,7 @@ class LeaderBoardRow extends StatelessWidget {
       child: InkWell(
         child: Container(
           decoration: BoxDecoration(
+              color: rowColor,
               border: Border.all(
                   color: position == 0
                       ? Colors.amber
@@ -140,97 +150,102 @@ class LeaderBoardRow extends StatelessWidget {
                               : Colors.white,
                   width: 3.0,
                   style: BorderStyle.solid),
-              borderRadius: BorderRadius.circular(5.0)),
+              borderRadius: BorderRadius.circular(50.0)),
           width: MediaQuery.of(context).size.width,
           child: Column(
             children: <Widget>[
-              Container(
-                color: rowColor,
-                child: Row(
-                  children: <Widget>[
-                    position == 0
-                        ? Padding(
-                            padding: const EdgeInsets.only(left: 7, right: 4),
-                            child: Text('🥇',
-                                style: const TextStyle(fontSize: 34)),
-                          )
-                        : position == 1
-                            ? Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 7, right: 4),
-                                child: Text('🥈',
-                                    style: const TextStyle(fontSize: 34)),
-                              )
-                            : position == 2
-                                ? Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 7, right: 4),
-                                    child: Text('🥉',
-                                        style: const TextStyle(fontSize: 34)),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 20, right: 20),
-                                    child: Text((position + 1).toString(),
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          foreground: Paint()
-                                            ..style = PaintingStyle.stroke
-                                            ..strokeWidth = 1
-                                            ..color = Colors.blue[700]!,
-                                        ))),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, bottom: 10),
-                      child: Row(
-                        children: <Widget>[
-                          CircleAvatar(
-                              child: Container(
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          image: /*NetworkImage(snapshot.data!.docs[index].get('photoUrl') as String)*/
-                                              AssetImage(
-                                                  'assets/images/profile.png'),
-                                          fit: BoxFit.fill)))),
-                        ],
-                      ),
+              Row(
+                children: <Widget>[
+                  position == 0
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 7, right: 4),
+                          child:
+                              Text('🥇', style: const TextStyle(fontSize: 34)),
+                        )
+                      : position == 1
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 7, right: 4),
+                              child: Text('🥈',
+                                  style: const TextStyle(fontSize: 34)),
+                            )
+                          : position == 2
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 7, right: 4),
+                                  child: Text('🥉',
+                                      style: const TextStyle(fontSize: 34)),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, right: 20),
+                                  child: Text((position + 1).toString(),
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        foreground: Paint()
+                                          ..style = PaintingStyle.stroke
+                                          ..strokeWidth = 1
+                                          ..color = Colors.blue[700]!,
+                                      ))),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 10),
+                    child: Row(
+                      children: <Widget>[
+                        CircleAvatar(
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: getImage(imageURL),
+                                        fit: BoxFit.fill)))),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                username,
-                                style: TextStyle(
-                                    color: Colors.deepPurple,
-                                    fontWeight: FontWeight.w500),
-                                maxLines: 2,
-                              ))
-                        ],
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              username,
+                              style: TextStyle(
+                                  color: Colors.deepPurple,
+                                  fontWeight: FontWeight.w500),
+                              maxLines: 2,
+                            ))
+                      ],
                     ),
-                    Flexible(child: Container()),
-                    Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Row(children: [
-                        Text(
+                  ),
+                  Flexible(child: Container()),
+                  Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Row(children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Text(
                           score,
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 21),
                         ),
-                        Icon(Icons.lock)
-                      ]),
-                    )
-                  ],
-                ),
+                      ),
+                      Icon(Icons.vpn_key, color: Colors.amber)
+                    ]),
+                  )
+                ],
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  ImageProvider getImage(String url) {
+    ImageProvider imageProvider = AssetImage('assets/images/profile.png');
+    if (url != '') {
+      imageProvider = NetworkImage(url);
+    }
+    return imageProvider;
   }
 }
