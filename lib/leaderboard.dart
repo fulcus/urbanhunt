@@ -25,7 +25,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
     _bestUsers = db
         .collection('users')
         .orderBy('score', descending: true)
-        .limit(5)
+        .limit(10)
         .snapshots();
     _myUser = FirebaseAuth.instance.currentUser!;
   }
@@ -44,14 +44,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 margin: EdgeInsets.only(left: 15.0, top: 10.0),
                 child: RichText(
                     text: TextSpan(
-                        text: "Leader",
+                        text: 'Leader',
                         style: TextStyle(
                             color: Colors.deepPurple,
                             fontSize: 30.0,
                             fontWeight: FontWeight.bold),
                         children: [
                       TextSpan(
-                          text: "Board",
+                          text: 'Board',
                           style: TextStyle(
                               color: Colors.pink,
                               fontSize: 30.0,
@@ -59,7 +59,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     ])),
               ),
               Padding(
-                padding: EdgeInsets.only(left: 15.0),
+                padding: EdgeInsets.only(left: 15, bottom: 5),
                 child: Text(
                   'Global Rank Board: ',
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -112,8 +112,6 @@ class _LeaderBoardState extends State<LeaderBoard> {
     );
   }
 }
-
-// todo | pos | pic? | username | points | lock icon |
 
 // Row of leaderboard that contains pic, text, medal, button
 class LeaderBoardRow extends StatelessWidget {
@@ -211,7 +209,8 @@ class LeaderBoardRow extends StatelessWidget {
                                     color: Colors.deepPurple,
                                     fontWeight: FontWeight.w500),
                                 maxLines: 2,
-                              ))],
+                              ))
+                        ],
                       ),
                     ),
                     Flexible(child: Container()),
@@ -225,19 +224,6 @@ class LeaderBoardRow extends StatelessWidget {
                         Icon(Icons.lock)
                       ]),
                     )
-                    // Padding(
-                    //   padding:
-                    //       EdgeInsets.only(left: 20.0, top: 13.0, right: 20.0),
-                    //   child: RaisedButton(
-                    //     onPressed: () {},
-                    //     child: Text(
-                    //       'Challenge',
-                    //       style: TextStyle(
-                    //           color: Colors.white, fontWeight: FontWeight.bold),
-                    //     ),
-                    //     color: Colors.deepPurple,
-                    //   ),
-                    // ),
                   ],
                 ),
               ),

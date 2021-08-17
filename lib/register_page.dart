@@ -1,12 +1,14 @@
+import 'dart:io';
+import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_signin_button/button_builder.dart';
+import 'package:image_picker/image_picker.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final db = FirebaseFirestore.instance;
-final FirebaseStorage storage = FirebaseStorage.instance;
 
 /// Entrypoint example for registering via Email/Password.
 class RegisterPage extends StatefulWidget {
@@ -22,9 +24,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final picker = ImagePicker();
 
-  bool _success = false;
-  String _userEmail = '';
+  String _errorMessage = 'Registration failed';
+  bool? _success;
+  User? user;
+  File? _image;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +42,8 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: ListView(
+                //crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   TextFormField(
                     controller: _usernameController,
@@ -46,6 +51,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     validator: (String? value) {
                       if (value!.isEmpty) {
                         return 'Please enter some text';
+                      }
+                      if (value.contains(' ')) {
+                        return 'No spaces allowed in username';
                       }
                       return null;
                     },
@@ -71,6 +79,67 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                     obscureText: true,
                   ),
+                  SizedBox(height: 24),
+                  Center(
+                    child: _image == null
+                        ? const Text('No image selected.')
+                        : Stack(
+                            children: <Widget>[
+                              Container(
+                                height: 200,
+                                width: 200,
+                                child: Image.file(
+                                  _image!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      setState(() {
+                                        _image = null;
+                                      });
+                                    });
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                  SizedBox(height: 24),
+                  TextButton.icon(
+                    onPressed: () => getImage(),
+                    label: const Text('Choose a picture'),
+                    icon: const Icon(Icons.add_a_photo),
+                    style: ButtonStyle(
+                        //elevation: MaterialStateProperty.all<double>(10),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                        overlayColor: MaterialStateProperty.resolveWith(
+                          (states) {
+                            return states.contains(MaterialState.pressed)
+                                ? Colors.blue[50]
+                                : null;
+                          },
+                        ),
+                        foregroundColor:
+                            MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.white),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    side: BorderSide(color: Colors.blue)))),
+                  ),
+                  SizedBox(height: 24),
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     alignment: Alignment.center,
@@ -78,23 +147,34 @@ class _RegisterPageState extends State<RegisterPage> {
                       icon: Icons.person_add,
                       backgroundColor: Colors.blueGrey,
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await _register();
+                        var isUnique =
+                            await _isUsernameUnique(_usernameController.text);
+                        if (!isUnique) {
+                          printErrorMessage('Username already exists');
+                        } else {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await _register().then((_) =>
+                                  _addUserToDB(_usernameController.text));
+                              await uploadFile(_image!);
+                            } on FirebaseAuthException catch (e) {
+                              printErrorMessage(e.message!);
+                              print('Failed with error code: ${e.code}');
+                              print(e.message);
+                            }
+                          }
                         }
                       },
                       text: 'Register',
                     ),
                   ),
                   Container(
-                    alignment: Alignment.center,
-                    /*child: Text(_success == null
-                        ? ''
-                        : (_success
-                            ? 'Successfully registered $_userEmail'
-                            : 'Registration failed')),*/
-                    child: Text(
-                        _success ? 'Successfully registered $_userEmail' : ''),
-                  )
+                      alignment: Alignment.center,
+                      child: Text(_success == null
+                          ? ''
+                          : (_success!
+                              ? 'Successfully registered'
+                              : _errorMessage)))
                 ],
               ),
             ),
@@ -111,32 +191,70 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Example code for registration.
+  Future<void> getImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) {
+      print('No image selected.');
+    } else {
+      setState(() {
+        _image = File(pickedFile.path);
+        print('file picked');
+      });
+    }
+  }
+
+  Future<void> uploadFile(File image) async {
+    try {
+      var path = '${user!.uid}${extension(image.path)}';
+      print('path ' + path);
+      await FirebaseStorage.instance
+          .ref()
+          .child('images/profile/$path')
+          .putFile(image);
+    } on FirebaseException catch (e) {
+      printErrorMessage(e.message!);
+      print(e.stackTrace);
+    }
+    print('File Uploaded');
+  }
+
+  // todo server side check of uniqueness
+  Future<bool> _isUsernameUnique(String username) async {
+    final username = await db
+        .collection('users')
+        .where('username', isEqualTo: _usernameController.text)
+        .get();
+    return username.docs.isEmpty;
+  }
+
   Future<void> _register() async {
-    final user = (await _auth.createUserWithEmailAndPassword(
+    user = (await _auth.createUserWithEmailAndPassword(
       email: _emailController.text,
       password: _passwordController.text,
     ))
         .user;
+  }
 
-    //save username to firestore User object and db field
-    // todo check username uniqueness
-    await user
-        ?.updateDisplayName(_usernameController.text)
-        .then((value) => db
-            .collection('users')
-            .doc(user.uid)
-            .update({'username': _usernameController.text}))
-        .then((_) {
-      setState(() {
-        _success = true;
-        _userEmail = user.email!;
+  Future<void> _addUserToDB(String username) async {
+    try {
+      await db
+          .collection("users")
+          .doc(user!.uid)
+          .set(<String, dynamic>{'score': 0, 'username': username}).then((_) {
+        setState(() {
+          _success = true;
+        });
       });
-    }).catchError((Error error) {
+    } on Exception catch(e) {
+      printErrorMessage(e.toString());
+      print(e);
+    }
+  }
+
+  void printErrorMessage(String message) {
+    setState(() {
       _success = false;
-      print(error);
+      _errorMessage = message;
     });
-    //upload pic to storage
-    //await user?.updatePhotoURL(user.uid); // photoURL is uid
   }
 }

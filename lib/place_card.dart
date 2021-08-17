@@ -7,12 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// Unlock distance threshold
+const double UNLOCK_RANGE_METERS = 15000000000.0;
+
 // Firebase db instance
 final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
 
-// map category tag to its color
+// Map category tag to its color
 final Map<String, Color> categoryColors = {};
 
 class PlaceCard extends StatefulWidget {
@@ -36,10 +39,10 @@ class PlaceCard extends StatefulWidget {
   late int likes;
   late int dislikes;
 
-  late void Function()? onCardClose;
+  late void Function() onCardClose;
 
   PlaceCard(DocumentSnapshot document, bool isLocked, bool isLiked,
-      bool isDisliked, void Function()? onCardClose,
+      bool isDisliked, void Function() onCardClose,
       {Key? key})
       : super(key: key) {
     this.document = document;
@@ -50,7 +53,7 @@ class PlaceCard extends StatefulWidget {
 
     this.onCardClose = onCardClose;
 
-    placeId = document.id;
+    placeId = document.id as String;
     name = document['name'] as String;
     address = document['address'] as Map<String, dynamic>;
     categories = (document['categories'] as List)
@@ -66,94 +69,95 @@ class PlaceCard extends StatefulWidget {
   }
 
   @override
-  _PlaceCardState createState() =>
-      _PlaceCardState(isLocked, isLiked, isDisliked);
+  _PlaceCardState createState() => _PlaceCardState();
 }
 
 class _PlaceCardState extends State<PlaceCard> {
-  bool _isLocked = true;
-  bool _isLiked = false;
-  bool _isDisliked = false;
-
-  double _distance = 0;
+  double _distance = 0.0;
   String _distanceUnit = ' km';
 
-  _PlaceCardState(bool isLocked, bool isLiked, bool isDisliked) {
-    _isLocked = isLocked;
-    _isLiked = isLiked;
-    _isDisliked = isDisliked;
-  }
+  _PlaceCardState();
 
   @override
   void initState() {
     super.initState();
-    _computeDistanceKm();
+    _updateDistance();
   }
 
-  Future<void> _computeDistanceKm() async {
-    var currentPos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best);
-    setState(() {});
-    var distance = Geolocator.distanceBetween(currentPos.latitude,
-        currentPos.longitude, widget.latitude, widget.longitude);
-    if (distance >= 1000) {
-      _distance = distance / 1000;
-    } else {
-      _distance = distance;
-      _distanceUnit = ' m';
-    }
+  void _updateDistance() {
+    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((pos) {
+      setState(() {
+        var distance = Geolocator.distanceBetween(
+            pos.latitude, pos.longitude, widget.latitude, widget.longitude);
+
+        if (distance > 999.0) {
+          _distance = distance / 1000.0;
+          _distanceUnit = ' km';
+        } else {
+          _distance = distance;
+          _distanceUnit = ' m';
+        }
+      });
+    });
   }
 
   // Interactions
-  Future<void> tryUnlock() async {
-    var currentPos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best);
-    if (Geolocator.distanceBetween(currentPos.latitude, currentPos.longitude,
-            widget.latitude, widget.longitude) <=
-        1500000000) {
+  void tryUnlock() {
+    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((pos) {
       setState(() {
-        _isLocked = false;
-        setState(() {
+        var distance = Geolocator.distanceBetween(
+            pos.latitude, pos.longitude, widget.latitude, widget.longitude);
+
+        if (distance > 999.0) {
+          _distance = distance / 1000.0;
+          _distanceUnit = ' km';
+        } else {
+          _distance = distance;
+          _distanceUnit = ' m';
+        }
+
+        if (widget.isLocked && distance < UNLOCK_RANGE_METERS) {
+          widget.isLocked = false;
           _dbUnlockPlace();
-        });
-        //update marker icon => markerId is document.id
-        //TODO update the UI: marker icon in Explore, likes and img in PlaceCard
+          // somehow trigger update for marker icon with unlocked icon (for marker with id document.id)
+        }
       });
-    }
+    });
   }
 
   // todo check if db calls are successful
-
   void like() {
-    if (!_isLocked) {
+    if (!widget.isLocked) {
       setState(() {
-        if (!_isLiked && !_isDisliked) {
+        if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateLikes(1);
-        } else if (_isLiked && !_isDisliked) {
+        } else if (widget.isLiked && !widget.isDisliked) {
           _dbUpdateLikes(-1);
-        } else if (!_isLiked && _isDisliked) {
+        } else if (!widget.isLiked && widget.isDisliked) {
           __dbSwapLikeDislike(false);
         }
 
-        _isLiked = !_isLiked;
-        _isDisliked = false;
+        widget.isLiked = !widget.isLiked;
+        widget.isDisliked = false;
       });
     }
   }
 
   void dislike() {
-    if (!_isLocked) {
+    if (!widget.isLocked) {
       setState(() {
-        if (!_isLiked && !_isDisliked) {
+        if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateDislikes(1);
-        } else if (_isLiked && !_isDisliked) {
+        } else if (widget.isLiked && !widget.isDisliked) {
           __dbSwapLikeDislike(true);
-        } else if (!_isLiked && _isDisliked) {
+        } else if (!widget.isLiked && widget.isDisliked) {
           _dbUpdateDislikes(-1);
         }
 
-        _isDisliked = !_isDisliked;
-        _isLiked = false;
+        widget.isDisliked = !widget.isDisliked;
+        widget.isLiked = false;
       });
     }
   }
@@ -334,8 +338,8 @@ class _PlaceCardState extends State<PlaceCard> {
                   colors: [Colors.black, Colors.transparent],
                 ).createShader(rect),
                 blendMode: BlendMode.darken,
-                child:
-                    Center(child: Image.network(widget.imagePath, height: 150.0)),
+                child: Center(
+                    child: Image.network(widget.imagePath, height: 150.0)),
               ),
               ClipRRect(
                 child: BackdropFilter(
@@ -416,7 +420,7 @@ class _PlaceCardState extends State<PlaceCard> {
     String description;
     Widget imageBanner;
 
-    if (_isLocked) {
+    if (widget.isLocked) {
       description = widget.descriptionLocked;
       imageBanner = imageBannerLocked();
     } else {
@@ -424,8 +428,8 @@ class _PlaceCardState extends State<PlaceCard> {
       imageBanner = imageBannerUnlocked();
     }
 
-    var likeOn = _isLiked ? Colors.green[600] : Colors.grey[400];
-    var dislikeOn = _isDisliked ? Colors.red[600] : Colors.grey[400];
+    var likeOn = widget.isLiked ? Colors.green[600] : Colors.grey[400];
+    var dislikeOn = widget.isDisliked ? Colors.red[600] : Colors.grey[400];
 
     var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
     var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);
@@ -451,7 +455,7 @@ class _PlaceCardState extends State<PlaceCard> {
                   GestureDetector(onTap: like, child: likeIcon),
                   SizedBox(width: 4.0),
                   Text(
-                    (widget.likes + (_isLiked ? 1 : 0)).toString(),
+                    (widget.likes + (widget.isLiked ? 1 : 0)).toString(),
                     style: TextStyle(
                         fontSize: 11.0,
                         fontWeight: FontWeight.w600,
@@ -461,7 +465,7 @@ class _PlaceCardState extends State<PlaceCard> {
                   GestureDetector(onTap: dislike, child: dislikeIcon),
                   SizedBox(width: 4.0),
                   Text(
-                    (widget.dislikes + (_isDisliked ? 1 : 0)).toString(),
+                    (widget.dislikes + (widget.isDisliked ? 1 : 0)).toString(),
                     style: TextStyle(
                         fontSize: 11.0,
                         fontWeight: FontWeight.w600,

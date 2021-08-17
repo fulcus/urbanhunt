@@ -72,6 +72,7 @@ class _ExploreState extends State<Explore> {
     // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      loading = false;
       // Location services are not enabled don't continue
       // accessing the position and request users of the
       // App to enable the location services.
@@ -184,7 +185,7 @@ class _StoreMapState extends State<StoreMap> {
           .where((element) => element.id == document.id)
           .toList();
 
-      bool isLocked = current.isEmpty;
+      var isLocked = current.isEmpty;
 
       customMarkers.add(Marker(
         markerId: MarkerId(document.id),
@@ -216,7 +217,7 @@ class _StoreMapState extends State<StoreMap> {
     Widget gmap = GoogleMap(
       initialCameraPosition: CameraPosition(
         target: widget.initialPosition,
-        zoom: 16,
+        zoom: 14,
       ),
       markers: customMarkers,
       onMapCreated: (mapController) {
@@ -226,9 +227,9 @@ class _StoreMapState extends State<StoreMap> {
       onCameraMove: _updateCameraInfo,
       myLocationEnabled: true,
 
-      compassEnabled: true,
-      myLocationButtonEnabled: true,
-      mapToolbarEnabled: true,
+      compassEnabled: false,
+      myLocationButtonEnabled: false,
+      mapToolbarEnabled: false,
       zoomControlsEnabled: false,
       //indoorViewEnabled: true,  // we might need it
     );
@@ -257,7 +258,7 @@ class _StoreMapState extends State<StoreMap> {
       ),
     );
 
-    List<Widget> children = <Widget>[gmap, locate];
+    var children = <Widget>[gmap, locate];
     if (_currentCameraBearing != 0.0) {
       children.add(rotate);
     }
@@ -283,11 +284,11 @@ class _StoreMapState extends State<StoreMap> {
       var current = widget.unlockedPlaces
           .where((element) => element.id == document.id)
           .toList();
-      bool isLocked = current.isEmpty;
+      var isLocked = current.isEmpty;
 
       // update markerIcon to match place locked/unlocked and set place card
-      bool isLiked = false;
-      bool isDisliked = false;
+      var isLiked = false;
+      var isDisliked = false;
 
       if (!isLocked) {
         isLiked = current[0]['liked'] as bool;

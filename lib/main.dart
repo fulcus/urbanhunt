@@ -17,8 +17,8 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Hunt Your Picture',
       home: Scaffold(
-        body: Home(),
-        //body: AuthTypeSelector(),
+        //body: Home(),
+        body: AuthTypeSelector(),
       ),
       theme: ThemeData(
         primarySwatch: Colors.blue,
