@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:hunt_app/contribute/form.dart';
-import 'package:hunt_app/explore.dart';
-import 'package:hunt_app/profile.dart';
+import 'package:hunt_app/explore/explore.dart';
+import 'package:hunt_app/profile/profile.dart';
 import 'package:hunt_app/leaderboard.dart';
 
 class Nav extends StatefulWidget {

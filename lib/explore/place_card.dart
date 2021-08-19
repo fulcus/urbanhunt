@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Unlock distance threshold
-const double UNLOCK_RANGE_METERS = 15000000000.0;
+const double UNLOCK_RANGE_METERS = 15.0;
 
 // Firebase db instance
 final db = FirebaseFirestore.instance;
@@ -231,8 +231,8 @@ class _PlaceCardState extends State<PlaceCard> {
 
   // @param fromLikeToDislike == true : add dislike and remove like and vice versa
   Future<void> __dbSwapLikeDislike(bool fromLikeToDislike) async {
-    int likesUpdate = fromLikeToDislike ? -1 : 1;
-    int dislikesUpdate = fromLikeToDislike ? 1 : -1;
+    var likesUpdate = fromLikeToDislike ? -1 : 1;
+    var dislikesUpdate = fromLikeToDislike ? 1 : -1;
 
     var placeRef = db.collection('places').doc(widget.placeId);
     var unlockedPlaceRef = db
@@ -388,7 +388,7 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   List<Widget> categoriesTags() {
-    List<Widget> tags = [];
+    var tags = <Widget>[];
 
     var textStyle = TextStyle(
       fontSize: 12.0,

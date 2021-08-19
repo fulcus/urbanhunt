@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:hunt_app/place_card.dart';
-import 'navbar.dart';
+import 'package:hunt_app/explore/place_card.dart';
+import '../navbar.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -51,7 +51,10 @@ class _ExploreState extends State<Explore> {
     });
 
     //retrieve all the places
-    _places = db.collection('places').orderBy('name').snapshots();
+    _places = db
+        .collection('places')
+        .orderBy('name')
+        .snapshots();
 
     //retrieve the user's unlocked places
     _unlockedPlaces = db

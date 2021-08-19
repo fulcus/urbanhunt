@@ -46,14 +46,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 margin: EdgeInsets.only(left: 15.0, top: 10.0),
                 child: RichText(
                     text: TextSpan(
-                        text: "Leader",
+                        text: 'Leader',
                         style: TextStyle(
                             color: Colors.deepPurple,
                             fontSize: 30.0,
                             fontWeight: FontWeight.bold),
                         children: [
                       TextSpan(
-                          text: "Board",
+                          text: 'Board',
                           style: TextStyle(
                               color: Colors.pink,
                               fontSize: 30.0,
@@ -76,7 +76,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           return ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
-                                QueryDocumentSnapshot currListUser =
+                                var currListUser =
                                     snapshot.data!.docs[index];
                                 QueryDocumentSnapshot prevListUser;
                                 print(index);
