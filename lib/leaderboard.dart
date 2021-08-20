@@ -76,8 +76,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           return ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
-                                var currListUser =
-                                    snapshot.data!.docs[index];
+                                var currListUser = snapshot.data!.docs[index];
                                 QueryDocumentSnapshot prevListUser;
                                 print(index);
                                 // highlight my user

@@ -1,7 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/profile/profile.dart';
 
@@ -16,7 +15,6 @@ class UnlockedList extends StatefulWidget {
 
 class _UnlockedListState extends State<UnlockedList> {
   late Stream<QuerySnapshot> _unlockedPlaces;
-  late Stream<QuerySnapshot> _myUnlockedPlaces;
 
   @override
   void initState() {
@@ -26,12 +24,6 @@ class _UnlockedListState extends State<UnlockedList> {
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
-        .snapshots();
-
-    //TODO check if it works
-    _myUnlockedPlaces = db
-        .collection('places')
-        .where(FieldPath.documentId, arrayContains: _unlockedPlaces)
         .snapshots();
   }
 
@@ -53,7 +45,7 @@ class _UnlockedListState extends State<UnlockedList> {
                         color: Colors.grey,
                         size: 18.0,
                       ),
-                      onPressed: () => Navigator.push(context,
+                      onPressed: () => Navigator.pop(context,
                           MaterialPageRoute<void>(builder: (context) => Profile())),
                     ),
 
@@ -76,27 +68,24 @@ class _UnlockedListState extends State<UnlockedList> {
                                       fontWeight: FontWeight.bold))
                             ])),
                   ),
-                  Flexible(
+                  Container(
                       child: StreamBuilder<QuerySnapshot>(
                           stream: _unlockedPlaces,
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
-                              return ListView.builder(
-                                  itemCount: snapshot.data!.docs.length,
-                                  itemBuilder: (context, index) {
-                                    var currListUser = snapshot.data!.docs[index];
-                                    QueryDocumentSnapshot prevListUser;
-                                    print(index);
+                              if(snapshot.data!.docs.isEmpty) {
+                                return Center(
+                                  child: Text('You have not unlocked any place yet. Get to work!')
+                                );
+                              }
+                              else {
+                                var placeIds = <String>[];
 
-                                    if(snapshot.data!.docs.isEmpty) {
-                                      return Center(
-                                        child: Text('You have not unlocked any place yet. Get to work!')
-                                      );
-                                    }
-                                    else {
-                                      return UnlockedListRow("ciao");
-                                    }
-                                  });
+                                for(var i in snapshot.data!.docs) {
+                                  placeIds.add(i.id);
+                                }
+                                return Helper(placeIds);
+                              }
                             } else {
                               return Center(
                                 child: CircularProgressIndicator(),
@@ -111,11 +100,79 @@ class _UnlockedListState extends State<UnlockedList> {
   }
 }
 
+
+class Helper extends StatefulWidget {
+  final List<String> list;
+
+  Helper(
+      this.list,
+      {Key? key}) : super(key: key);
+
+  @override
+  _HelperState createState() => _HelperState();
+}
+
+class _HelperState extends State<Helper> {
+  late Stream<QuerySnapshot> _myUnlockedPlaces;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _myUnlockedPlaces = db
+        .collection('places')
+        //.orderBy('address.city')
+        .where(FieldPath.documentId, whereIn: widget.list)
+        .snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _myUnlockedPlaces,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var currUlkPlace = snapshot.data!.docs[index];
+                    return UnlockedListRow(
+                        currUlkPlace.get('address.city').toString(),
+                        //currUlkPlace.get('address.country').toString(), //TODO fix incoherency in the DB (country vs state)
+                        currUlkPlace.get('address.street').toString(),
+                        currUlkPlace.get('imgpath').toString(),
+                        currUlkPlace.get('name').toString()
+                    );
+                  }
+              );
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        )
+    );
+  }
+}
+
+
 class UnlockedListRow extends StatelessWidget {
-  final String imagePath;
+  final String city;
+  //final String country;
+  final String street;
+  final String imgPath;
+  final String name;
 
   UnlockedListRow (
-      this.imagePath,
+      this.city,
+      //this.country,
+      this.street,
+      this.imgPath,
+      this.name,
       {Key? key}) : super(key: key);
 
   @override
@@ -136,7 +193,7 @@ class UnlockedListRow extends StatelessWidget {
               Row(
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.only(top: 10, bottom: 10),
+                    padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10),
                     child: Row(
                       children: <Widget>[
                         CircleAvatar(
@@ -144,7 +201,7 @@ class UnlockedListRow extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
-                                        image: getImage(imagePath),
+                                        image: getImage(imgPath),
                                         fit: BoxFit.fill)))),
                       ],
                     ),
@@ -157,13 +214,13 @@ class UnlockedListRow extends StatelessWidget {
                       children: <Widget>[
                         Container(
                             alignment: Alignment.centerLeft,
-                            /*child: Text(
-                              username,
+                            child: Text(
+                              name,
                               style: TextStyle(
                                   color: Colors.deepPurple,
                                   fontWeight: FontWeight.w500),
                               maxLines: 2,
-                            )*/
+                            )
                         )
                       ],
                     ),
@@ -174,10 +231,10 @@ class UnlockedListRow extends StatelessWidget {
                     child: Row(children: [
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
-                        /*child: Text(
-                          score,
-                          style: TextStyle(fontSize: 21),
-                        ),*/
+                        child: Text(
+                          /*city + */' ' + street,
+                          style: TextStyle(fontSize: 10),
+                        ),
                       ),
                       Icon(Icons.vpn_key, color: Colors.amber)
                     ]),

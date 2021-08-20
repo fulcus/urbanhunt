@@ -53,7 +53,7 @@ class PlaceCard extends StatefulWidget {
 
     this.onCardClose = onCardClose;
 
-    placeId = document.id as String;
+    placeId = document.id;
     name = document['name'] as String;
     address = document['address'] as Map<String, dynamic>;
     categories = (document['categories'] as List)
