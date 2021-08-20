@@ -6,9 +6,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hunt_app/explore/place_card.dart';
-import '../navbar.dart';
+import 'package:hunt_app/navbar.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -48,13 +49,20 @@ class _ExploreState extends State<Explore> {
         _initLng = value.longitude;
         loading = false;
       });
+    }).catchError((Object error, StackTrace stacktrace) async {
+      //if location is off use the latest cached location
+      await SharedPreferences.getInstance().then((prefs) => setState(() {
+            _initLat = (prefs.getDouble('_initLat') ?? 0.1);
+            _initLng = (prefs.getDouble('_initLng') ?? 0.1);
+            loading = false;
+          }));
+      print('initializing locations: $_initLat $_initLng');
+      print(stacktrace.toString());
+      return null;
     });
 
     //retrieve all the places
-    _places = db
-        .collection('places')
-        .orderBy('name')
-        .snapshots();
+    _places = db.collection('places').orderBy('name').snapshots();
 
     //retrieve the user's unlocked places
     _unlockedPlaces = db
@@ -152,6 +160,7 @@ class StoreMap extends StatefulWidget {
 
   @override
   _StoreMapState createState() => _StoreMapState();
+
 }
 
 class _StoreMapState extends State<StoreMap> {
@@ -171,6 +180,16 @@ class _StoreMapState extends State<StoreMap> {
     _currentLat = widget.initialPosition.latitude;
     _currentLng = widget.initialPosition.longitude;
     _setupCustomMarkers();
+  }
+
+  //cache latest location
+  Future<void> _cacheLocation() async {
+    //print('storing location: $_currentLat $_currentLng');
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setDouble('_initLat', _currentLat);
+      prefs.setDouble('_initLng', _currentLng);
+    });
   }
 
   Future<void> _setupCustomMarkers() async {
@@ -277,6 +296,7 @@ class _StoreMapState extends State<StoreMap> {
     _currentCameraTilt = cameraPosition.tilt;
     _currentLat = cameraPosition.target.latitude;
     _currentLng = cameraPosition.target.longitude;
+    _cacheLocation();
     _currentZoom = cameraPosition.zoom;
     setState(() {});
   }
@@ -322,6 +342,7 @@ class _StoreMapState extends State<StoreMap> {
   }
 
   Future<void> _setCurrentLocation() async {
+    // todo handle exception location is disabled
     var currentLocation = await Geolocator.getCurrentPosition();
     var cPosition = CameraPosition(
       zoom: 14,
