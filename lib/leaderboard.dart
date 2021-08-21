@@ -1,20 +1,164 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-final db = FirebaseFirestore.instance;
 
-class LeaderBoard extends StatefulWidget {
+final db = FirebaseFirestore.instance;
+final User myUser = FirebaseAuth.instance.currentUser!;
+
+class LeaderBoard extends StatelessWidget {
+  const LeaderBoard({Key? key}) : super(key: key);
+
   @override
-  _LeaderBoardState createState() => _LeaderBoardState();
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.public)),
+              Tab(icon: Icon(Icons.near_me_outlined)),
+            ],
+          ),
+          title: const Text('Leaderboard'),
+        ),
+        body: TabBarView(
+          children: [
+            GlobalLeaderBoard(),
+            CountryLeaderBoard(),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _LeaderBoardState extends State<LeaderBoard> {
+class CountryLeaderBoard extends StatefulWidget {
+  @override
+  _CountryLeaderBoardState createState() => _CountryLeaderBoardState();
+}
+
+class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
+  Stream<QuerySnapshot>? _bestUsers;
+  Color _rowColor = Colors.transparent;
+  int _position = 0;
+  String? myCountry;
+  bool _myUserInTop = false; //todo if false add me as last
+
+  Future<String> getCountry() async {
+    var doc = await db.collection('users').doc(myUser.uid).get();
+    return doc['country'].toString();
+  }
+
+  Future<Stream<QuerySnapshot<Object?>>> getBestUsers() async {
+    myCountry = await getCountry();
+    var users = db.collection('users')
+        .where('country', isEqualTo: myCountry)
+        .orderBy('score', descending: true)
+        .limit(50)
+        .snapshots();
+    return users;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    (getBestUsers().then((users) => _bestUsers = users)).whenComplete((){
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+            body: Container(
+          margin: EdgeInsets.only(top: 65.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(left: 15.0, top: 10.0),
+                child: RichText(
+                    text: TextSpan(
+                        text: 'Leader',
+                        style: TextStyle(
+                            color: Colors.deepPurple,
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.bold),
+                        children: [
+                      TextSpan(
+                          text: 'Board',
+                          style: TextStyle(
+                              color: Colors.pink,
+                              fontSize: 30.0,
+                              fontWeight: FontWeight.bold))
+                    ])),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 15.0),
+                child: Text(
+                  '$myCountry Rank Board: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Flexible(
+                  child: StreamBuilder<QuerySnapshot>(
+                      stream: _bestUsers,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && _bestUsers != null) {
+                          _position = 0;
+                          return ListView.builder(
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (context, index) {
+                                var currListUser = snapshot.data!.docs[index];
+                                QueryDocumentSnapshot prevListUser;
+                                // highlight my user
+                                if (currListUser.id == myUser.uid) {
+                                  _rowColor = Colors.orangeAccent;
+                                  _myUserInTop = true;
+                                } else {
+                                  _rowColor = Colors.transparent;
+                                }
+                                if (index >= 1) {
+                                  prevListUser = snapshot.data!.docs[index - 1];
+                                  if (currListUser.get('score') ==
+                                      prevListUser.get('score')) {
+                                  } else {
+                                    _position++;
+                                  }
+                                }
+                                return LeaderBoardRow(
+                                    currListUser.get('username').toString(),
+                                    currListUser.get('imageURL').toString(),
+                                    currListUser.get('score').toString(),
+                                    _position,
+                                    _rowColor);
+                              });
+                        } else {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                      }))
+            ],
+          ),
+        )),
+      ],
+    );
+  }
+}
+
+class GlobalLeaderBoard extends StatefulWidget {
+  @override
+  _GlobalLeaderBoardState createState() => _GlobalLeaderBoardState();
+}
+
+class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
   late Stream<QuerySnapshot> _bestUsers;
-  late User _myUser;
   Color _rowColor = Colors.transparent;
   int _position = 0;
   bool _myUserInTop = false; //todo if false add me as last
@@ -27,9 +171,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
     _bestUsers = db
         .collection('users')
         .orderBy('score', descending: true)
-        .limit(5)
+        .limit(50)
         .snapshots();
-    _myUser = FirebaseAuth.instance.currentUser!;
   }
 
   @override
@@ -78,9 +221,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
                               itemBuilder: (context, index) {
                                 var currListUser = snapshot.data!.docs[index];
                                 QueryDocumentSnapshot prevListUser;
-                                print(index);
                                 // highlight my user
-                                if (currListUser.id == _myUser.uid) {
+                                if (currListUser.id == myUser.uid) {
                                   _rowColor = Colors.orangeAccent;
                                   _myUserInTop = true;
                                 } else {
@@ -120,12 +262,7 @@ class LeaderBoardRow extends StatelessWidget {
   final String username, imageURL, score;
   final int position;
   final Color rowColor;
-  
-// currListUser.get('username').toString(),
-// currListUser.get('imageURL').toString(),
-// currListUser.get('score').toString(),
-// _position,
-// _rowColor);
+
   LeaderBoardRow(
       this.username, this.imageURL, this.score, this.position, this.rowColor,
       {Key? key})

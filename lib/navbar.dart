@@ -13,11 +13,11 @@ class Nav extends StatefulWidget {
 
 class NavState extends State<Nav> {
   String _currentPage = 'Explore';
-  List<String> pageKeys = ['Explore', 'Contribute', 'Social', 'Profile'];
+  List<String> pageKeys = ['Explore', 'Contribute', 'Leaderboard', 'Profile'];
   final Map<String, GlobalKey<NavigatorState>> _navigatorKeys = {
     'Explore': GlobalKey<NavigatorState>(),
     'Contribute': GlobalKey<NavigatorState>(),
-    'Social': GlobalKey<NavigatorState>(),
+    'Leaderboard': GlobalKey<NavigatorState>(),
     'Profile': GlobalKey<NavigatorState>(),
   };
   int _selectedIndex = 0;
@@ -53,7 +53,7 @@ class NavState extends State<Nav> {
         body: Stack(children: <Widget>[
           _buildOffstageNavigator('Explore'),
           _buildOffstageNavigator('Contribute'),
-          _buildOffstageNavigator('Social'),
+          _buildOffstageNavigator('Leaderboard'),
           _buildOffstageNavigator('Profile'),
         ]),
         bottomNavigationBar: BottomNavigationBar(
@@ -74,9 +74,9 @@ class NavState extends State<Nav> {
               label: 'Contribute',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.group_outlined),
-              activeIcon: Icon(Icons.group),
-              label: 'Social',
+              icon: Icon(Icons.leaderboard_outlined),
+              activeIcon: Icon(Icons.leaderboard),
+              label: 'Leaderboard',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outlined),
@@ -115,7 +115,7 @@ class TabNavigator extends StatelessWidget {
       child = Explore();
     } else if (tabItem == 'Contribute') {
       child = Contribute();
-    } else if (tabItem == 'Social') {
+    } else if (tabItem == 'Leaderboard') {
       child = LeaderBoard();
     } else if (tabItem == 'Profile') {
       child = Profile();
@@ -171,7 +171,7 @@ class CupertinoStoreHomePage extends StatelessWidget {
           case 2:
             return CupertinoTabView(builder: (context) {
               return CupertinoPageScaffold(
-                child: Social(),
+                child: Leaderboard(),
               );
             });
           default:

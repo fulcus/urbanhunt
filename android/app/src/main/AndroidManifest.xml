@@ -3,7 +3,9 @@
    <application
         android:label="hunt_app"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true"> <!--added for image picker-->
+       android:usesCleartextTraffic="true"
+       android:requestLegacyExternalStorage="true">
+       <!-- usesCleartextTraffic for http request, requestLegacyExternalStorage for image picker-->
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -40,4 +42,5 @@
             android:value="2" />
        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCwn-EcgAgDoAwrkirKpZyktDK0cKsSWwI"/>
     </application>
+<!--    <uses-permission android:name="android.permission.INTERNET" />-->
 </manifest>
