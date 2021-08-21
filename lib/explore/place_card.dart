@@ -20,6 +20,7 @@ final Map<String, Color> categoryColors = {};
 
 class PlaceCard extends StatefulWidget {
   late DocumentSnapshot document;
+  late bool fullscreen;
   late bool isLocked;
   late bool isLiked;
   late bool isDisliked;
@@ -41,11 +42,13 @@ class PlaceCard extends StatefulWidget {
 
   late void Function() onCardClose;
 
-  PlaceCard(DocumentSnapshot document, bool isLocked, bool isLiked,
+  PlaceCard(DocumentSnapshot document, bool fullscreen, bool isLocked, bool isLiked,
       bool isDisliked, void Function() onCardClose,
       {Key? key})
       : super(key: key) {
     this.document = document;
+
+    this.fullscreen = fullscreen;
 
     this.isLocked = isLocked;
     this.isLiked = isLiked;
@@ -527,21 +530,32 @@ class _PlaceCardState extends State<PlaceCard> {
       ],
     );
 
-    return DraggableScrollableSheet(
-      minChildSize: 0.44,
-      initialChildSize: 0.60,
-      builder: (context, scrollController) {
-        return Material(
-          elevation: 10,
-          shadowColor: Colors.black,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: content,
-          ),
-        );
-      },
-    );
+    if(widget.fullscreen) {
+      return Material(
+        elevation: 10,
+        shadowColor: Colors.black,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        child: content,
+      );
+    }
+
+    else {
+      return DraggableScrollableSheet(
+        minChildSize: 0.44,
+        initialChildSize: 0.60,
+        builder: (context, scrollController) {
+          return Material(
+            elevation: 10,
+            shadowColor: Colors.black,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: content,
+            ),
+          );
+        },
+      );
+    }
   }
 }
 

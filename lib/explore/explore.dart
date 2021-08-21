@@ -331,7 +331,7 @@ class _StoreMapState extends State<StoreMap> {
       ));
 
       _placeCard =
-          PlaceCard(document, isLocked, isLiked, isDisliked, _onCardClose);
+          PlaceCard(document, false, isLocked, isLiked, isDisliked, _onCardClose);
     });
   }
 

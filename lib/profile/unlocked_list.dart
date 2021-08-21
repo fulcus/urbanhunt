@@ -1,7 +1,9 @@
 
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/explore/place_card.dart';
 import 'package:hunt_app/profile/profile.dart';
 
 final db = FirebaseFirestore.instance;
@@ -84,7 +86,7 @@ class _UnlockedListState extends State<UnlockedList> {
                                 for(var i in snapshot.data!.docs) {
                                   placeIds.add(i.id);
                                 }
-                                return Helper(placeIds);
+                                return Helper(placeIds, snapshot.data!.docs);
                               }
                             } else {
                               return Center(
@@ -103,9 +105,11 @@ class _UnlockedListState extends State<UnlockedList> {
 
 class Helper extends StatefulWidget {
   final List<String> list;
+  final List<DocumentSnapshot> unlocked;
 
   Helper(
       this.list,
+      this.unlocked,
       {Key? key}) : super(key: key);
 
   @override
@@ -140,6 +144,9 @@ class _HelperState extends State<Helper> {
                   itemBuilder: (context, index) {
                     var currUlkPlace = snapshot.data!.docs[index];
                     return UnlockedListRow(
+                        currUlkPlace,
+                        widget.unlocked[index].get('liked') as bool,
+                        widget.unlocked[index].get('disliked') as bool,
                         currUlkPlace.get('address.city').toString(),
                         //currUlkPlace.get('address.country').toString(), //TODO fix incoherency in the DB (country vs state)
                         currUlkPlace.get('address.street').toString(),
@@ -161,6 +168,9 @@ class _HelperState extends State<Helper> {
 
 
 class UnlockedListRow extends StatelessWidget {
+  final DocumentSnapshot doc;
+  final bool isLiked;
+  final bool isDisliked;
   final String city;
   //final String country;
   final String street;
@@ -168,6 +178,9 @@ class UnlockedListRow extends StatelessWidget {
   final String name;
 
   UnlockedListRow (
+      this.doc,
+      this.isLiked,
+      this.isDisliked,
       this.city,
       //this.country,
       this.street,
@@ -177,6 +190,12 @@ class UnlockedListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    void _onCardClose() {
+      Navigator.pop(context,
+          MaterialPageRoute<void>(builder: (context) => UnlockedList()));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
       child: InkWell(
@@ -232,8 +251,8 @@ class UnlockedListRow extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: Text(
-                          /*city + */' ' + street,
-                          style: TextStyle(fontSize: 10),
+                          city,
+                          style: TextStyle(fontSize: 12),
                         ),
                       ),
                       Icon(Icons.vpn_key, color: Colors.amber)
@@ -244,6 +263,8 @@ class UnlockedListRow extends StatelessWidget {
             ],
           ),
         ),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute<void>(builder: (context) => PlaceCard(doc, true, false, isLiked, isDisliked, _onCardClose))),
       ),
     );
   }
@@ -255,5 +276,6 @@ class UnlockedListRow extends StatelessWidget {
     }
     return imageProvider;
   }
+
 
 }
