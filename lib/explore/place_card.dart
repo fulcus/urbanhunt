@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Unlock distance threshold
@@ -42,8 +43,8 @@ class PlaceCard extends StatefulWidget {
 
   late void Function() onCardClose;
 
-  PlaceCard(DocumentSnapshot document, bool fullscreen, bool isLocked, bool isLiked,
-      bool isDisliked, void Function() onCardClose,
+  PlaceCard(DocumentSnapshot document, bool fullscreen, bool isLocked,
+      bool isLiked, bool isDisliked, void Function() onCardClose,
       {Key? key})
       : super(key: key) {
     this.document = document;
@@ -88,20 +89,35 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   void _updateDistance() {
+    var lat = 0.0;
+    var lng = 0.0;
+
     Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((pos) {
-      setState(() {
-        var distance = Geolocator.distanceBetween(
-            pos.latitude, pos.longitude, widget.latitude, widget.longitude);
+      lat = pos.latitude;
+      lng = pos.longitude;
+    }).catchError((Object error, StackTrace stacktrace) async {
+      //if location is off use the latest cached location
+      await SharedPreferences.getInstance().then((prefs) => setState(() {
+            lat = (prefs.getDouble('_initLat') ?? 0.1);
+            lng = (prefs.getDouble('_initLng') ?? 0.1);
+          }));
+      print('initializing locations from cache: $lat $lng');
+      print('printing stacktrace' + stacktrace.toString());
+      return null;
+    });
 
-        if (distance > 999.0) {
-          _distance = distance / 1000.0;
-          _distanceUnit = ' km';
-        } else {
-          _distance = distance;
-          _distanceUnit = ' m';
-        }
-      });
+    setState(() {
+      var distance = Geolocator.distanceBetween(
+          lat, lng, widget.latitude, widget.longitude);
+
+      if (distance > 999.0) {
+        _distance = distance / 1000.0;
+        _distanceUnit = ' km';
+      } else {
+        _distance = distance;
+        _distanceUnit = ' m';
+      }
     });
   }
 
@@ -530,16 +546,14 @@ class _PlaceCardState extends State<PlaceCard> {
       ],
     );
 
-    if(widget.fullscreen) {
+    if (widget.fullscreen) {
       return Material(
         elevation: 10,
         shadowColor: Colors.black,
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
         child: content,
       );
-    }
-
-    else {
+    } else {
       return DraggableScrollableSheet(
         minChildSize: 0.44,
         initialChildSize: 0.60,

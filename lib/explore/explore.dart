@@ -56,7 +56,7 @@ class _ExploreState extends State<Explore> {
             _initLng = (prefs.getDouble('_initLng') ?? 0.1);
             loading = false;
           }));
-      print('initializing locations: $_initLat $_initLng');
+      print('initializing locations from cache: $_initLat $_initLng');
       print(stacktrace.toString());
       return null;
     });

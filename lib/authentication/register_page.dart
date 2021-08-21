@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_signin_button/button_builder.dart';
 import 'package:image_picker/image_picker.dart';
-import 'network.dart';
+import 'package:hunt_app/network.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final db = FirebaseFirestore.instance;
@@ -249,7 +249,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _addUserToDB(String username) async {
     try {
       var myCountry = await getCountry();
-      await db.collection("users").doc(user!.uid).set(<String, dynamic>{
+      await db.collection('users').doc(user!.uid).set(<String, dynamic>{
         'imageURL': '',
         'score': 0,
         'username': username,

@@ -139,7 +139,6 @@ class _HelperState extends State<Helper> {
             if (snapshot.hasData) {
               return ListView.builder(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     var currUlkPlace = snapshot.data!.docs[index];
