@@ -56,14 +56,14 @@ class _UnlockedListState extends State<UnlockedList> {
                     margin: EdgeInsets.only(left: 15.0, top: 10.0),
                     child: RichText(
                         text: TextSpan(
-                            text: "Unlocked",
+                            text: 'Unlocked',
                             style: TextStyle(
                                 color: Colors.deepPurple,
                                 fontSize: 30.0,
                                 fontWeight: FontWeight.bold),
                             children: [
                               TextSpan(
-                                  text: "Places",
+                                  text: 'Places',
                                   style: TextStyle(
                                       color: Colors.pink,
                                       fontSize: 30.0,
@@ -147,7 +147,7 @@ class _HelperState extends State<Helper> {
                         widget.unlocked[index].get('liked') as bool,
                         widget.unlocked[index].get('disliked') as bool,
                         currUlkPlace.get('address.city').toString(),
-                        //currUlkPlace.get('address.country').toString(), //TODO fix incoherency in the DB (country vs state)
+                        //currUlkPlace.get('address.country').toString(), //TODO fix incoherency in the DB => country
                         currUlkPlace.get('address.street').toString(),
                         currUlkPlace.get('imgpath').toString(),
                         currUlkPlace.get('name').toString()
