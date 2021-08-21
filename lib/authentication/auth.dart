@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_builder.dart';
 
-import './register_page.dart';
-import './signin_page.dart';
+import 'register_page.dart';
+import 'signin_page.dart';
 
 /// Provides a UI to select a authentication type page
 class AuthTypeSelector extends StatelessWidget {
