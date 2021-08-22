@@ -479,6 +479,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
 
+  void _changePassword(String password) async{
+    //Create an instance of the current user.
+
+    //Pass in the password to updatePassword.
+    await _myUser.updatePassword(password).then((_){
+      print("Successfully changed password");
+    }).catchError((Object error){
+      print("Password can't be changed" + error.toString());
+      //This might happen, when the wrong password is in, the user isn't found, or if the user hasn't logged in recently.
+    });
+  }
+
   @override
   void dispose() {
     // Clean up the controller when the Widget is disposed
