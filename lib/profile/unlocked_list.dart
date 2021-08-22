@@ -220,7 +220,7 @@ class UnlockedListRow extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
                                         image: getImage(imgPath),
-                                        fit: BoxFit.fill)))),
+                                        fit: BoxFit.cover)))),
                       ],
                     ),
                   ),

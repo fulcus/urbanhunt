@@ -18,8 +18,11 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   bool _status = true;
+  bool _enabled = true;
+  bool _isNameButton = true;
   final FocusNode myFocusNode = FocusNode();
-  String newName = '';
+  String _newName = '';
+  String _newPassword = '';
   File? _image;
   final picker = ImagePicker();
   late User _myUser;
@@ -93,7 +96,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                     shape: BoxShape.circle,
                                                     image: DecorationImage(
                                                       image: showImage(url),
-                                                      fit: BoxFit.fill,
+                                                      fit: BoxFit.cover,
                                                     )))
                                           ],
                                         ),
@@ -198,7 +201,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                ),
                                                 enabled: !_status,
                                                 autofocus: !_status,
-                                                onChanged: (name) => newName = name,
+                                                onChanged: (name) => _newName = name,
                                             )),
                                         ],
                                       )),
@@ -262,6 +265,60 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                             mainAxisAlignment: MainAxisAlignment.end,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
+                                              _enabled
+                                                  ? _getEditIcon2()
+                                                  : Container(),
+                                            ],
+                                          )
+                                        ],
+                                      )),
+                                  Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 25.0, right: 25.0, top: 2.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: <Widget>[
+                                          Flexible(
+                                            child: TextField(
+                                              controller:
+                                              TextEditingController()
+                                                ..text = '*************',
+                                              obscureText: true,
+                                              enabled: !_enabled,
+                                              autofocus: !_enabled,
+                                              onChanged: (password) => {
+                                                _newPassword = password,
+                                                _isNameButton = false,
+                                              }
+
+                                            ),
+                                          ),
+                                        ],
+                                      )),
+                                  !_enabled ? _getActionButtons() : Container(),
+                                  /*Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 25.0, right: 25.0, top: 25.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: <Widget>[
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              Text(
+                                                'Password',
+                                                style: TextStyle(
+                                                    fontSize: 16.0,
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
                                               //TODO add message 'email sent'
                                               GestureDetector(
                                                 child: CircleAvatar(
@@ -291,11 +348,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   TextEditingController()
                                                     ..text = '*************',
                                               obscureText: true,
-                                              enabled: false,
+                                              enabled: _enabled,
                                             ),
                                           ),
                                         ],
-                                      )),
+                                      )),*/
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -479,15 +536,14 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
 
-  void _changePassword(String password) async{
-    //Create an instance of the current user.
-
+  Future<void> _changePassword(String password) async {
     //Pass in the password to updatePassword.
     await _myUser.updatePassword(password).then((_){
-      print("Successfully changed password");
+      print('Successfully changed password');
     }).catchError((Object error){
       print("Password can't be changed" + error.toString());
-      //This might happen, when the wrong password is in, the user isn't found, or if the user hasn't logged in recently.
+      //This might happen, when the wrong password is in, the user isn't found,
+      //or if the user hasn't logged in recently.
     });
   }
 
@@ -518,9 +574,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(20.0)),
                     ),
                     onPressed: () {
-                      _updateUsername(newName);
+                      _isNameButton ? _updateUsername(_newName) : _changePassword(_newPassword);
                       setState(() {
-                        _status = true;
+                        _isNameButton ? _status = true : _enabled = true;
                         //FocusScope.of(context).requestFocus(FocusNode());
                       });
                     },
@@ -542,7 +598,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                     ),
                     onPressed: () {
                       setState(() {
-                        _status = true;
+                        _isNameButton ? _status = true : _enabled = true;
                         //FocusScope.of(context).requestFocus(FocusNode());
                       });
                     },
@@ -568,7 +624,29 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       ),
       onTap: () {
         setState(() {
+          _isNameButton = true;
           _status = false;
+        });
+      },
+    );
+  }
+
+
+  Widget _getEditIcon2() {
+    return GestureDetector(
+      child: CircleAvatar(
+        backgroundColor: Colors.blueAccent,
+        radius: 14.0,
+        child: Icon(
+          Icons.edit,
+          color: Colors.white,
+          size: 16.0,
+        ),
+      ),
+      onTap: () {
+        setState(() {
+          _isNameButton = false;
+          _enabled = false;
         });
       },
     );

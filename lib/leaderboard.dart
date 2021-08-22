@@ -332,7 +332,7 @@ class LeaderBoardRow extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
                                         image: getImage(imageURL),
-                                        fit: BoxFit.fill)))),
+                                        fit: BoxFit.cover)))),
                       ],
                     ),
                   ),
