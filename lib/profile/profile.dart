@@ -1,6 +1,8 @@
+
 import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
+import 'package:one_context/one_context.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +25,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   final FocusNode myFocusNode = FocusNode();
   String _newName = '';
   String _newPassword = '';
+  String _oldPassword = '';
   File? _image;
   final picker = ImagePicker();
   late User _myUser;
@@ -280,17 +283,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           Flexible(
                                             child: TextField(
-                                              controller:
-                                              TextEditingController()
-                                                ..text = '*************',
+                                              controller: TextEditingController()..text = '***********',
                                               obscureText: true,
                                               enabled: !_enabled,
                                               autofocus: !_enabled,
-                                              onChanged: (password) => {
-                                                _newPassword = password,
-                                                _isNameButton = false,
-                                              }
-
+                                              onChanged: (password) => _newPassword = password,
                                             ),
                                           ),
                                         ],
@@ -541,10 +538,76 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     await _myUser.updatePassword(password).then((_){
       print('Successfully changed password');
     }).catchError((Object error){
-      print("Password can't be changed" + error.toString());
+        if(error is FirebaseAuthException) {
+          if(error.code == 'requires-recent-login') {
+
+            _retrieveOldPassword();
+            var credential = EmailAuthProvider.credential(email: _myUser.email!, password: _oldPassword);
+            _myUser.reauthenticateWithCredential(credential);
+          }
+          else if(error.code == 'weak-password') {
+            _errorPopup('The password is too weak.\n Please insert another one.');
+          }
+          else {
+            _errorPopup('Please try again.' + error.toString());
+          }
+      }
+      else {
+        _errorPopup("Password can't be changed" + error.toString());
+      }
       //This might happen, when the wrong password is in, the user isn't found,
       //or if the user hasn't logged in recently.
     });
+  }
+
+  void _retrieveOldPassword() {
+    var controller = TextEditingController();
+
+    OneContext().showDialog<void>(
+        builder: (_) =>  AlertDialog(
+          title: Text('You have to re-authenticate to change the password'),
+          content: TextFormField(
+            decoration: const InputDecoration(
+                hintText: 'Enter your password'),
+            controller: controller,
+            obscureText: true,
+            enabled: true,
+          ),
+          actions: [
+            ElevatedButton(
+              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.green,
+                textStyle: TextStyle(color: Colors.white),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+              ),
+              onPressed: () => _oldPassword = controller.value.text,
+            )
+          ],
+        ),
+    );
+  }
+
+  void _errorPopup (String content) {
+    OneContext().showDialog<void>(
+        builder: (_) => AlertDialog(
+          title: Text('Alert:'),
+          content: Text(content),
+          actions: [
+            ElevatedButton(
+              child: Text('Ok'),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.green,
+                textStyle: TextStyle(color: Colors.white),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+              ),
+              onPressed: () => OneContext().popDialog(),
+            )
+          ],
+        ),
+    );
   }
 
   @override
@@ -626,6 +689,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         setState(() {
           _isNameButton = true;
           _status = false;
+          _enabled = true;
         });
       },
     );
@@ -646,6 +710,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       onTap: () {
         setState(() {
           _isNameButton = false;
+          _status = true;
           _enabled = false;
         });
       },

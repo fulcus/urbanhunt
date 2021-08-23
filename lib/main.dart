@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:one_context/one_context.dart';
 
 import 'authentication/auth.dart';
 
@@ -14,6 +15,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: OneContext().builder,
       title: 'Hunt Your Picture',
       home: Scaffold(
         //body: Home(),
