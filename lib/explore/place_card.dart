@@ -85,7 +85,7 @@ class _PlaceCardState extends State<PlaceCard> {
   @override
   void initState() {
     super.initState();
-    _updateDistance();
+    //_updateDistance(); not needed, called in build
   }
 
   void _updateDistance() {
@@ -96,29 +96,38 @@ class _PlaceCardState extends State<PlaceCard> {
         .then((pos) {
       lat = pos.latitude;
       lng = pos.longitude;
+
+      setState(() {
+        _computeDistance(lat, lng);
+      });
     }).catchError((Object error, StackTrace stacktrace) async {
       //if location is off use the latest cached location
-      await SharedPreferences.getInstance().then((prefs) => setState(() {
-            lat = (prefs.getDouble('_initLat') ?? 0.1);
-            lng = (prefs.getDouble('_initLng') ?? 0.1);
-          }));
+      await SharedPreferences.getInstance().then((prefs) {
+        lat = (prefs.getDouble('_initLat') ?? 0.1);
+        lng = (prefs.getDouble('_initLng') ?? 0.1);
+
+        setState(() {
+          _computeDistance(lat, lng);
+        });
+      });
       print('initializing locations from cache: $lat $lng');
       print('printing stacktrace' + stacktrace.toString());
       return null;
     });
 
-    setState(() {
-      var distance = Geolocator.distanceBetween(
-          lat, lng, widget.latitude, widget.longitude);
+  }
 
-      if (distance > 999.0) {
-        _distance = distance / 1000.0;
-        _distanceUnit = ' km';
-      } else {
-        _distance = distance;
-        _distanceUnit = ' m';
-      }
-    });
+  void _computeDistance(double startLatitude, double startLongitude) {
+    var distance = Geolocator.distanceBetween(
+        startLatitude, startLongitude, widget.latitude, widget.longitude);
+
+    if (distance > 999.0) {
+      _distance = distance / 1000.0;
+      _distanceUnit = ' km';
+    } else {
+      _distance = distance;
+      _distanceUnit = ' m';
+    }
   }
 
   // Interactions
@@ -433,6 +442,8 @@ class _PlaceCardState extends State<PlaceCard> {
   // Build
   @override
   Widget build(BuildContext context) {
+    _updateDistance();
+
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
 

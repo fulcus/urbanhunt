@@ -521,6 +521,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _updateUsername(String username) async {
+    //TODO input validation
     var data = <String, dynamic>{'username': username};
 
     return await db
@@ -534,14 +535,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _changePassword(String password) async {
-    //Pass in the password to updatePassword.
-    await _myUser.updatePassword(password).then((_){
+
+    await _myUser.updatePassword(password).then((_) {
       print('Successfully changed password');
     }).catchError((Object error){
         if(error is FirebaseAuthException) {
           if(error.code == 'requires-recent-login') {
-
+            //TODO check if logged in with email or fb/google
             _retrieveOldPassword();
+
             var credential = EmailAuthProvider.credential(email: _myUser.email!, password: _oldPassword);
             _myUser.reauthenticateWithCredential(credential);
           }
