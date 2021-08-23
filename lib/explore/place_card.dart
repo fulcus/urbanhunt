@@ -77,57 +77,213 @@ class PlaceCard extends StatefulWidget {
 }
 
 class _PlaceCardState extends State<PlaceCard> {
-  double _distance = 0.0;
-  String _distanceUnit = ' km';
+  String _displayDistance = '';
 
   _PlaceCardState();
 
   @override
   void initState() {
     super.initState();
-    //_updateDistance(); not needed, called in build
+    displayDist();
   }
 
-  void _updateDistance() {
+  @override
+  Widget build(BuildContext context) {
+    String description;
+    Widget imageBanner;
+
+
+    if (widget.isLocked) {
+      description = widget.descriptionLocked;
+      imageBanner = imageBannerLocked();
+    } else {
+      description = widget.descriptionUnlocked;
+      imageBanner = imageBannerUnlocked();
+    }
+
+    var likeOn = widget.isLiked ? Colors.green[600] : Colors.grey[400];
+    var dislikeOn = widget.isDisliked ? Colors.red[600] : Colors.grey[400];
+
+    var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
+    var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);
+
+    // Content
+    Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        // scroll hint and close button
+        topBar(),
+        // Image
+        imageBanner,
+        // Below Image: Place info
+        Padding(
+          padding: EdgeInsets.only(top: 8.0, left: 32.0, right: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Like/Dislike and Category tags
+              Row(
+                children: <Widget>[
+                  // Like Dislike stats
+                  GestureDetector(onTap: like, child: likeIcon),
+                  SizedBox(width: 4.0),
+                  Text(
+                    (widget.likes + (widget.isLiked ? 1 : 0)).toString(),
+                    style: TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green[600]),
+                  ),
+                  SizedBox(width: 16.0),
+                  GestureDetector(onTap: dislike, child: dislikeIcon),
+                  SizedBox(width: 4.0),
+                  Text(
+                    (widget.dislikes + (widget.isDisliked ? 1 : 0)).toString(),
+                    style: TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red[600]),
+                  ),
+                  // Sep
+                  Spacer(),
+                  // Category tags
+                  Row(children: categoriesTags()),
+                ],
+              ),
+              // Sep
+              SizedBox(height: 6.0),
+              // Open directions in Google Maps
+              GmapButton(
+                latitude: widget.latitude,
+                longitude: widget.longitude,
+              ),
+              // Sep
+              SizedBox(height: 6.0),
+              // Name
+              Text(
+                widget.name,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              // Sep
+              SizedBox(height: 4.0),
+              // Address
+              Text(
+                widget.address['street'] as String,
+                style: TextStyle(
+                  fontSize: 14.0,
+                ),
+              ),
+              // Sep
+              SizedBox(height: 4.0),
+              // Distance
+              Text(
+                _displayDistance,
+                style: TextStyle(
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black45,
+                ),
+              ),
+              SizedBox(height: 4.0),
+              // Sep
+              SizedBox(height: 8.0),
+              // Description
+              Text(description, style: TextStyle(fontSize: 12.0)),
+              // Sep
+              SizedBox(height: 32.0),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (widget.fullscreen) {
+      return Material(
+        elevation: 10,
+        shadowColor: Colors.black,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        child: content,
+      );
+    } else {
+      return DraggableScrollableSheet(
+        minChildSize: 0.44,
+        initialChildSize: 0.60,
+        builder: (context, scrollController) {
+          return Material(
+            elevation: 10,
+            shadowColor: Colors.black,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: content,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> displayDist() async {
+    _displayDistance = await _updateDistance();
+    setState(() {});
+  }
+
+
+
+  Future<String> _updateDistance() async {
     var lat = 0.0;
     var lng = 0.0;
+    String distance = '';
 
-    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+    return await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.best)
         .then((pos) {
       lat = pos.latitude;
       lng = pos.longitude;
 
-      setState(() {
-        _computeDistance(lat, lng);
-      });
+      distance = _computeDistance(lat, lng);
+      print('in location on $distance');
+      return distance;
     }).catchError((Object error, StackTrace stacktrace) async {
       //if location is off use the latest cached location
-      await SharedPreferences.getInstance().then((prefs) {
-        lat = (prefs.getDouble('_initLat') ?? 0.1);
-        lng = (prefs.getDouble('_initLng') ?? 0.1);
+      print('before await');
+      final prefs = await SharedPreferences.getInstance();
 
-        setState(() {
-          _computeDistance(lat, lng);
-        });
-      });
+      print('inside then');
+      lat = (prefs.getDouble('_initLat') ?? 0.1);
+      lng = (prefs.getDouble('_initLng') ?? 0.1);
+      print('in then: $lat $lng');
+      distance = _computeDistance(lat, lng);
+      print('distance: $distance');
+      return distance;
+
       print('initializing locations from cache: $lat $lng');
-      print('printing stacktrace' + stacktrace.toString());
-      return null;
+      print(error.toString());
+      //print('printing stacktrace' + stacktrace.toString());
     });
 
+    // print('before return $distance');
+    // return distance;
   }
 
-  void _computeDistance(double startLatitude, double startLongitude) {
-    var distance = Geolocator.distanceBetween(
+  String _computeDistance(double startLatitude, double startLongitude) {
+    var _distance = 0.0;
+    var _distanceUnit = ' km';
+
+    var _meterDistance = Geolocator.distanceBetween(
         startLatitude, startLongitude, widget.latitude, widget.longitude);
 
-    if (distance > 999.0) {
-      _distance = distance / 1000.0;
+    if (_meterDistance > 999.0) {
+      _distance = _meterDistance / 1000.0;
       _distanceUnit = ' km';
     } else {
-      _distance = distance;
+      _distance = _meterDistance;
       _distanceUnit = ' m';
     }
+    return _distance.toInt().toString() + _distanceUnit;
   }
 
   // Interactions
@@ -135,21 +291,15 @@ class _PlaceCardState extends State<PlaceCard> {
     Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((pos) {
       setState(() {
-        var distance = Geolocator.distanceBetween(
+        var posDistance = Geolocator.distanceBetween(
             pos.latitude, pos.longitude, widget.latitude, widget.longitude);
 
-        if (distance > 999.0) {
-          _distance = distance / 1000.0;
-          _distanceUnit = ' km';
-        } else {
-          _distance = distance;
-          _distanceUnit = ' m';
-        }
-
-        if (widget.isLocked && distance < UNLOCK_RANGE_METERS) {
+        if (widget.isLocked && posDistance < UNLOCK_RANGE_METERS) {
           widget.isLocked = false;
           _dbUnlockPlace();
           // somehow trigger update for marker icon with unlocked icon (for marker with id document.id)
+        } else {
+          // todo display "you are too far"
         }
       });
     });
@@ -170,6 +320,8 @@ class _PlaceCardState extends State<PlaceCard> {
         widget.isLiked = !widget.isLiked;
         widget.isDisliked = false;
       });
+    } else {
+      // todo display "cannot like, too far"
     }
   }
 
@@ -187,6 +339,8 @@ class _PlaceCardState extends State<PlaceCard> {
         widget.isDisliked = !widget.isDisliked;
         widget.isLiked = false;
       });
+    } else {
+      // todo display "cannot like, too far"
     }
   }
 
@@ -437,150 +591,6 @@ class _PlaceCardState extends State<PlaceCard> {
     }
 
     return tags;
-  }
-
-  // Build
-  @override
-  Widget build(BuildContext context) {
-    _updateDistance();
-
-    var width = MediaQuery.of(context).size.width;
-    var height = MediaQuery.of(context).size.height;
-
-    String description;
-    Widget imageBanner;
-
-    if (widget.isLocked) {
-      description = widget.descriptionLocked;
-      imageBanner = imageBannerLocked();
-    } else {
-      description = widget.descriptionUnlocked;
-      imageBanner = imageBannerUnlocked();
-    }
-
-    var likeOn = widget.isLiked ? Colors.green[600] : Colors.grey[400];
-    var dislikeOn = widget.isDisliked ? Colors.red[600] : Colors.grey[400];
-
-    var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
-    var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);
-
-    // Content
-    Widget content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // scroll hint and close button
-        topBar(),
-        // Image
-        imageBanner,
-        // Below Image: Place info
-        Padding(
-          padding: EdgeInsets.only(top: 8.0, left: 32.0, right: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Like/Dislike and Category tags
-              Row(
-                children: <Widget>[
-                  // Like Dislike stats
-                  GestureDetector(onTap: like, child: likeIcon),
-                  SizedBox(width: 4.0),
-                  Text(
-                    (widget.likes + (widget.isLiked ? 1 : 0)).toString(),
-                    style: TextStyle(
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green[600]),
-                  ),
-                  SizedBox(width: 16.0),
-                  GestureDetector(onTap: dislike, child: dislikeIcon),
-                  SizedBox(width: 4.0),
-                  Text(
-                    (widget.dislikes + (widget.isDisliked ? 1 : 0)).toString(),
-                    style: TextStyle(
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red[600]),
-                  ),
-                  // Sep
-                  Spacer(),
-                  // Category tags
-                  Row(children: categoriesTags()),
-                ],
-              ),
-              // Sep
-              SizedBox(height: 6.0),
-              // Open directions in Google Maps
-              GmapButton(
-                latitude: widget.latitude,
-                longitude: widget.longitude,
-              ),
-              // Sep
-              SizedBox(height: 6.0),
-              // Name
-              Text(
-                widget.name,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              // Sep
-              SizedBox(height: 4.0),
-              // Address
-              Text(
-                widget.address['street'] as String,
-                style: TextStyle(
-                  fontSize: 14.0,
-                ),
-              ),
-              // Sep
-              SizedBox(height: 4.0),
-              // Distance
-              Text(
-                _distance.toStringAsFixed(0) + _distanceUnit,
-                style: TextStyle(
-                  fontSize: 10.0,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.black45,
-                ),
-              ),
-              SizedBox(height: 4.0),
-              // Sep
-              SizedBox(height: 8.0),
-              // Description
-              Text(description, style: TextStyle(fontSize: 12.0)),
-              // Sep
-              SizedBox(height: 32.0),
-            ],
-          ),
-        ),
-      ],
-    );
-
-    if (widget.fullscreen) {
-      return Material(
-        elevation: 10,
-        shadowColor: Colors.black,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-        child: content,
-      );
-    } else {
-      return DraggableScrollableSheet(
-        minChildSize: 0.44,
-        initialChildSize: 0.60,
-        builder: (context, scrollController) {
-          return Material(
-            elevation: 10,
-            shadowColor: Colors.black,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: content,
-            ),
-          );
-        },
-      );
-    }
   }
 }
 
