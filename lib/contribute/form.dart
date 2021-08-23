@@ -11,7 +11,7 @@ import 'package:hunt_app/api_key.dart';
 import 'package:hunt_app/contribute/thankyou.dart';
 
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-GlobalKey<ScaffoldMessengerState>();
+    GlobalKey<ScaffoldMessengerState>();
 
 class Contribute extends StatelessWidget {
   @override
@@ -45,30 +45,36 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
   void _handleSubmitted() {
     final form = _formKey.currentState!;
-    if (!form.validate()) {
-      _autoValidateMode =
-          AutovalidateMode.always; // Start validating on every change.
-      _showInSnackBar('Error in form');
-      form.save(); // ?
-      // todo only for debugging
-      Navigator.of(_formKey.currentState!.context)
-          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
-      resetForm(form);
-    } else {
+
+    if (form.validate() && _validateImage() && _validateAddress()) {
       form.save();
       data.addPlace();
+
       print(data.name + data.lockedDescription + data.unlockedDescription);
+      //showInSnackBar('Added Place');
+
+      _reset();
       Navigator.of(_formKey.currentState!.context)
           .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
-      //showInSnackBar('Added Place');
-      // todo clear form or something to present brand new form
-      resetForm(form);
+    } else {
+      // Start validating on every change.
+      _autoValidateMode = AutovalidateMode.always;
+      //_showInSnackBar('Error in form');
+      form.save(); // ?
+      // only for debugging
+      // _reset();
+      // Navigator.of(_formKey.currentState!.context)
+      //     .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
     }
   }
 
-  void resetForm(FormState form) {
-    form.reset();
-    _image = null;
+  void _reset() {
+    Navigator.pushReplacement<void, void>(
+      _formKey.currentState!.context,
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => AddPlaceForm(),
+      ),
+    );
   }
 
   void _unfocus(BuildContext context) {
@@ -120,6 +126,20 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     return null;
   }
 
+  bool _validateImage() {
+    if (_image == null) {
+      _showInSnackBar('Please select an image');
+    }
+    return _image != null;
+  }
+
+  bool _validateAddress() {
+    if (data.pickedLocation == null) {
+      _showInSnackBar('Please select the location');
+    }
+    return data.pickedLocation != null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -139,16 +159,13 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   @override
   Widget build(BuildContext context) {
     const sizedBoxSpace = SizedBox(height: 24);
-    _multiChoice = MultiSelectChip(
-      ['Culture', 'Art', 'Nature', 'Food'],
-      onSelectionChanged: (selectedList) {
-        setState(() {
-          data.categories = selectedList;
-          _unfocus(context);
-        });
-      },
-    );
-
+    _multiChoice = MultiSelectChip(['Culture', 'Art', 'Nature', 'Food'],
+        onSelectionChanged: (selectedList) {
+      setState(() {
+        data.categories = selectedList;
+        _unfocus(context);
+      });
+    });
     return GestureDetector(
       onTap: () {
         _unfocus(context);
@@ -218,57 +235,38 @@ class AddPlaceFormState extends State<AddPlaceForm> {
               sizedBoxSpace,
               _multiChoice,
               sizedBoxSpace,
-              /*Center(
-                child: _image == null
-                    ? const Text('No image selected.')
-                    : InkWell(
-                        onTap: () {
-                          setState(() {
-                            _image = null;
-                          });
-                        },
-                        child: Container(
-                          height: 100,
-                          width: 100,
-                          child: Image.file(
-                            _image!,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-              ),*/
               Center(
                 child: _image == null
                     ? const Text('No image selected.')
                     : Stack(
-                  children: <Widget>[
-                    Container(
-                      height: 200,
-                      width: 200,
-                      child: Image.file(
-                        _image!,
-                        fit: BoxFit.cover,
+                        children: <Widget>[
+                          Container(
+                            height: 200,
+                            width: 200,
+                            child: Image.file(
+                              _image!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  setState(() {
+                                    _image = null;
+                                  });
+                                });
+                              },
+                              child: const Icon(
+                                Icons.close,
+                                // color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            setState(() {
-                              _image = null;
-                            });
-                          });
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
               sizedBoxSpace,
               TextButton.icon(
@@ -276,50 +274,51 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 label: const Text('Choose a picture'),
                 icon: const Icon(Icons.add_a_photo),
                 style: ButtonStyle(
-                  //elevation: MaterialStateProperty.all<double>(10),
+                    //elevation: MaterialStateProperty.all<double>(10),
                     padding: MaterialStateProperty.all<EdgeInsets>(
                         EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
                     overlayColor: MaterialStateProperty.resolveWith(
-                          (states) {
+                      (states) {
                         return states.contains(MaterialState.pressed)
                             ? Colors.blue[50]
                             : null;
                       },
                     ),
                     foregroundColor:
-                    MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
                     backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.white),
+                        MaterialStateProperty.all<Color>(Colors.white),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                             side: BorderSide(color: Colors.blue)))),
               ),
               sizedBoxSpace,
+              // todo make address prettier
               data.pickedLocation == null
                   ? Container()
                   : Text(
-                  data.pickedLocation!.formattedAddress ?? 'No location'),
+                      data.pickedLocation!.formattedAddress ?? 'No location'),
               sizedBoxSpace,
               TextButton.icon(
                 label: const Text('Select place location'),
                 icon: const Icon(Icons.pin_drop),
                 onPressed: () => openLocationPicker(context),
                 style: ButtonStyle(
-                  //elevation: MaterialStateProperty.all<double>(10),
+                    //elevation: MaterialStateProperty.all<double>(10),
                     padding: MaterialStateProperty.all<EdgeInsets>(
                         EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
                     overlayColor: MaterialStateProperty.resolveWith(
-                          (states) {
+                      (states) {
                         return states.contains(MaterialState.pressed)
                             ? Colors.blue[50]
                             : null;
                       },
                     ),
                     foregroundColor:
-                    MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
                     backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.white),
+                        MaterialStateProperty.all<Color>(Colors.white),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
@@ -344,13 +343,12 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
   Future<void> openLocationPicker(BuildContext context) async {
     LocationResult? result = await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) =>
-            Scaffold(
-                primary: true,
-                appBar: AppBar(),
-                body: PlacePicker(
-                  googleMapsApiKey,
-                ))));
+        builder: (context) => Scaffold(
+            primary: true,
+            appBar: AppBar(),
+            body: PlacePicker(
+              googleMapsApiKey,
+            ))));
     setState(() {
       try {
         data.pickedLocation = result!;
@@ -380,7 +378,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
 Future<String> uploadFile(File _image) async {
   var storageReference =
-  FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
+      FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
   await storageReference.putFile(_image);
   print('File Uploaded');
   var returnURL = '';
@@ -389,7 +387,6 @@ Future<String> uploadFile(File _image) async {
   });
   return returnURL;
 }
-
 
 class MultiSelectChip extends StatefulWidget {
   final List<String> reportList;
@@ -413,10 +410,10 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
   Widget build(BuildContext context) {
     return InputDecorator(
       decoration: InputDecoration(
-        // prefixIcon: Padding(
-        //   padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
-        //   child: Icon(Icons.category_outlined),
-        // ),
+          // prefixIcon: Padding(
+          //   padding: EdgeInsets.only(bottom: 10), // add padding to adjust icon
+          //   child: Icon(Icons.category_outlined),
+          // ),
           icon: const Icon(Icons.category_outlined),
           labelStyle: TextStyle(fontSize: 18, height: 0),
           labelText: 'Select a category',
@@ -454,11 +451,5 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
       ));
     });
     return choices;
-  }
-
-  void clear() {
-    setState(() {
-      _selectedChoices.clear();
-    });
   }
 }

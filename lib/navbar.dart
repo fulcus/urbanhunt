@@ -6,7 +6,17 @@ import 'package:hunt_app/explore/explore.dart';
 import 'package:hunt_app/profile/profile.dart';
 import 'package:hunt_app/leaderboard.dart';
 
+
 class Nav extends StatefulWidget {
+  // singleton pattern
+  Nav._privateConstructor();
+
+  static final Nav instance = Nav._privateConstructor();
+
+  factory Nav() {
+    return instance;
+  }
+
   @override
   State<StatefulWidget> createState() => NavState();
 }

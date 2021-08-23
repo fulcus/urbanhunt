@@ -16,11 +16,12 @@ final userId = FirebaseAuth.instance.currentUser!.uid;
 bool loading = true;
 
 class Home extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Explore(),
-      bottomNavigationBar: Nav(),
+      bottomNavigationBar: Nav.instance,
     );
   }
 }
