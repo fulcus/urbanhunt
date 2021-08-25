@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hunt_app/explore/explore.dart';
 
 // Backend utils
+const Color fbBlue = Color(0xFF4267B2);
 
 // To be used in main.dart (App build) as home property (i.e. home: redirectHomeOrLogin()).
 StreamBuilder redirectHomeOrLogin() {
@@ -27,24 +29,54 @@ StreamBuilder redirectHomeOrLogin() {
 }
 
 Future<bool> loginFacebook() async {
-  // todo catch errors
-  return await FacebookAuth.instance
-      .login(permissions: ['public_profile', 'email']).then((value) {
-    FacebookAuth.instance.getUserData().then((userData) {
-      // var name = userData['name'] as String;
-      // var email = userData['email'] as String;
-      // var picture = userData['picture']['data']['url'] as String;  // use in NetworkImage
+  try {
+    // Trigger the sign-in flow
+    final loginResult = await FacebookAuth.instance.login();
 
-      print('Facebook login success!');
-    });
+    // Create a credential from the access token
+    final facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+    // Once signed in, return the UserCredential
+    var userCredential = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+
+    // todo write data to db
+    var name = userCredential.user!.displayName;
+    var picture = userCredential.user!.photoURL;  // use in NetworkImage
+    print('$name $picture');
     return true;
-  }).catchError((Object error) {
-    // todo display exception
-    print(error);
+    // todo catch errors
+  } on Exception catch (e) {
+    print('Error: $e');
     return false;
-  });
-
+  }
 }
+
+Future<bool> loginGoogle() async {
+  try {
+    // Trigger the authentication flow
+    final googleUser = (await GoogleSignIn().signIn())!;
+    // Obtain the auth details from the request
+    final googleAuth = await googleUser.authentication;
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    // Once signed in, return the UserCredential
+    var userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential);
+    // todo write data to db
+    var name = userCredential.user!.displayName;
+    var picture = userCredential.user!.photoURL;  // use in NetworkImage
+    print('$name $picture');
+    return true;
+    // todo catch errors
+  } on Exception catch (e) {
+    print('Error: $e');
+    return false;
+  }
+}
+
 
 Future<bool> loginEmailPassword(String email, String password) async {
   return await FirebaseAuth.instance
@@ -279,6 +311,56 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(
+              color: fbBlue,
+              style: BorderStyle.solid,
+              width: 1.0,
+            ),
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Image(
+                  image: AssetImage('assets/images/facebook.png'),
+                  width: 22.0,
+                  height: 22.0,
+                  color: fbBlue,
+                ),
+              ),
+              SizedBox(width: 10.0),
+              Center(
+                child: const Text('Login with facebook', style: TextStyle(
+                    fontFamily: 'Trueno',
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: fbBlue)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginGoogleButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        loginGoogle().then((ok) {
+          if (ok) {
+            Navigator.of(context).push<MaterialPageRoute>(
+              MaterialPageRoute(builder: (context) => BottomNavContainer()),
+            );
+          }
+        });
+      },
+      child: Container(
+        height: 50.0,
+        color: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
               color: Colors.black,
               style: BorderStyle.solid,
               width: 1.0,
@@ -290,14 +372,16 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
-                child: ImageIcon(
-                  AssetImage('assets/images/facebook.png'),
-                  size: 22.0,
+                child: Image(
+                  image: AssetImage('assets/images/google.png'),
+                  width: 22.0,
+                  height: 22.0,
+                  color: null,
                 ),
               ),
               SizedBox(width: 10.0),
               Center(
-                child: Text('Login with facebook', style: styleBold),
+                child: Text('Login with Google', style: styleBold),
               ),
             ],
           ),
@@ -305,6 +389,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
 
   Widget _buildLoginForm(BuildContext context) {
     return Padding(
@@ -350,6 +435,8 @@ class _LoginPageState extends State<LoginPage> {
           _buildLoginButton(context),
           SizedBox(height: 20.0),
           _buildLoginFacebookButton(context),
+          SizedBox(height: 20.0),
+          _buildLoginGoogleButton(context),
           SizedBox(height: 38.0),
           lineLink(
             'Dont have an account?',
