@@ -250,9 +250,8 @@ class _LoginPageState extends State<LoginPage> {
         if (validateForm(_formKey)) {
           loginEmailPassword(_email, _password).then((ok) {
             if (ok) {
-              Navigator.of(context).push<MaterialPageRoute>(
-                MaterialPageRoute(builder: (context) => BottomNavContainer()),
-              );
+                  Navigator.of(context, rootNavigator: true)
+                      .pushReplacement(MaterialPageRoute<void>(builder: (context) => BottomNavContainer()));
             }
           });
         }
@@ -269,9 +268,8 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         loginFacebook().then((ok) {
           if (ok) {
-            Navigator.of(context).push<MaterialPageRoute>(
-              MaterialPageRoute(builder: (context) => BottomNavContainer()),
-            );
+            Navigator.of(context, rootNavigator: true)
+                .pushReplacement(MaterialPageRoute<void>(builder: (context) => BottomNavContainer()));
           }
         });
       },
@@ -400,9 +398,8 @@ class _SignupPageState extends State<SignupPage> {
         if (validateForm(_formKey)) {
           signupAndLoginEmailPassword(_email, _password).then((ok) {
             if (ok) {
-              Navigator.of(context).push<MaterialPageRoute>(
-                MaterialPageRoute(builder: (context) => BottomNavContainer()),
-              );
+              Navigator.of(context, rootNavigator: true)
+                  .pushReplacement(MaterialPageRoute<void>(builder: (context) => BottomNavContainer()));
             }
           });
         }

@@ -2,6 +2,8 @@
 import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:hunt_app/login_page.dart';
 import 'package:one_context/one_context.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -160,6 +162,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           ),
                                         ],
                                       )),
+
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -209,6 +212,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         ],
                                       )),
                                   !_status ? _getActionButtons() : Container(),
+
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -245,6 +249,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           ),
                                         ],
                                       )),
+
+                                  //if the user is logged with fb, the password is not shown
+                                  if(FacebookAuth.i.accessToken == null)
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -275,6 +282,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           )
                                         ],
                                       )),
+                                  if(FacebookAuth.i.accessToken == null)
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 2.0),
@@ -283,7 +291,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           Flexible(
                                             child: TextField(
-                                              controller: TextEditingController()..text = '***********',
+                                              controller: TextEditingController()..text = '**********',
                                               obscureText: true,
                                               enabled: !_enabled,
                                               autofocus: !_enabled,
@@ -293,63 +301,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         ],
                                       )),
                                   !_enabled ? _getActionButtons() : Container(),
-                                  /*Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              Text(
-                                                'Password',
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight: FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              //TODO add message 'email sent'
-                                              GestureDetector(
-                                                child: CircleAvatar(
-                                                  backgroundColor: Colors.blueAccent,
-                                                  radius: 14.0,
-                                                  child: Icon(
-                                                    Icons.autorenew,
-                                                    color: Colors.white,
-                                                    size: 16.0,
-                                                  ),
-                                                ),
-                                                onTap: () => _resetPassword(_myUser.email!),
-                                              )
-                                            ],
-                                          )
-                                        ],
-                                      )),
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 2.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Flexible(
-                                            child: TextField(
-                                              controller:
-                                                  TextEditingController()
-                                                    ..text = '*************',
-                                              obscureText: true,
-                                              enabled: _enabled,
-                                            ),
-                                          ),
-                                        ],
-                                      )),*/
+
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -409,6 +361,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           ),
                                         ],
                                       )),
+
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -446,6 +399,46 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                               )
                                             ],
+                                          )
+                                        ],
+                                      )
+                                  ),
+
+                                  //LOGOUT button
+                                  Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 25.0, right: 25.0, top: 25.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: <Widget>[
+                                          GestureDetector(
+                                              child: Container(
+                                                width: 100.0,
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(color: Colors.black87),
+                                                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(width: 6.0),
+                                                    Icon(Icons.exit_to_app, color: Colors.black87),
+                                                    SizedBox(width: 4.0),
+                                                    Text(
+                                                      'Logout',
+                                                      style: TextStyle(
+                                                        color: Colors.black87,
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 18.0,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                Navigator.of(context, rootNavigator: true)
+                                                    .pushReplacement(MaterialPageRoute<void>
+                                                  (builder: (context) => LoginPage()));
+                                              }
                                           )
                                         ],
                                       )),
@@ -521,7 +514,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _updateUsername(String username) async {
-    //TODO input validation
+    //TODO input validation: unique, if '' or newName = currName don't update db, too short (3 chars)
     var data = <String, dynamic>{'username': username};
 
     return await db
@@ -530,10 +523,21 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         .update(data);
   }
 
-  Future<void> _resetPassword(String email) async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
+    if (!nameExp.hasMatch(value)) {
+      return 'Please enter only alphabetical characters';
+    }*/
+    if (value.length > 50) {
+      return 'Name is too long, use at most 50 characters';
+    }
+    return null;
   }
 
+  //TODO if the user is logged with fb or google, the password cannot be changed
   Future<void> _changePassword(String password) async {
 
     await _myUser.updatePassword(password).then((_) {
@@ -541,7 +545,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     }).catchError((Object error){
         if(error is FirebaseAuthException) {
           if(error.code == 'requires-recent-login') {
-            //TODO check if logged in with email or fb/google
+
             _retrieveOldPassword();
 
             var credential = EmailAuthProvider.credential(email: _myUser.email!, password: _oldPassword);

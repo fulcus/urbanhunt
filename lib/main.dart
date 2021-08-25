@@ -20,7 +20,7 @@ class App extends StatelessWidget {
       title: 'Hunt Your Picture',
       home: Scaffold(
         //appBar: AppBar(),
-        // body: BottomNavContainer(),
+        //body: BottomNavContainer(),
         body: LoginPage(),
       ),
       theme: ThemeData(

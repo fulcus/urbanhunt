@@ -78,12 +78,14 @@ class PlaceCard extends StatefulWidget {
 
 class _PlaceCardState extends State<PlaceCard> {
   String _displayDistance = '';
+  bool _isGPSon = false;
 
   _PlaceCardState();
 
   @override
   void initState() {
     super.initState();
+    _checkGPS();
     displayDist();
   }
 
@@ -179,6 +181,7 @@ class _PlaceCardState extends State<PlaceCard> {
               // Sep
               SizedBox(height: 4.0),
               // Distance
+              if(_isGPSon)
               Text(
                 _displayDistance,
                 style: TextStyle(
@@ -226,17 +229,19 @@ class _PlaceCardState extends State<PlaceCard> {
     }
   }
 
+  Future<void> _checkGPS() async {
+    _isGPSon = await Geolocator.isLocationServiceEnabled();
+  }
+
   Future<void> displayDist() async {
     _displayDistance = await _updateDistance();
     setState(() {});
   }
 
-
-
   Future<String> _updateDistance() async {
     var lat = 0.0;
     var lng = 0.0;
-    String distance = '';
+    var distance = '';
 
     return await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best)
@@ -256,6 +261,7 @@ class _PlaceCardState extends State<PlaceCard> {
       lat = (prefs.getDouble('_initLat') ?? 0.1);
       lng = (prefs.getDouble('_initLng') ?? 0.1);
       print('in then: $lat $lng');
+      //TODO not needed, just return 0
       distance = _computeDistance(lat, lng);
       print('distance: $distance');
       return distance;

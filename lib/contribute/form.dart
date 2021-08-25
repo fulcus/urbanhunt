@@ -72,13 +72,13 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     Navigator.pushReplacement<void, void>(
       _formKey.currentState!.context,
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => AddPlaceForm(),
+        builder: (context) => AddPlaceForm(),
       ),
     );
   }
 
   void _unfocus(BuildContext context) {
-    FocusScopeNode currentFocus = FocusScope.of(context);
+    var currentFocus = FocusScope.of(context);
 
     if (!currentFocus.hasPrimaryFocus) {
       currentFocus.unfocus();
@@ -253,11 +253,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                             right: 0,
                             child: GestureDetector(
                               onTap: () {
-                                setState(() {
                                   setState(() {
                                     _image = null;
                                   });
-                                });
                               },
                               child: const Icon(
                                 Icons.close,
@@ -432,7 +430,7 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
   }
 
   List<Widget> _buildChoiceList() {
-    List<Widget> choices = [];
+    var choices = <Widget>[];
 
     widget.reportList.forEach((item) {
       choices.add(Container(
