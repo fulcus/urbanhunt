@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'explore.dart';
+import 'package:hunt_app/explore/explore.dart';
 
 // Backend utils
 
@@ -18,7 +18,7 @@ StreamBuilder redirectHomeOrLogin() {
 
       final hasUser = snapshot.hasData;
       if (hasUser && FirebaseAuth.instance.currentUser!.emailVerified) {
-        return Home();
+        return BottomNavContainer();
       } else {
         return LoginPage();
       }
@@ -27,45 +27,8 @@ StreamBuilder redirectHomeOrLogin() {
 }
 
 Future<bool> loginFacebook() async {
-  // REQUIRED SETUP:
-  // Pubspec.yaml: flutter_facebook_auth: ^3.5.1
-  // Create a facebook developer account and generate an app:
-  // - package name: dev.flutter.hunt_app
-  // - class name: dev.flutter.hunt_app.MainActivity
-  // - command to get app hash
-  // Obtain APP_NAME, APP_ID
-
-  // ANDROID
-  // NEW FILE: app/src/main/res/values/strings.xml
-  // <?xml version="1.0" encoding="utf-8"?>
-  // <resources>
-  //     <string name="app_name">APP_NAME</string>
-  //     <string name="facebook_app_id">APP_ID</string>
-  //     <string name="fb_login_protocol_scheme">fb1365719610250300</string>
-  // </resources>
-  // EDIT FILE: app/src/main/AndroidManifest.xml
-  // INSERT RIGHT BEFORE <application ... >:
-  // <uses-permission android:name="android.permission.INTERNET"/>
-  // INSERT RIGHT AFTER <application ... >:
-  // <meta-data android:name="com.facebook.sdk.ApplicationId"
-  //       android:value="@string/facebook_app_id"/>
-  // <activity android:name="com.facebook.FacebookActivity"
-  //       android:configChanges=
-  //                 "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-  //       android:label="@string/app_name" />
-  // <activity
-  //       android:name="com.facebook.CustomTabActivity"
-  //       android:exported="true">
-  //       <intent-filter>
-  //           <action android:name="android.intent.action.VIEW" />
-  //           <category android:name="android.intent.category.DEFAULT" />
-  //           <category android:name="android.intent.category.BROWSABLE" />
-  //           <data android:scheme="@string/fb_login_protocol_scheme" />
-  //       </intent-filter>
-  // </activity>
-  // TODO iOS
-
-  await FacebookAuth.instance
+  // todo catch errors
+  return await FacebookAuth.instance
       .login(permissions: ['public_profile', 'email']).then((value) {
     FacebookAuth.instance.getUserData().then((userData) {
       // var name = userData['name'] as String;
@@ -74,16 +37,24 @@ Future<bool> loginFacebook() async {
 
       print('Facebook login success!');
     });
+    return true;
+  }).catchError((Object error) {
+    // todo display exception
+    print(error);
+    return false;
   });
 
-  return true;
 }
 
 Future<bool> loginEmailPassword(String email, String password) async {
-  await FirebaseAuth.instance
-      .signInWithEmailAndPassword(email: email, password: password);
-
-  return true;
+  return await FirebaseAuth.instance
+      .signInWithEmailAndPassword(email: email, password: password).then((value) {
+    return true;
+  }).catchError((Object error) {
+    // todo display exception
+    print(error);
+    return false;
+  });
 }
 
 Future<bool> signupAndLoginEmailPassword(String email, String password) async {
@@ -280,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
           loginEmailPassword(_email, _password).then((ok) {
             if (ok) {
               Navigator.of(context).push<MaterialPageRoute>(
-                MaterialPageRoute(builder: (context) => Home()),
+                MaterialPageRoute(builder: (context) => BottomNavContainer()),
               );
             }
           });
@@ -299,7 +270,7 @@ class _LoginPageState extends State<LoginPage> {
         loginFacebook().then((ok) {
           if (ok) {
             Navigator.of(context).push<MaterialPageRoute>(
-              MaterialPageRoute(builder: (context) => Home()),
+              MaterialPageRoute(builder: (context) => BottomNavContainer()),
             );
           }
         });
@@ -430,7 +401,7 @@ class _SignupPageState extends State<SignupPage> {
           signupAndLoginEmailPassword(_email, _password).then((ok) {
             if (ok) {
               Navigator.of(context).push<MaterialPageRoute>(
-                MaterialPageRoute(builder: (context) => Home()),
+                MaterialPageRoute(builder: (context) => BottomNavContainer()),
               );
             }
           });

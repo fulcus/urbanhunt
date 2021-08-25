@@ -15,7 +15,7 @@ final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
 bool loading = true;
 
-class Home extends StatelessWidget {
+class BottomNavContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {

@@ -160,7 +160,7 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
         ),
       );
 
-      _pushPage(context, Home());
+      _pushPage(context, BottomNavContainer());
     } catch (e) {
       Scaffold.of(context).showSnackBar(
         const SnackBar(

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/explore/explore.dart';
 import 'package:one_context/one_context.dart';
 
-import 'authentication/auth.dart';
+import 'login_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +19,9 @@ class App extends StatelessWidget {
       builder: OneContext().builder,
       title: 'Hunt Your Picture',
       home: Scaffold(
-        //body: Home(),
-        body: AuthTypeSelector(),
+        //appBar: AppBar(),
+        // body: BottomNavContainer(),
+        body: LoginPage(),
       ),
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -28,3 +30,20 @@ class App extends StatelessWidget {
     );
   }
 }
+
+class CustomAppBar extends StatefulWidget {
+  const CustomAppBar({Key? key}) : super(key: key);
+
+  @override
+  _CustomAppBarState createState() => _CustomAppBarState();
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  String title = 'title';
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(title: Text(title));
+  }
+
+}
+
