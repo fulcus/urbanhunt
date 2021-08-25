@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hunt_app/explore/explore.dart';
+
+import 'network.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);
@@ -28,22 +32,43 @@ StreamBuilder redirectHomeOrLogin() {
   );
 }
 
+Future<void> _addUserToDB(String uid, String? imageURL) async {
+  var randomUsername = 'user' + (Random().nextInt(99999)).toString();
+  try {
+    var myCountry = await getCountry();
+    await db.collection('users').doc(uid).set(<String, dynamic>{
+      'imageURL': imageURL ?? '',
+      'score': 0,
+      'username': randomUsername,
+      'country': myCountry
+    });
+  } on Exception catch (e) {
+    // printErrorMessage(e.toString());
+    print(e);
+  }
+}
+
 Future<bool> loginFacebook() async {
   try {
     // Trigger the sign-in flow
     final loginResult = await FacebookAuth.instance.login();
 
     // Create a credential from the access token
-    final facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
+    final facebookAuthCredential =
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
-    var userCredential = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-
-    // todo write data to db
-    var name = userCredential.user!.displayName;
-    var picture = userCredential.user!.photoURL;  // use in NetworkImage
-    print('$name $picture');
+    var userCredential = await FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential);
+    if (userCredential.additionalUserInfo!.isNewUser) {
+      //User logging in for the first time
+      var name = userCredential.user!.displayName;
+      var picture = userCredential.user!.photoURL; // use in NetworkImage
+      print('$name $picture');
+      await _addUserToDB(userCredential.user!.uid, picture);
+    }
     return true;
+
     // todo catch errors
   } on Exception catch (e) {
     print('Error: $e');
@@ -63,12 +88,15 @@ Future<bool> loginGoogle() async {
       idToken: googleAuth.idToken,
     );
     // Once signed in, return the UserCredential
-    var userCredential = await FirebaseAuth.instance.signInWithCredential(
-        credential);
-    // todo write data to db
-    var name = userCredential.user!.displayName;
-    var picture = userCredential.user!.photoURL;  // use in NetworkImage
-    print('$name $picture');
+    var userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    if (userCredential.additionalUserInfo!.isNewUser) {
+      //User logging in for the first time
+      var name = userCredential.user!.displayName;
+      var picture = userCredential.user!.photoURL; // use in NetworkImage
+      print('$name $picture');
+      await _addUserToDB(userCredential.user!.uid, picture);
+    }
     return true;
     // todo catch errors
   } on Exception catch (e) {
@@ -77,10 +105,10 @@ Future<bool> loginGoogle() async {
   }
 }
 
-
 Future<bool> loginEmailPassword(String email, String password) async {
   return await FirebaseAuth.instance
-      .signInWithEmailAndPassword(email: email, password: password).then((value) {
+      .signInWithEmailAndPassword(email: email, password: password)
+      .then((_) {
     return true;
   }).catchError((Object error) {
     // todo display exception
@@ -90,10 +118,22 @@ Future<bool> loginEmailPassword(String email, String password) async {
 }
 
 Future<bool> signupAndLoginEmailPassword(String email, String password) async {
-  await FirebaseAuth.instance
-      .createUserWithEmailAndPassword(email: email, password: password);
-
-  return loginEmailPassword(email, password);
+  return await FirebaseAuth.instance
+      .createUserWithEmailAndPassword(email: email, password: password)
+      .then((userCredential) async {
+    if (userCredential.additionalUserInfo!.isNewUser) {
+      // redundant
+      //User logging in for the first time
+      var name = userCredential.user!.displayName;
+      print('$name');
+      await _addUserToDB(userCredential.user!.uid, null);
+    }
+    return loginEmailPassword(email, password);
+  }).catchError((Object error) {
+    // todo display exception
+    print(error);
+    return false;
+  });
 }
 
 bool validateForm(GlobalKey<FormState> formKey) {
@@ -282,8 +322,9 @@ class _LoginPageState extends State<LoginPage> {
         if (validateForm(_formKey)) {
           loginEmailPassword(_email, _password).then((ok) {
             if (ok) {
-                  Navigator.of(context, rootNavigator: true)
-                      .pushReplacement(MaterialPageRoute<void>(builder: (context) => BottomNavContainer()));
+              Navigator.of(context, rootNavigator: true).pushReplacement(
+                  MaterialPageRoute<void>(
+                      builder: (context) => BottomNavContainer()));
             }
           });
         }
@@ -300,8 +341,9 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         loginFacebook().then((ok) {
           if (ok) {
-            Navigator.of(context, rootNavigator: true)
-                .pushReplacement(MaterialPageRoute<void>(builder: (context) => BottomNavContainer()));
+            Navigator.of(context, rootNavigator: true).pushReplacement(
+                MaterialPageRoute<void>(
+                    builder: (context) => BottomNavContainer()));
           }
         });
       },
@@ -331,11 +373,12 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(width: 10.0),
               Center(
-                child: const Text('Login with facebook', style: TextStyle(
-                    fontFamily: 'Trueno',
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    color: fbBlue)),
+                child: const Text('Login with facebook',
+                    style: TextStyle(
+                        fontFamily: 'Trueno',
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: fbBlue)),
               ),
             ],
           ),
@@ -389,7 +432,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
 
   Widget _buildLoginForm(BuildContext context) {
     return Padding(
@@ -485,8 +527,9 @@ class _SignupPageState extends State<SignupPage> {
         if (validateForm(_formKey)) {
           signupAndLoginEmailPassword(_email, _password).then((ok) {
             if (ok) {
-              Navigator.of(context, rootNavigator: true)
-                  .pushReplacement(MaterialPageRoute<void>(builder: (context) => BottomNavContainer()));
+              Navigator.of(context, rootNavigator: true).pushReplacement(
+                  MaterialPageRoute<void>(
+                      builder: (context) => BottomNavContainer()));
             }
           });
         }
