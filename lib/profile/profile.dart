@@ -2,12 +2,11 @@
 import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hunt_app/login_page.dart';
 import 'package:one_context/one_context.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/profile/unlocked_list.dart';
@@ -24,6 +23,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   bool _status = true;
   bool _enabled = true;
   bool _isNameButton = true;
+  bool _isUnique = true;
+  bool _isEmailAuth = true;
   final FocusNode myFocusNode = FocusNode();
   String _newName = '';
   String _newPassword = '';
@@ -42,6 +43,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         .collection('users')
         .where(FieldPath.documentId, isEqualTo: _myUser.uid)
         .snapshots();
+
+    _isEmailAuthProvider();
   }
 
   @override
@@ -52,10 +55,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 var url = snapshot.data!.docs[0].get('imageURL').toString();
-                var username =
-                    snapshot.data!.docs[0].get('username').toString();
-                var countryName =
-                    snapshot.data!.docs[0].get('country').toString();
+                var username = snapshot.data!.docs[0].get('username').toString();
+                var countryName = snapshot.data!.docs[0].get('country').toString();
 
                 return Container(
                   color: Colors.white,
@@ -200,14 +201,19 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Flexible(
-                                              child: TextField(
+                                              child: TextFormField(
                                                 controller: TextEditingController()..text = username,
                                                 decoration: const InputDecoration(
                                                   hintText: 'Enter Your Name',
-                                               ),
+                                                ),
                                                 enabled: !_status,
                                                 autofocus: !_status,
+                                                autovalidateMode: AutovalidateMode.onUserInteraction,
                                                 onChanged: (name) => _newName = name,
+                                                onEditingComplete: () async => {
+                                                  _isUnique = await _isUsernameUnique(TextEditingController().text)
+                                                },
+                                                validator: _validateName,
                                             )),
                                         ],
                                       )),
@@ -250,8 +256,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         ],
                                       )),
 
-                                  //if the user is logged with fb, the password is not shown
-                                  if(FacebookAuth.i.accessToken == null)
+                                  //if the user is not logged with email and password, the password is not shown
+                                  if(_isEmailAuth)
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
@@ -267,7 +273,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 'Password',
                                                 style: TextStyle(
                                                     fontSize: 16.0,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight: FontWeight.bold
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -282,7 +289,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           )
                                         ],
                                       )),
-                                  if(FacebookAuth.i.accessToken == null)
+                                  if(_isEmailAuth)
                                   Padding(
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 2.0),
@@ -316,8 +323,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 'Country',
                                                 style: TextStyle(
                                                     fontSize: 16.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    fontWeight: FontWeight.bold
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -331,11 +338,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           Flexible(
                                             child: TextField(
-                                              controller:
-                                                  TextEditingController()..text = countryName,
+                                              controller: TextEditingController()..text = countryName,
                                               decoration: const InputDecoration(
-                                                  hintText:
-                                                      'Enter your Country'),
+                                                  hintText: 'Enter your Country'),
                                               enabled: false,
                                               autofocus: !_status,
                                             ),
@@ -416,7 +421,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 width: 100.0,
                                                 decoration: BoxDecoration(
                                                     border: Border.all(color: Colors.black87),
-                                                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                    borderRadius: BorderRadius.all(Radius.circular(20))
+                                                ),
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   children: [
@@ -504,6 +510,14 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     return imageProvider;
   }
 
+  void _isEmailAuthProvider() {
+    var providerId = _myUser.providerData[0].providerId;
+
+    if(providerId != 'password') {
+      _isEmailAuth = false;
+    }
+  }
+
   Future<void> _updateCountry(String country) async {
     var data = <String, dynamic>{'country': country};
 
@@ -514,7 +528,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _updateUsername(String username) async {
-    //TODO input validation: unique, if '' or newName = currName don't update db, too short (3 chars)
     var data = <String, dynamic>{'username': username};
 
     return await db
@@ -525,17 +538,32 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Name is required';
+      return 'Name is required.';
     }
-    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
-    if (!nameExp.hasMatch(value)) {
-      return 'Please enter only alphabetical characters';
-    }*/
+    if (value.length < 3) {
+      return 'Name has to be at least 3 characters long.';
+    }
     if (value.length > 50) {
-      return 'Name is too long, use at most 50 characters';
+      return 'Name has to be at most 50 characters long.';
+    }
+    final nameExp = RegExp(r'^[a-zA-Z0-9_]+$');
+    if (!nameExp.hasMatch(value)) {
+      return 'Please enter only alphanumeric characters.';
+    }
+    if(!_isUnique) {
+      return 'This name is already taken. Please choose another one.';
     }
     return null;
   }
+
+  Future<bool> _isUsernameUnique(String name) async {
+    final username = await db
+        .collection('users')
+        .where('username', isEqualTo: name)
+        .get();
+    return username.docs.isEmpty;
+  }
+
 
   //TODO if the user is logged with fb or google, the password cannot be changed
   Future<void> _changePassword(String password) async {
@@ -643,7 +671,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(20.0)),
                     ),
                     onPressed: () {
-                      _isNameButton ? _updateUsername(_newName) : _changePassword(_newPassword);
+                      if(_newName.isNotEmpty && _isNameButton) {
+                        _updateUsername(_newName);
+                      }
+                      if(_newPassword.isNotEmpty && !_isNameButton) {
+                        _changePassword(_newPassword);
+                      }
+
                       setState(() {
                         _isNameButton ? _status = true : _enabled = true;
                         //FocusScope.of(context).requestFocus(FocusNode());

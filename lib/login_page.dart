@@ -53,19 +53,35 @@ Future<bool> loginFacebook() async {
     // Trigger the sign-in flow
     final loginResult = await FacebookAuth.instance.login();
 
-    // Create a credential from the access token
-    final facebookAuthCredential =
+    switch(loginResult.status) {
+      case LoginStatus.success:
+        // Create a credential from the access token
+        final facebookAuthCredential =
         FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
-    // Once signed in, return the UserCredential
-    var userCredential = await FirebaseAuth.instance
-        .signInWithCredential(facebookAuthCredential);
-    if (userCredential.additionalUserInfo!.isNewUser) {
-      //User logging in for the first time
-      var name = userCredential.user!.displayName;
-      var picture = userCredential.user!.photoURL; // use in NetworkImage
-      print('$name $picture');
-      await _addUserToDB(userCredential.user!.uid, picture);
+        // Once signed in, return the UserCredential
+        var userCredential = await FirebaseAuth.instance
+            .signInWithCredential(facebookAuthCredential);
+        if (userCredential.additionalUserInfo!.isNewUser) {
+          //User logging in for the first time
+          var name = userCredential.user!.displayName;
+          var picture = userCredential.user!.photoURL; // use in NetworkImage
+          print('$name $picture');
+          await _addUserToDB(userCredential.user!.uid, picture);
+        }
+        break;
+
+      case LoginStatus.operationInProgress:
+      // TODO: Handle this case.
+        break;
+
+      case LoginStatus.cancelled:
+        //TODO update UI
+        break;
+
+      case LoginStatus.failed:
+        //TODO handle error
+        break;
     }
     return true;
 
