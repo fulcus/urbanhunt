@@ -25,12 +25,20 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   bool _isNameButton = true;
   bool _isUnique = true;
   bool _isEmailAuth = true;
-  final FocusNode myFocusNode = FocusNode();
+  bool _onChanged = true;
+
   String _newName = '';
   String _newPassword = '';
   String _oldPassword = '';
+
   File? _image;
-  final picker = ImagePicker();
+
+  final FocusNode myFocusNode = FocusNode();
+  final ImagePicker picker = ImagePicker();
+  final GlobalKey<FormFieldState> _nameFormKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _pswFormKey = GlobalKey<FormFieldState>();
+  final TextEditingController _nameController = TextEditingController();
+
   late User _myUser;
   late Stream<QuerySnapshot> _myUserData;
 
@@ -202,16 +210,20 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           Flexible(
                                               child: TextFormField(
-                                                controller: TextEditingController()..text = username,
+                                                key: _nameFormKey,
+                                                controller: _nameController..text = username,
                                                 decoration: const InputDecoration(
                                                   hintText: 'Enter Your Name',
                                                 ),
                                                 enabled: !_status,
                                                 autofocus: !_status,
                                                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                onChanged: (name) => _newName = name,
-                                                onEditingComplete: () async => {
-                                                  _isUnique = await _isUsernameUnique(TextEditingController().text)
+                                                onChanged: (name) => {
+                                                  if(_nameController.text != username) {
+                                                    _isUsernameUnique(_nameController.text),
+                                                    _newName = _nameController.text,
+                                                    _onChanged = true,
+                                                  }
                                                 },
                                                 validator: _validateName,
                                             )),
@@ -297,12 +309,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Flexible(
-                                            child: TextField(
+                                            child: TextFormField(
+                                              key: _pswFormKey,
                                               controller: TextEditingController()..text = '**********',
                                               obscureText: true,
                                               enabled: !_enabled,
                                               autofocus: !_enabled,
+                                              autovalidateMode: AutovalidateMode.onUserInteraction,
                                               onChanged: (password) => _newPassword = password,
+                                              validator: _validatePsw,
                                             ),
                                           ),
                                         ],
@@ -550,48 +565,62 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     if (!nameExp.hasMatch(value)) {
       return 'Please enter only alphanumeric characters.';
     }
-    if(!_isUnique) {
+    if(!_isUnique && !_onChanged) {
       return 'This name is already taken. Please choose another one.';
     }
     return null;
   }
 
-  Future<bool> _isUsernameUnique(String name) async {
+  Future<void> _isUsernameUnique(String name) async {
     final username = await db
         .collection('users')
         .where('username', isEqualTo: name)
         .get();
-    return username.docs.isEmpty;
+
+    username.docs.isEmpty ? _isUnique = true : _isUnique = false;
   }
 
 
-  //TODO if the user is logged with fb or google, the password cannot be changed
   Future<void> _changePassword(String password) async {
-
     await _myUser.updatePassword(password).then((_) {
       print('Successfully changed password');
     }).catchError((Object error){
         if(error is FirebaseAuthException) {
           if(error.code == 'requires-recent-login') {
-
             _retrieveOldPassword();
-
             var credential = EmailAuthProvider.credential(email: _myUser.email!, password: _oldPassword);
-            _myUser.reauthenticateWithCredential(credential);
+
+            _myUser.reauthenticateWithCredential(credential)
+                .then((_) => print('Re-authenticated'))
+                .catchError((Object error) {
+                  if(error is FirebaseAuthException) {
+                    if (error.code == 'wrong-password') {
+                      //TODO show UI
+                      print('The password is wrong');
+                    }
+                  }
+            });
           }
           else if(error.code == 'weak-password') {
-            _errorPopup('The password is too weak.\n Please insert another one.');
+            print('The password is too weak. Please insert another one.');
           }
           else {
-            _errorPopup('Please try again.' + error.toString());
+            print('Please try again.' + error.toString());
           }
       }
       else {
-        _errorPopup("Password can't be changed" + error.toString());
+        print("Password can't be changed" + error.toString());
       }
-      //This might happen, when the wrong password is in, the user isn't found,
-      //or if the user hasn't logged in recently.
     });
+  }
+
+  String? _validatePsw(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required.';
+    }
+    if (value.length < 6) {
+      return 'The password is too weak. Please insert another one.';
+    }
   }
 
   void _retrieveOldPassword() {
@@ -623,26 +652,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _errorPopup (String content) {
-    OneContext().showDialog<void>(
-        builder: (_) => AlertDialog(
-          title: Text('Alert:'),
-          content: Text(content),
-          actions: [
-            ElevatedButton(
-              child: Text('Ok'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green,
-                textStyle: TextStyle(color: Colors.white),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
-              ),
-              onPressed: () => OneContext().popDialog(),
-            )
-          ],
-        ),
-    );
-  }
 
   @override
   void dispose() {
@@ -671,17 +680,33 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(20.0)),
                     ),
                     onPressed: () {
-                      if(_newName.isNotEmpty && _isNameButton) {
-                        _updateUsername(_newName);
-                      }
-                      if(_newPassword.isNotEmpty && !_isNameButton) {
-                        _changePassword(_newPassword);
+                      if(_isNameButton) {
+                        _onChanged = false;
+                        final form = _nameFormKey.currentState!;
+
+                        if(form.validate() && _isUnique) {
+                          if(_newName.isNotEmpty) {
+                            _updateUsername(_newName);
+                          }
+                          setState(() {
+                            _status = true;
+                          });
+                        }
                       }
 
-                      setState(() {
-                        _isNameButton ? _status = true : _enabled = true;
+                      else {
+                        final form = _pswFormKey.currentState!;
+
+                        if(form.validate()) {
+                          if(_newPassword.isNotEmpty) {
+                            _changePassword(_newPassword);
+                          }
+                          setState(() {
+                            _enabled = true;
+                          });
+                        }
+                      }
                         //FocusScope.of(context).requestFocus(FocusNode());
-                      });
                     },
               )),
             ),
