@@ -5,11 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:hunt_app/explore/explore.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
-import 'main.dart';
-import 'network.dart';
+import 'package:hunt_app/explore/explore.dart';
+import 'package:hunt_app/navbar.dart';
+import 'package:hunt_app/network.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);

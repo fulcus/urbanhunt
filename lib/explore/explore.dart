@@ -7,24 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:hunt_app/explore/place_card.dart';
-import 'package:hunt_app/navbar.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
 bool loading = true;
-
-class BottomNavContainer extends StatelessWidget {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Explore(),
-      bottomNavigationBar: Nav.instance,
-    );
-  }
-}
 
 class Explore extends StatefulWidget {
   @override
@@ -161,7 +148,6 @@ class StoreMap extends StatefulWidget {
 
   @override
   _StoreMapState createState() => _StoreMapState();
-
 }
 
 class _StoreMapState extends State<StoreMap> {
@@ -331,8 +317,8 @@ class _StoreMapState extends State<StoreMap> {
         },
       ));
 
-      _placeCard =
-          PlaceCard(document, false, isLocked, isLiked, isDisliked, _onCardClose);
+      _placeCard = PlaceCard(
+          document, false, isLocked, isLiked, isDisliked, _onCardClose);
     });
   }
 
