@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+
 import 'package:hunt_app/contribute/form.dart';
 import 'package:hunt_app/leaderboard.dart';
 import 'package:hunt_app/profile/profile.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:hunt_app/explore/explore.dart';
 
-import 'explore/explore.dart';
 
 BuildContext? testContext;
 
@@ -50,13 +51,13 @@ class _ProvidedStylesExampleState extends State<ProvidedStylesExample> {
         title: ('Contribute'),
         activeColorPrimary: Colors.teal,
         inactiveColorPrimary: Colors.grey,
-        routeAndNavigatorSettings: RouteAndNavigatorSettings(
-          initialRoute: '/',
-          routes: {
-            '/first': (context) => Contribute(),
-            '/second': (context) => LeaderBoard(),
-          },
-        ),
+        // routeAndNavigatorSettings: RouteAndNavigatorSettings(
+        //   initialRoute: '/',
+        //   routes: {
+        //     '/first': (context) => Contribute(),
+        //     '/second': (context) => LeaderBoard(),
+        //   },
+        // ),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.leaderboard),
@@ -65,13 +66,13 @@ class _ProvidedStylesExampleState extends State<ProvidedStylesExample> {
 
         activeColorSecondary: Colors.deepOrange,
         inactiveColorPrimary: Colors.grey,
-        routeAndNavigatorSettings: RouteAndNavigatorSettings(
-          initialRoute: '/',
-          routes: {
-            '/first': (context) => Contribute(),
-            '/second': (context) => LeaderBoard(),
-          },
-        ),
+        // routeAndNavigatorSettings: RouteAndNavigatorSettings(
+        //   initialRoute: '/',
+        //   routes: {
+        //     '/first': (context) => Contribute(),
+        //     '/second': (context) => LeaderBoard(),
+        //   },
+        // ),
         // onPressed: (context) {
         //   pushDynamicScreen<void>(context!,
         //       screen: SampleModalScreen(), withNavBar: true);
@@ -82,13 +83,13 @@ class _ProvidedStylesExampleState extends State<ProvidedStylesExample> {
         title: ('Profile'),
         activeColorPrimary: Colors.indigo,
         inactiveColorPrimary: Colors.grey,
-        routeAndNavigatorSettings: RouteAndNavigatorSettings(
-          initialRoute: '/',
-          routes: {
-            '/first': (context) => Contribute(),
-            '/second': (context) => LeaderBoard(),
-          },
-        ),
+        // routeAndNavigatorSettings: RouteAndNavigatorSettings(
+        //   initialRoute: '/',
+        //   routes: {
+        //     '/first': (context) => Contribute(),
+        //     '/second': (context) => LeaderBoard(),
+        //   },
+        // ),
       ),
     ];
   }
