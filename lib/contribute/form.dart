@@ -19,7 +19,7 @@ class Contribute extends StatelessWidget {
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Scaffold(
-        //appBar: AppBar(title: Text('Add new place')),
+        appBar: AppBar(title: Text('Add new place')),
         body: const AddPlaceForm(),
       ),
     );

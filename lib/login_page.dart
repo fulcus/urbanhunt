@@ -6,7 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hunt_app/explore/explore.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
+import 'main.dart';
 import 'network.dart';
 
 // Backend utils
@@ -24,7 +26,8 @@ StreamBuilder redirectHomeOrLogin() {
 
       final hasUser = snapshot.hasData;
       if (hasUser && FirebaseAuth.instance.currentUser!.emailVerified) {
-        return BottomNavContainer();
+        // return BottomNavContainer();
+        return ProvidedStylesExample(menuScreenContext: context);
       } else {
         return LoginPage();
       }
@@ -53,21 +56,21 @@ Future<bool> loginFacebook() async {
     // Trigger the sign-in flow
     final loginResult = await FacebookAuth.instance.login();
 
-    if(loginResult.status == LoginStatus.success) {
-        // Create a credential from the access token
-        final facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.token);
+    if (loginResult.status == LoginStatus.success) {
+      // Create a credential from the access token
+      final facebookAuthCredential =
+          FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
-        // Once signed in, return the UserCredential
-        var userCredential = await FirebaseAuth.instance
-            .signInWithCredential(facebookAuthCredential);
-        if (userCredential.additionalUserInfo!.isNewUser) {
-          //User logging in for the first time
-          var name = userCredential.user!.displayName;
-          var picture = userCredential.user!.photoURL; // use in NetworkImage
-          print('$name $picture');
-          await _addUserToDB(userCredential.user!.uid, picture);
-        }
+      // Once signed in, return the UserCredential
+      var userCredential = await FirebaseAuth.instance
+          .signInWithCredential(facebookAuthCredential);
+      if (userCredential.additionalUserInfo!.isNewUser) {
+        //User logging in for the first time
+        var name = userCredential.user!.displayName;
+        var picture = userCredential.user!.photoURL; // use in NetworkImage
+        print('$name $picture');
+        await _addUserToDB(userCredential.user!.uid, picture);
+      }
 
       /*else if(loginResult.status == LoginStatus.cancelled) {}
       //TODO update UI
@@ -332,9 +335,15 @@ class _LoginPageState extends State<LoginPage> {
         if (validateForm(_formKey)) {
           loginEmailPassword(_email, _password).then((ok) {
             if (ok) {
-              Navigator.of(context, rootNavigator: true).pushReplacement(
-                  MaterialPageRoute<void>(
-                      builder: (context) => BottomNavContainer()));
+              pushNewScreen<void>(
+                context,
+                screen: ProvidedStylesExample(
+                  menuScreenContext: context,
+                ),
+              );
+              //   Navigator.of(context, rootNavigator: true).pushReplacement(
+              //       MaterialPageRoute<void>(
+              //           builder: (context) => BottomNavContainer()));
             }
           });
         }
@@ -351,9 +360,16 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         loginFacebook().then((ok) {
           if (ok) {
-            Navigator.of(context, rootNavigator: true).pushReplacement(
-                MaterialPageRoute<void>(
-                    builder: (context) => BottomNavContainer()));
+            pushNewScreen<void>(
+              context,
+              screen: ProvidedStylesExample(
+                menuScreenContext: context,
+              ),
+            );
+
+            // Navigator.of(context, rootNavigator: true).pushReplacement(
+            //     MaterialPageRoute<void>(
+            //         builder: (context) => BottomNavContainer()));
           }
         });
       },
@@ -402,9 +418,16 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         loginGoogle().then((ok) {
           if (ok) {
-            Navigator.of(context).push<MaterialPageRoute>(
-              MaterialPageRoute(builder: (context) => BottomNavContainer()),
+            pushNewScreen<void>(
+              context,
+              screen: ProvidedStylesExample(
+                menuScreenContext: context,
+              ),
             );
+
+            // Navigator.of(context).push<MaterialPageRoute>(
+            //   MaterialPageRoute(builder: (context) => BottomNavContainer()),
+            // );
           }
         });
       },
@@ -478,8 +501,13 @@ class _LoginPageState extends State<LoginPage> {
             child: link(
               'Forgot Password?',
               () {
-                Navigator.of(context).push<MaterialPageRoute>(MaterialPageRoute(
-                    builder: (context) => ResetPasswordPage()));
+                pushNewScreen<void>(
+                  context,
+                  screen: ResetPasswordPage()
+                );
+
+                // Navigator.of(context).push<MaterialPageRoute>(MaterialPageRoute(
+                //     builder: (context) => ResetPasswordPage()));
               },
             ),
           ),
@@ -494,9 +522,14 @@ class _LoginPageState extends State<LoginPage> {
             'Dont have an account?',
             'Sign up now',
             () {
-              Navigator.of(context).push<MaterialPageRoute>(
-                MaterialPageRoute(builder: (context) => SignupPage()),
+              pushNewScreen<void>(
+                context,
+                screen: SignupPage()
               );
+
+              // Navigator.of(context).push<MaterialPageRoute>(
+              //   MaterialPageRoute(builder: (context) => SignupPage()),
+              // );
             },
           ),
         ],
@@ -537,9 +570,16 @@ class _SignupPageState extends State<SignupPage> {
         if (validateForm(_formKey)) {
           signupAndLoginEmailPassword(_email, _password).then((ok) {
             if (ok) {
-              Navigator.of(context, rootNavigator: true).pushReplacement(
-                  MaterialPageRoute<void>(
-                      builder: (context) => BottomNavContainer()));
+              pushNewScreen<void>(
+                context,
+                screen: ProvidedStylesExample(
+                  menuScreenContext: context,
+                ),
+              );
+
+              // Navigator.of(context, rootNavigator: true).pushReplacement(
+              //     MaterialPageRoute<void>(
+              //         builder: (context) => BottomNavContainer()));
             }
           });
         }
