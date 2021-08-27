@@ -94,6 +94,7 @@ class _PlaceCardState extends State<PlaceCard> {
     String description;
     Widget imageBanner;
 
+    displayDist();
 
     if (widget.isLocked) {
       description = widget.descriptionLocked;
@@ -311,7 +312,7 @@ class _PlaceCardState extends State<PlaceCard> {
     });
   }
 
-  // todo check if db calls are successful
+
   void like() {
     if (!widget.isLocked) {
       setState(() {

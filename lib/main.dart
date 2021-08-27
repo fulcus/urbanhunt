@@ -18,11 +18,12 @@ class App extends StatelessWidget {
     return MaterialApp(
       builder: OneContext().builder,
       title: 'Hunt Your Picture',
-      home: Scaffold(
+      home: redirectHomeOrLogin(),
+      /*Scaffold(
         //appBar: AppBar(),
         //body: BottomNavContainer(),
         body: LoginPage(),
-      ),
+      ),*/
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.blueAccent[50],
