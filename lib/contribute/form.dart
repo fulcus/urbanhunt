@@ -177,10 +177,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              SizedBox(height: 70.0),
-              const Text('Add new place',
-                  style: TextStyle(fontSize: 22), textAlign: TextAlign.center),
-              SizedBox(height: 44),
+              const SizedBox(height: 44),
               TextFormField(
                 focusNode: _name,
                 textInputAction: TextInputAction.next,
@@ -253,9 +250,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                             right: 0,
                             child: GestureDetector(
                               onTap: () {
-                                  setState(() {
-                                    _image = null;
-                                  });
+                                setState(() {
+                                  _image = null;
+                                });
                               },
                               child: const Icon(
                                 Icons.close,
@@ -329,7 +326,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                   onPressed: _handleSubmitted,
                 ),
               ),
-              sizedBoxSpace,
+              const SizedBox(height: 100),
             ],
           ),
         ),

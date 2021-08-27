@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 final db = FirebaseFirestore.instance;
 final User myUser = FirebaseAuth.instance.currentUser!;
 
@@ -54,7 +53,8 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
 
   Future<Stream<QuerySnapshot<Object?>>> getBestUsers() async {
     myCountry = await getCountry();
-    var users = db.collection('users')
+    var users = db
+        .collection('users')
         .where('country', isEqualTo: myCountry)
         .orderBy('score', descending: true)
         .limit(50)
@@ -65,7 +65,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
   @override
   void initState() {
     super.initState();
-    (getBestUsers().then((users) => _bestUsers = users)).whenComplete((){
+    (getBestUsers().then((users) => _bestUsers = users)).whenComplete(() {
       setState(() {});
     });
   }
@@ -80,24 +80,6 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 15.0, top: 10.0),
-                child: RichText(
-                    text: TextSpan(
-                        text: 'Leader',
-                        style: TextStyle(
-                            color: Colors.deepPurple,
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.bold),
-                        children: [
-                      TextSpan(
-                          text: 'Board',
-                          style: TextStyle(
-                              color: Colors.pink,
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold))
-                    ])),
-              ),
               Padding(
                 padding: EdgeInsets.only(left: 15.0),
                 child: Text(
@@ -143,7 +125,8 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                             child: CircularProgressIndicator(),
                           );
                         }
-                      }))
+                      })),
+              const SizedBox(height: 100),
             ],
           ),
         )),
@@ -185,24 +168,6 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 15.0, top: 10.0),
-                child: RichText(
-                    text: TextSpan(
-                        text: 'Leader',
-                        style: TextStyle(
-                            color: Colors.deepPurple,
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.bold),
-                        children: [
-                      TextSpan(
-                          text: 'Board',
-                          style: TextStyle(
-                              color: Colors.pink,
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold))
-                    ])),
-              ),
               Padding(
                 padding: EdgeInsets.only(left: 15.0),
                 child: Text(
@@ -248,7 +213,8 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                             child: CircularProgressIndicator(),
                           );
                         }
-                      }))
+                      })),
+              const SizedBox(height: 100),
             ],
           ),
         )),
