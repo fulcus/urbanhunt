@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Unlock distance threshold
@@ -242,7 +241,7 @@ class _PlaceCardState extends State<PlaceCard> {
   Future<String> _updateDistance() async {
     var lat = 0.0;
     var lng = 0.0;
-    var distance = '';
+    var distanceString = '';
 
     return await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best)
@@ -250,30 +249,13 @@ class _PlaceCardState extends State<PlaceCard> {
       lat = pos.latitude;
       lng = pos.longitude;
 
-      distance = _computeDistance(lat, lng);
-      print('in location on $distance');
-      return distance;
+      distanceString = _computeDistance(lat, lng);
+      print('in location on $distanceString');
+      return distanceString;
     }).catchError((Object error, StackTrace stacktrace) async {
-      //if location is off use the latest cached location
-      print('before await');
-      final prefs = await SharedPreferences.getInstance();
-
-      print('inside then');
-      lat = (prefs.getDouble('_initLat') ?? 0.1);
-      lng = (prefs.getDouble('_initLng') ?? 0.1);
-      print('in then: $lat $lng');
-      //TODO not needed, just return 0
-      distance = _computeDistance(lat, lng);
-      print('distance: $distance');
-      return distance;
-
-      print('initializing locations from cache: $lat $lng');
-      print(error.toString());
-      //print('printing stacktrace' + stacktrace.toString());
+      //if location is off use don't display anything
+      return '';
     });
-
-    // print('before return $distance');
-    // return distance;
   }
 
   String _computeDistance(double startLatitude, double startLongitude) {

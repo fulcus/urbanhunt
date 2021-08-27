@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hunt_app/explore/place_card.dart';
 
 final db = FirebaseFirestore.instance;
@@ -38,12 +37,23 @@ class _ExploreState extends State<Explore> {
         loading = false;
       });
     }).catchError((Object error, StackTrace stacktrace) async {
-      //if location is off use the latest cached location
-      await SharedPreferences.getInstance().then((prefs) => setState(() {
-            _initLat = (prefs.getDouble('_initLat') ?? 0.1);
-            _initLng = (prefs.getDouble('_initLng') ?? 0.1);
-            loading = false;
-          }));
+      //if location is off
+      try {
+        var position = await Geolocator.getLastKnownPosition();
+
+        setState(() {
+          _initLat = position!.latitude;
+          _initLng = position.longitude;
+          loading = false;
+        });
+      } on Error catch(error) {
+        print('getLastKnownPos stacktrace: ' + error.stackTrace.toString());
+      }
+      // await SharedPreferences.getInstance().then((prefs) => setState(() {
+      //       _initLat = (prefs.getDouble('_initLat') ?? 0.1);
+      //       _initLng = (prefs.getDouble('_initLng') ?? 0.1);
+      //       loading = false;
+      //     }));
       print('initializing locations from cache: $_initLat $_initLng');
       print(stacktrace.toString());
       return null;
@@ -170,14 +180,14 @@ class _StoreMapState extends State<StoreMap> {
   }
 
   //cache latest location
-  Future<void> _cacheLocation() async {
-    //print('storing location: $_currentLat $_currentLng');
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setDouble('_initLat', _currentLat);
-      prefs.setDouble('_initLng', _currentLng);
-    });
-  }
+  // Future<void> _cacheLocation() async {
+  //   //print('storing location: $_currentLat $_currentLng');
+  //   final prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     prefs.setDouble('_initLat', _currentLat);
+  //     prefs.setDouble('_initLng', _currentLng);
+  //   });
+  // }
 
   Future<void> _setupCustomMarkers() async {
     // create all markers with the correct starting icon (locked / unlocked)
@@ -283,7 +293,7 @@ class _StoreMapState extends State<StoreMap> {
     _currentCameraTilt = cameraPosition.tilt;
     _currentLat = cameraPosition.target.latitude;
     _currentLng = cameraPosition.target.longitude;
-    _cacheLocation();
+    // _cacheLocation();
     _currentZoom = cameraPosition.zoom;
     setState(() {});
   }
