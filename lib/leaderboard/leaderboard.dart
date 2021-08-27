@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
 final User myUser = FirebaseAuth.instance.currentUser!;
@@ -297,7 +298,7 @@ class LeaderBoardRow extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
-                                        image: getImage(imageURL),
+                                        image: ImageHelper().showImage(imageURL, 'assets/images/as.png'),
                                         fit: BoxFit.cover)))),
                       ],
                     ),
@@ -343,11 +344,4 @@ class LeaderBoardRow extends StatelessWidget {
     );
   }
 
-  ImageProvider getImage(String url) {
-    ImageProvider imageProvider = AssetImage('assets/images/profile.png');
-    if (url != '') {
-      imageProvider = NetworkImage(url);
-    }
-    return imageProvider;
-  }
 }

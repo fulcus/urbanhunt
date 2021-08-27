@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import 'package:hunt_app/contribute/form.dart';
-import 'package:hunt_app/leaderboard.dart';
+import 'package:hunt_app/leaderboard/leaderboard.dart';
 import 'package:hunt_app/profile/profile.dart';
 import 'package:hunt_app/explore/explore.dart';
 

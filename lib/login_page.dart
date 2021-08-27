@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import 'package:hunt_app/explore/explore.dart';
@@ -158,28 +159,9 @@ bool validateForm(GlobalKey<FormState> formKey) {
   return false;
 }
 
-String? validateEmail(String? value) {
-  if (value == null || value.isEmpty) {
-    return 'Email is required';
-  } else {
-    var re = RegExp(
-        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-    if (!re.hasMatch(value)) {
-      return 'Invalid email';
-    }
-    return null;
-  }
-}
-
-String? validatePassword(String? value) {
-  if (value == null || value.isEmpty) {
-    return 'Password is required';
-  } else {
-    return null;
-  }
-}
 
 // Frontend utils
+ValidationHelper validationHelper = ValidationHelper();
 Color mainColor = Colors.greenAccent[400]!;
 Color mainColorContrast = Colors.green[400]!;
 
@@ -247,7 +229,7 @@ Widget emailField(void Function(String?) onTextChanged) {
           UnderlineInputBorder(borderSide: BorderSide(color: mainColor)),
     ),
     onChanged: onTextChanged,
-    validator: validateEmail,
+    validator: validationHelper.validateEmail,
   );
 }
 
@@ -261,7 +243,7 @@ Widget passwordField(void Function(String?) onTextChanged) {
     ),
     obscureText: true,
     onChanged: onTextChanged,
-    validator: validatePassword,
+    validator: validationHelper.validatePassword,
   );
 }
 

@@ -28,6 +28,8 @@ dependencies:
   persistent_bottom_nav_bar: ^4.0.2
 
 dev_dependencies:
+  mockito:
+  build_runner:
   flutter_test:
     sdk: flutter
   pedantic: ^1.11.0

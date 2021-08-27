@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hunt_app/contribute/place_data.dart';
+import 'package:hunt_app/utils/image_helper.dart';
+import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
 import 'package:place_picker/place_picker.dart';
 import 'package:hunt_app/api_key.dart';
 import 'package:hunt_app/contribute/thankyou.dart';
@@ -35,6 +35,7 @@ class AddPlaceForm extends StatefulWidget {
 
 class AddPlaceFormState extends State<AddPlaceForm> {
   final data = PlaceData();
+  final ValidationHelper validationHelper = ValidationHelper();
   File? _image;
   final picker = ImagePicker();
   late MultiSelectChip _multiChoice;
@@ -92,40 +93,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     ));
   }
 
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name is required';
-    }
-    /*final nameExp = RegExp(r'^[A-Za-z ]+$');
-    if (!nameExp.hasMatch(value)) {
-      return 'Please enter only alphabetical characters';
-    }*/
-    if (value.length > 50) {
-      return 'Name is too long, use at most 50 characters';
-    }
-    return null;
-  }
-
-  String? _validateLockedDescr(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Locked description is required';
-    }
-    if (value.length > 150) {
-      return 'Locked description is too long, use at most 150 characters';
-    }
-    return null;
-  }
-
-  String? _validateUnlockedDescr(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Unlocked description is required';
-    }
-    if (value.length > 500) {
-      return 'Unlocked description is too long, use at most 500 characters';
-    }
-    return null;
-  }
-
   bool _validateImage() {
     if (_image == null) {
       _showInSnackBar('Please select an image');
@@ -177,7 +144,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              const SizedBox(height: 44),
+              SizedBox(height: 35),
               TextFormField(
                 focusNode: _name,
                 textInputAction: TextInputAction.next,
@@ -193,7 +160,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                   data.name = value!;
                   print('value of name: ' + data.name);
                 },
-                validator: _validateName,
+                validator: validationHelper.validatePlaceName,
               ),
               sizedBoxSpace,
               TextFormField(
@@ -210,7 +177,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 onSaved: (value) {
                   data.lockedDescription = value!;
                 },
-                validator: _validateLockedDescr,
+                validator: validationHelper.validateLockedDescr,
               ),
               sizedBoxSpace,
               TextFormField(
@@ -227,7 +194,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                 onSaved: (value) {
                   data.unlockedDescription = value!;
                 },
-                validator: _validateUnlockedDescr,
+                validator: validationHelper.validateUnlockedDescr,
               ),
               sizedBoxSpace,
               _multiChoice,
@@ -366,21 +333,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       setState(() {
         _image = File(pickedFile.path);
       });
-      data.imageURL = await uploadFile(_image!);
+      data.imageURL = await ImageHelper().uploadFile(_image!);
     }
   }
-}
-
-Future<String> uploadFile(File _image) async {
-  var storageReference =
-      FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
-  await storageReference.putFile(_image);
-  print('File Uploaded');
-  var returnURL = '';
-  await storageReference.getDownloadURL().then((fileURL) {
-    returnURL = fileURL;
-  });
-  return returnURL;
 }
 
 class MultiSelectChip extends StatefulWidget {

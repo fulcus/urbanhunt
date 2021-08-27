@@ -85,7 +85,7 @@ class _PlaceCardState extends State<PlaceCard> {
   void initState() {
     super.initState();
     _checkGPS();
-    displayDist();
+    _displayDist();
   }
 
   @override
@@ -93,7 +93,7 @@ class _PlaceCardState extends State<PlaceCard> {
     String description;
     Widget imageBanner;
 
-    displayDist();
+    _displayDist();
 
     if (widget.isLocked) {
       description = widget.descriptionLocked;
@@ -233,7 +233,7 @@ class _PlaceCardState extends State<PlaceCard> {
     _isGPSon = await Geolocator.isLocationServiceEnabled();
   }
 
-  Future<void> displayDist() async {
+  Future<void> _displayDist() async {
     _displayDistance = await _updateDistance();
     setState(() {});
   }
@@ -303,7 +303,7 @@ class _PlaceCardState extends State<PlaceCard> {
         } else if (widget.isLiked && !widget.isDisliked) {
           _dbUpdateLikes(-1);
         } else if (!widget.isLiked && widget.isDisliked) {
-          __dbSwapLikeDislike(false);
+          _dbSwapLikeDislike(false);
         }
 
         widget.isLiked = !widget.isLiked;
@@ -320,7 +320,7 @@ class _PlaceCardState extends State<PlaceCard> {
         if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateDislikes(1);
         } else if (widget.isLiked && !widget.isDisliked) {
-          __dbSwapLikeDislike(true);
+          _dbSwapLikeDislike(true);
         } else if (!widget.isLiked && widget.isDisliked) {
           _dbUpdateDislikes(-1);
         }
@@ -401,7 +401,7 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   // @param fromLikeToDislike == true : add dislike and remove like and vice versa
-  Future<void> __dbSwapLikeDislike(bool fromLikeToDislike) async {
+  Future<void> _dbSwapLikeDislike(bool fromLikeToDislike) async {
     var likesUpdate = fromLikeToDislike ? -1 : 1;
     var dislikesUpdate = fromLikeToDislike ? 1 : -1;
 

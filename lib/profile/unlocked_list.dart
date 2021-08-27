@@ -1,10 +1,10 @@
 
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/explore/place_card.dart';
 import 'package:hunt_app/profile/profile.dart';
+import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -219,7 +219,7 @@ class UnlockedListRow extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
-                                        image: getImage(imgPath),
+                                        image: ImageHelper().showImage(imgPath, 'assets/images/open-lock.png'),
                                         fit: BoxFit.cover)))),
                       ],
                     ),
@@ -266,14 +266,6 @@ class UnlockedListRow extends StatelessWidget {
             MaterialPageRoute<void>(builder: (context) => PlaceCard(doc, true, false, isLiked, isDisliked, _onCardClose))),
       ),
     );
-  }
-
-  ImageProvider getImage(String url) {
-    ImageProvider imageProvider = AssetImage('assets/images/open-lock.png');
-    if (url != '') {
-      imageProvider = NetworkImage(url);
-    }
-    return imageProvider;
   }
 
 
