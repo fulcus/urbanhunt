@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
-bool loading = true;
 
 class Explore extends StatefulWidget {
   @override
@@ -41,7 +40,6 @@ class _ExploreState extends State<Explore> {
       await determinePosition().then((value) {
         setState(() {
           initPosition = LatLng(value.latitude, value.longitude);
-          loading = false;
         });
         cacheLocation();
       }).catchError((Object error, StackTrace stacktrace) {
@@ -54,32 +52,11 @@ class _ExploreState extends State<Explore> {
       //if location is off
       print('last known == null');
       initPosition = await getCachedPosition();
-      loading = false;
       setState(() {
       });
       print('getLastKnown failed\n' + error.toString() + stacktrace.toString());
     });
-
-    //retrieve the user's initial position
-    // determinePosition().then((value) {
-    //   setState(() {
-    //     initPosition = LatLng(value.latitude, value.longitude);
-    //     loading = false;
-    //   });
-    // }).catchError((Object error, StackTrace stacktrace) async {
-    //   //if location is off
-    //   try {
-    //     var position = await getLastKnown();
-    //     setState(() {
-    //       initPosition = LatLng(position!.latitude, position.longitude);
-    //       loading = false;
-    //     });
-    //   } on Error catch (error) {
-    //     print('getLastKnownPos stacktrace: ' + error.stackTrace.toString());
-    //   }
-    //   print(stacktrace.toString());
-    // });
-
+    
     //retrieve all the places
     _places = db.collection('places').orderBy('name').snapshots();
 
@@ -89,6 +66,38 @@ class _ExploreState extends State<Explore> {
         .doc(userId)
         .collection('unlockedPlaces')
         .snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _places,
+        builder: (context, snapshot) {
+          return StreamBuilder<QuerySnapshot>(
+              stream: _unlockedPlaces,
+              builder: (context, snapshot2) {
+                if (snapshot.hasError || snapshot2.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData || !snapshot2.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (initPosition == null) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                return PlaceMap(
+                  places: snapshot.data!.docs,
+                  unlockedPlaces: snapshot2.data!.docs,
+                  initialPosition: initPosition!,
+                  mapController: _mapController,
+                );
+              });
+        },
+      ),
+    );
   }
 
   /// Determine the current position of the device.
@@ -102,7 +111,6 @@ class _ExploreState extends State<Explore> {
     // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      loading = false;
       // Location services are not enabled don't continue
       // accessing the position and request users of the
       // App to enable the location services.
@@ -158,41 +166,10 @@ class _ExploreState extends State<Explore> {
     prefs.setDouble('lng', (initPosition?.longitude) ?? 0.2);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _places,
-        builder: (context, snapshot) {
-          return StreamBuilder<QuerySnapshot>(
-              stream: _unlockedPlaces,
-              builder: (context, snapshot2) {
-                if (snapshot.hasError || snapshot2.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                if (!snapshot.hasData || !snapshot2.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (initPosition == null) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                return StoreMap(
-                  places: snapshot.data!.docs,
-                  unlockedPlaces: snapshot2.data!.docs,
-                  initialPosition: initPosition!,
-                  mapController: _mapController,
-                );
-              });
-        },
-      ),
-    );
-  }
 }
 
-class StoreMap extends StatefulWidget {
-  StoreMap({
+class PlaceMap extends StatefulWidget {
+  PlaceMap({
     Key? key,
     required this.places,
     required this.unlockedPlaces,
@@ -206,10 +183,10 @@ class StoreMap extends StatefulWidget {
   final Completer<GoogleMapController> mapController;
 
   @override
-  _StoreMapState createState() => _StoreMapState();
+  _PlaceMapState createState() => _PlaceMapState();
 }
 
-class _StoreMapState extends State<StoreMap> {
+class _PlaceMapState extends State<PlaceMap> {
   late Set<Marker> customMarkers;
   late BitmapDescriptor _markerIconUnlocked;
   late BitmapDescriptor _markerIconLocked;
@@ -228,59 +205,8 @@ class _StoreMapState extends State<StoreMap> {
     _setupCustomMarkers();
   }
 
-  //cache latest location
-  // Future<void> _cacheLocation() async {
-  //   //print('storing location: $_currentLat $_currentLng');
-  //   final prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     prefs.setDouble('_initLat', _currentLat);
-  //     prefs.setDouble('_initLng', _currentLng);
-  //   });
-  // }
-
-  Future<void> _setupCustomMarkers() async {
-    // create all markers with the correct starting icon (locked / unlocked)
-    customMarkers = {};
-
-    _markerIconUnlocked =
-        await _createMarkerImageFromAsset('assets/images/open-lock.png');
-    _markerIconLocked =
-        await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
-
-    for (var document in widget.places) {
-      // retrieve the place from the unlockedPlaces collection, if present
-      var current = widget.unlockedPlaces
-          .where((element) => element.id == document.id)
-          .toList();
-
-      var isLocked = current.isEmpty;
-
-      customMarkers.add(Marker(
-        markerId: MarkerId(document.id),
-        icon: isLocked ? _markerIconLocked : _markerIconUnlocked,
-        position: LatLng(
-          document['location'].latitude as double,
-          document['location'].longitude as double,
-        ),
-        onTap: () {
-          _onMarkerTap(document);
-        },
-      ));
-    }
-  }
-
-  Future<BitmapDescriptor> _createMarkerImageFromAsset(String iconPath) async {
-    return await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(), iconPath);
-  }
-
   @override
   Widget build(BuildContext context) {
-    // if (loading) {
-    //   return Center(
-    //     child: CircularProgressIndicator(),
-    //   );
-    // }
 
     Widget gmap = GoogleMap(
       initialCameraPosition: CameraPosition(
@@ -337,12 +263,48 @@ class _StoreMapState extends State<StoreMap> {
     return Stack(children: children);
   }
 
+  Future<void> _setupCustomMarkers() async {
+    // create all markers with the correct starting icon (locked / unlocked)
+    customMarkers = {};
+
+    _markerIconUnlocked =
+        await _createMarkerImageFromAsset('assets/images/open-lock.png');
+    _markerIconLocked =
+        await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
+
+    for (var document in widget.places) {
+      // retrieve the place from the unlockedPlaces collection, if present
+      var current = widget.unlockedPlaces
+          .where((element) => element.id == document.id)
+          .toList();
+
+      var isLocked = current.isEmpty;
+
+      customMarkers.add(Marker(
+        markerId: MarkerId(document.id),
+        icon: isLocked ? _markerIconLocked : _markerIconUnlocked,
+        position: LatLng(
+          document['location'].latitude as double,
+          document['location'].longitude as double,
+        ),
+        onTap: () {
+          _onMarkerTap(document);
+        },
+      ));
+    }
+  }
+
+  Future<BitmapDescriptor> _createMarkerImageFromAsset(String iconPath) async {
+    return await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(), iconPath);
+  }
+  
   void _updateCameraInfo(CameraPosition cameraPosition) {
     _currentCameraBearing = cameraPosition.bearing;
     _currentCameraTilt = cameraPosition.tilt;
     _currentLat = cameraPosition.target.latitude;
     _currentLng = cameraPosition.target.longitude;
-    // _cacheLocation();
+    // cacheLocation();
     _currentZoom = cameraPosition.zoom;
     setState(() {});
   }

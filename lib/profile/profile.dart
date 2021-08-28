@@ -64,8 +64,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 var url = snapshot.data!.docs[0].get('imageURL').toString();
-                var username = snapshot.data!.docs[0].get('username').toString();
-                var countryName = snapshot.data!.docs[0].get('country').toString();
+                var username =
+                    snapshot.data!.docs[0].get('username').toString();
+                var countryName =
+                    snapshot.data!.docs[0].get('country').toString();
 
                 return Container(
                   color: Colors.white,
@@ -84,8 +86,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                       fit: StackFit.loose,
                                       children: <Widget>[
                                         Row(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: <Widget>[
                                             Container(
                                                 width: 140.0,
@@ -93,19 +97,24 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                     image: DecorationImage(
-                                                      image: imageHelper.showImage(url, 'assets/images/as.png'),
+                                                      image: imageHelper.showImage(
+                                                          url,
+                                                          'assets/images/as.png'),
                                                       fit: BoxFit.cover,
                                                     )))
                                           ],
                                         ),
                                         Padding(
-                                            padding: EdgeInsets.only(top: 90.0, right: 100.0),
+                                            padding: EdgeInsets.only(
+                                                top: 90.0, right: 100.0),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: <Widget>[
                                                 FloatingActionButton(
                                                   child: CircleAvatar(
-                                                    backgroundColor: Colors.blueAccent,
+                                                    backgroundColor:
+                                                        Colors.blueAccent,
                                                     radius: 25.0,
                                                     child: Icon(
                                                       Icons.camera_alt,
@@ -115,7 +124,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   heroTag: 'btn1',
                                                   onPressed: () async => {
                                                     await getImage(),
-                                                    await imageHelper.uploadImage(_image!, _myUser)
+                                                    await imageHelper
+                                                        .uploadImage(
+                                                            _image!, _myUser)
                                                   },
                                                 )
                                               ],
@@ -137,18 +148,21 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 10.0),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               Text(
                                                 'Personal Information',
                                                 style: TextStyle(
                                                     fontSize: 18.0,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -159,23 +173,27 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               Text(
                                                 'Name',
                                                 style: TextStyle(
                                                     fontSize: 16.0,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             ],
                                           ),
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               _status
@@ -193,23 +211,29 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           Flexible(
                                               child: TextFormField(
-                                                key: _nameFormKey,
-                                                controller: _nameController..text = username,
-                                                decoration: const InputDecoration(
-                                                  hintText: 'Enter Your Name',
-                                                ),
-                                                enabled: !_status,
-                                                autofocus: !_status,
-                                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                onChanged: (name) => {
-                                                  if(_nameController.text != username) {
-                                                    _isUsernameUnique(_nameController.text),
-                                                    _newName = _nameController.text,
-                                                    _onChanged = true,
-                                                  }
-                                                },
-                                                validator: _validateName,
-                                            )),
+                                            key: _nameFormKey,
+                                            controller: _nameController
+                                              ..text = username,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Enter Your Name',
+                                            ),
+                                            enabled: !_status,
+                                            autofocus: !_status,
+                                            autovalidateMode: AutovalidateMode
+                                                .onUserInteraction,
+                                            onChanged: (name) => {
+                                              if (_nameController.text !=
+                                                  username)
+                                                {
+                                                  _isUsernameUnique(
+                                                      _nameController.text),
+                                                  _newName =
+                                                      _nameController.text,
+                                                  _onChanged = true,
+                                                }
+                                            },
+                                            validator: _validateName,
+                                          )),
                                         ],
                                       )),
                                   !_status ? _getActionButtons() : Container(),
@@ -221,14 +245,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               Text(
                                                 'Email',
                                                 style: TextStyle(
                                                     fontSize: 16.0,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -243,7 +269,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           Flexible(
                                             child: TextField(
                                               controller:
-                                                  TextEditingController()..text = _myUser.email.toString(),
+                                                  TextEditingController()
+                                                    ..text = _myUser.email
+                                                        .toString(),
                                               //email cannot be changed
                                               enabled: false,
                                             ),
@@ -252,59 +280,68 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                       )),
 
                                   //if the user is not logged with email and password, the password is not shown
-                                  if(_isEmailAuth)
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              Text(
-                                                'Password',
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight: FontWeight.bold
+                                  if (_isEmailAuth)
+                                    Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 25.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Text(
+                                                  'Password',
+                                                  style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              _enabled
-                                                  ? _getEditIcon2()
-                                                  : Container(),
-                                            ],
-                                          )
-                                        ],
-                                      )),
-                                  if(_isEmailAuth)
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 2.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Flexible(
-                                            child: TextFormField(
-                                              key: _pswFormKey,
-                                              controller: TextEditingController()..text = '**********',
-                                              obscureText: true,
-                                              enabled: !_enabled,
-                                              autofocus: !_enabled,
-                                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                                              onChanged: (password) => _newPassword = password,
-                                              validator: ValidationHelper().validatePassword,
+                                              ],
                                             ),
-                                          ),
-                                        ],
-                                      )),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                _enabled
+                                                    ? _getEditIcon2()
+                                                    : Container(),
+                                              ],
+                                            )
+                                          ],
+                                        )),
+                                  if (_isEmailAuth)
+                                    Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 2.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            Flexible(
+                                              child: TextFormField(
+                                                key: _pswFormKey,
+                                                controller:
+                                                    TextEditingController()
+                                                      ..text = '**********',
+                                                obscureText: true,
+                                                enabled: !_enabled,
+                                                autofocus: !_enabled,
+                                                autovalidateMode:
+                                                    AutovalidateMode
+                                                        .onUserInteraction,
+                                                onChanged: (password) =>
+                                                    _newPassword = password,
+                                                validator: ValidationHelper()
+                                                    .validatePassword,
+                                              ),
+                                            ),
+                                          ],
+                                        )),
                                   !_enabled ? _getActionButtons() : Container(),
 
                                   Padding(
@@ -314,15 +351,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               Text(
                                                 'Country',
                                                 style: TextStyle(
                                                     fontSize: 16.0,
-                                                    fontWeight: FontWeight.bold
-                                                ),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             ],
                                           ),
@@ -336,9 +374,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           Flexible(
                                             child: TextField(
-                                              controller: TextEditingController()..text = countryName,
+                                              controller:
+                                                  TextEditingController()
+                                                    ..text = countryName,
                                               decoration: const InputDecoration(
-                                                  hintText: 'Enter your Country'),
+                                                  hintText:
+                                                      'Enter your Country'),
                                               enabled: false,
                                               autofocus: !_status,
                                             ),
@@ -346,7 +387,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           GestureDetector(
                                             child: CircleAvatar(
                                               backgroundColor:
-                                              Colors.transparent,
+                                                  Colors.transparent,
                                               radius: 14.0,
                                               child: Icon(
                                                 Icons.arrow_drop_down,
@@ -369,31 +410,39 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                       padding: EdgeInsets.only(
                                           left: 25.0, right: 25.0, top: 25.0),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               Text(
                                                 'My Unlocked Places',
                                                 style: TextStyle(
                                                     fontSize: 18.0,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             ],
                                           ),
                                           Column(
-                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               FloatingActionButton(
                                                 heroTag: 'btn2',
-                                                onPressed: () => Navigator.push(context,
-                                                    MaterialPageRoute<void>(builder: (context) => UnlockedList())),
+                                                onPressed: () => Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute<void>(
+                                                        builder: (context) =>
+                                                            UnlockedList())),
                                                 child: CircleAvatar(
-                                                  backgroundColor: Colors.blueAccent,
+                                                  backgroundColor:
+                                                      Colors.blueAccent,
                                                   radius: 25.0,
                                                   child: Icon(
                                                     Icons.lock_open,
@@ -404,8 +453,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                             ],
                                           )
                                         ],
-                                      )
-                                  ),
+                                      )),
 
                                   //LOGOUT button
                                   Padding(
@@ -418,20 +466,26 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                               child: Container(
                                                 width: 100.0,
                                                 decoration: BoxDecoration(
-                                                    border: Border.all(color: Colors.black87),
-                                                    borderRadius: BorderRadius.all(Radius.circular(20))
-                                                ),
+                                                    border: Border.all(
+                                                        color: Colors.black87),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
                                                 child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
                                                   children: [
                                                     SizedBox(width: 6.0),
-                                                    Icon(Icons.exit_to_app, color: Colors.black87),
+                                                    Icon(Icons.exit_to_app,
+                                                        color: Colors.black87),
                                                     SizedBox(width: 4.0),
                                                     Text(
                                                       'Logout',
                                                       style: TextStyle(
                                                         color: Colors.black87,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         fontSize: 18.0,
                                                       ),
                                                     ),
@@ -439,11 +493,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                               ),
                                               onTap: () {
-                                                Navigator.of(context, rootNavigator: true)
-                                                    .pushReplacement(MaterialPageRoute<void>
-                                                  (builder: (context) => LoginPage()));
-                                              }
-                                          )
+                                                Navigator.of(context,
+                                                        rootNavigator: true)
+                                                    .pushReplacement(
+                                                        MaterialPageRoute<void>(
+                                                            builder: (context) =>
+                                                                LoginPage()));
+                                              })
                                         ],
                                       )),
                                 ],
@@ -479,7 +535,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   void _isEmailAuthProvider() {
     var providerId = _myUser.providerData[0].providerId;
 
-    if(providerId != 'password') {
+    if (providerId != 'password') {
       _isEmailAuth = false;
     }
   }
@@ -487,19 +543,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   Future<void> _updateCountry(String country) async {
     var data = <String, dynamic>{'country': country};
 
-    return await db
-        .collection('users')
-        .doc(_myUser.uid)
-        .update(data);
+    return await db.collection('users').doc(_myUser.uid).update(data);
   }
 
   Future<void> _updateUsername(String username) async {
     var data = <String, dynamic>{'username': username};
 
-    return await db
-        .collection('users')
-        .doc(_myUser.uid)
-        .update(data);
+    return await db.collection('users').doc(_myUser.uid).update(data);
   }
 
   String? _validateName(String? value) {
@@ -523,10 +573,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _isUsernameUnique(String name) async {
-    final username = await db
-        .collection('users')
-        .where('username', isEqualTo: name)
-        .get();
+    final username =
+        await db.collection('users').where('username', isEqualTo: name).get();
 
     username.docs.isEmpty ? _isUnique = true : _isUnique = false;
   }
@@ -534,11 +582,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   Future<void> _changePassword(String password) async {
     await _myUser.updatePassword(password).then((_) {
       print('Successfully changed password');
-    }).catchError((Object error){
-        if(error is FirebaseAuthException) {
-          if(error.code == 'requires-recent-login') {
-            _retrieveOldPassword();
-            var credential = EmailAuthProvider.credential(email: _myUser.email!, password: _oldPassword);
+    }).catchError((Object error) {
+      if (error is FirebaseAuthException) {
+        if (error.code == 'requires-recent-login') {
+          _retrieveOldPassword();
+          var credential = EmailAuthProvider.credential(
+              email: _myUser.email!, password: _oldPassword);
 
           _myUser
               .reauthenticateWithCredential(credential)
@@ -564,31 +613,29 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     var controller = TextEditingController();
 
     OneContext().showDialog<void>(
-        builder: (_) =>  AlertDialog(
-          title: Text('You have to re-authenticate to change the password'),
-          content: TextFormField(
-            decoration: const InputDecoration(
-                hintText: 'Enter your password'),
-            controller: controller,
-            obscureText: true,
-            enabled: true,
-          ),
-          actions: [
-            ElevatedButton(
-              child: Text('Submit'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green,
-                textStyle: TextStyle(color: Colors.white),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
-              ),
-              onPressed: () => _oldPassword = controller.value.text,
-            )
-          ],
+      builder: (_) => AlertDialog(
+        title: Text('You have to re-authenticate to change the password'),
+        content: TextFormField(
+          decoration: const InputDecoration(hintText: 'Enter your password'),
+          controller: controller,
+          obscureText: true,
+          enabled: true,
         ),
+        actions: [
+          ElevatedButton(
+            child: Text('Submit'),
+            style: ElevatedButton.styleFrom(
+              primary: Colors.green,
+              textStyle: TextStyle(color: Colors.white),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+            ),
+            onPressed: () => _oldPassword = controller.value.text,
+          )
+        ],
+      ),
     );
   }
-
 
   @override
   void dispose() {
@@ -609,41 +656,40 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               padding: EdgeInsets.only(right: 10.0),
               child: Container(
                   child: ElevatedButton(
-                    child: Text('Save'),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.green,
-                      textStyle: TextStyle(color: Colors.white),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)),
-                    ),
-                    onPressed: () {
-                      if(_isNameButton) {
-                        _onChanged = false;
-                        final form = _nameFormKey.currentState!;
+                child: Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.green,
+                  textStyle: TextStyle(color: Colors.white),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                ),
+                onPressed: () {
+                  if (_isNameButton) {
+                    _onChanged = false;
+                    final form = _nameFormKey.currentState!;
 
-                        if(form.validate() && _isUnique) {
-                          if(_newName.isNotEmpty) {
-                            _updateUsername(_newName);
-                          }
-                          setState(() {
-                            _status = true;
-                          });
-                        }
+                    if (form.validate() && _isUnique) {
+                      if (_newName.isNotEmpty) {
+                        _updateUsername(_newName);
                       }
-                      else {
-                        final form = _pswFormKey.currentState!;
+                      setState(() {
+                        _status = true;
+                      });
+                    }
+                  } else {
+                    final form = _pswFormKey.currentState!;
 
-                        if(form.validate()) {
-                          if(_newPassword.isNotEmpty) {
-                            _changePassword(_newPassword);
-                          }
-                          setState(() {
-                            _enabled = true;
-                          });
-                        }
+                    if (form.validate()) {
+                      if (_newPassword.isNotEmpty) {
+                        _changePassword(_newPassword);
                       }
-                        //FocusScope.of(context).requestFocus(FocusNode());
-                    },
+                      setState(() {
+                        _enabled = true;
+                      });
+                    }
+                  }
+                  //FocusScope.of(context).requestFocus(FocusNode());
+                },
               )),
             ),
             flex: 2,
@@ -653,19 +699,19 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               padding: EdgeInsets.only(left: 10.0),
               child: Container(
                   child: ElevatedButton(
-                    child: Text('Cancel'),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      textStyle: TextStyle(color: Colors.white),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.0)),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isNameButton ? _status = true : _enabled = true;
-                        //FocusScope.of(context).requestFocus(FocusNode());
-                      });
-                    },
+                child: Text('Cancel'),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red,
+                  textStyle: TextStyle(color: Colors.white),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isNameButton ? _status = true : _enabled = true;
+                    //FocusScope.of(context).requestFocus(FocusNode());
+                  });
+                },
               )),
             ),
             flex: 2,
@@ -695,7 +741,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       },
     );
   }
-
 
   Widget _getEditIcon2() {
     return GestureDetector(

@@ -85,8 +85,11 @@ class _PlaceCardState extends State<PlaceCard> {
   @override
   void initState() {
     super.initState();
-    _checkGPS();
-    _displayDist();
+    _checkGPS().then((isGPSon) {
+      if (isGPSon) {
+        _displayDist();
+      }
+    });
   }
 
   @override
@@ -94,7 +97,11 @@ class _PlaceCardState extends State<PlaceCard> {
     String description;
     Widget imageBanner;
 
-    // _displayDist();
+    if (_isGPSon) {
+      _displayDist();
+    } else {
+      print('GPS off');
+    }
 
     if (widget.isLocked) {
       description = widget.descriptionLocked;
@@ -157,24 +164,21 @@ class _PlaceCardState extends State<PlaceCard> {
               SizedBox(height: 6.0),
               Row(
                 children: [
-                  Column(
-                    children: [
-                      // Open directions in Google Maps
-                      GmapButton(
-                        latitude: widget.latitude,
-                        longitude: widget.longitude,
-                      )
-                    ]
-                  ),
+                  Column(children: [
+                    // Open directions in Google Maps
+                    GmapButton(
+                      latitude: widget.latitude,
+                      longitude: widget.longitude,
+                    )
+                  ]),
                   SizedBox(width: 30.0),
-                  Column(
-                    children: [
-                      // Share GPS position with a friend
-                      ShareButton(
-                        latitude: widget.latitude,
-                        longitude: widget.longitude,
-                      )
-                    ])
+                  Column(children: [
+                    // Share GPS position with a friend
+                    ShareButton(
+                      latitude: widget.latitude,
+                      longitude: widget.longitude,
+                    )
+                  ])
                 ],
               ),
               // Sep
@@ -199,15 +203,15 @@ class _PlaceCardState extends State<PlaceCard> {
               // Sep
               SizedBox(height: 4.0),
               // Distance
-              if(_isGPSon)
-              Text(
-                _displayDistance,
-                style: TextStyle(
-                  fontSize: 10.0,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.black45,
+              if (_isGPSon)
+                Text(
+                  _displayDistance,
+                  style: TextStyle(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black45,
+                  ),
                 ),
-              ),
               SizedBox(height: 4.0),
               // Sep
               SizedBox(height: 8.0),
@@ -247,8 +251,9 @@ class _PlaceCardState extends State<PlaceCard> {
     }
   }
 
-  Future<void> _checkGPS() async {
+  Future<bool> _checkGPS() async {
     _isGPSon = await Geolocator.isLocationServiceEnabled();
+    return _isGPSon;
   }
 
   Future<void> _displayDist() async {
@@ -257,21 +262,17 @@ class _PlaceCardState extends State<PlaceCard> {
   }
 
   Future<String> _updateDistance() async {
-    var lat = 0.0;
-    var lng = 0.0;
     var distanceString = '';
 
     return await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best)
         .then((pos) {
-      lat = pos.latitude;
-      lng = pos.longitude;
-
-      distanceString = _computeDistance(lat, lng);
+      distanceString = _computeDistance(pos.latitude, pos.longitude);
       print('in location on $distanceString');
       return distanceString;
     }).catchError((Object error, StackTrace stacktrace) async {
       //if location is off use don't display anything
+      print('permission denied');
       return '';
     });
   }
@@ -309,9 +310,11 @@ class _PlaceCardState extends State<PlaceCard> {
           // todo display "you are too far"
         }
       });
+    }).catchError((Object error, StackTrace stacktrace) {
+      //if location is off use don't display anything
+      print('location is off, to unlock turn it on');
     });
   }
-
 
   void like() {
     if (!widget.isLocked) {
@@ -656,7 +659,6 @@ class GmapButton extends StatelessWidget {
   }
 }
 
-
 class ShareButton extends StatelessWidget {
   const ShareButton({
     Key? key,
@@ -682,10 +684,9 @@ class ShareButton extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Share.share('Join me here! https://maps.google.com/?q=$latitude,$longitude');
+        Share.share(
+            'Join me here! https://maps.google.com/?q=$latitude,$longitude');
       },
     );
   }
-
 }
-
