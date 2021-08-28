@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Unlock distance threshold
@@ -154,10 +155,27 @@ class _PlaceCardState extends State<PlaceCard> {
               ),
               // Sep
               SizedBox(height: 6.0),
-              // Open directions in Google Maps
-              GmapButton(
-                latitude: widget.latitude,
-                longitude: widget.longitude,
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      // Open directions in Google Maps
+                      GmapButton(
+                        latitude: widget.latitude,
+                        longitude: widget.longitude,
+                      )
+                    ]
+                  ),
+                  SizedBox(width: 30.0),
+                  Column(
+                    children: [
+                      // Share GPS position with a friend
+                      ShareButton(
+                        latitude: widget.latitude,
+                        longitude: widget.longitude,
+                      )
+                    ])
+                ],
               ),
               // Sep
               SizedBox(height: 6.0),
@@ -637,3 +655,37 @@ class GmapButton extends StatelessWidget {
     }*/
   }
 }
+
+
+class ShareButton extends StatelessWidget {
+  const ShareButton({
+    Key? key,
+    required this.latitude,
+    required this.longitude,
+  }) : super(key: key);
+
+  final double latitude;
+  final double longitude;
+
+  @override
+  Widget build(BuildContext context) {
+    var color = Colors.blue[600] ?? Colors.blue;
+
+    return GestureDetector(
+      child: CircleAvatar(
+        backgroundColor: color,
+        radius: 18.0,
+        child: Icon(
+          Icons.share,
+          color: Colors.white,
+          size: 18.0,
+        ),
+      ),
+      onTap: () {
+        Share.share('Join me here! https://maps.google.com/?q=$latitude,$longitude');
+      },
+    );
+  }
+
+}
+
