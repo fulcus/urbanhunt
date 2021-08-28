@@ -10,7 +10,7 @@ import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import 'package:hunt_app/explore/explore.dart';
 import 'package:hunt_app/navbar.dart';
-import 'package:hunt_app/network.dart';
+import 'package:hunt_app/utils/network.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);

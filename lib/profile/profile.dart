@@ -545,16 +545,14 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               .then((_) => print('Re-authenticated'))
               .catchError((Object error) {
             if (error is FirebaseAuthException) {
-              if (error.code == 'wrong-password') {
-                //TODO show UI
-                print('The password is wrong');
-              }
+              //TODO show UI
+              print(error.message);
+            } else {
+              print(error.toString());
             }
           });
-        } else if (error.code == 'weak-password') {
-          print('The password is too weak. Please insert another one.');
         } else {
-          print('Please try again.' + error.toString());
+          print(error.message);
         }
       } else {
         print("Password can't be changed" + error.toString());
