@@ -94,7 +94,7 @@ class _PlaceCardState extends State<PlaceCard> {
     String description;
     Widget imageBanner;
 
-    _displayDist();
+    // _displayDist();
 
     if (widget.isLocked) {
       description = widget.descriptionLocked;

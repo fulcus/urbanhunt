@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hunt_app/explore/place_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final db = FirebaseFirestore.instance;
 final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -22,42 +23,62 @@ class _ExploreState extends State<Explore> {
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();
 
-  double _initLat = 0.0;
-  double _initLng = 0.0;
+  LatLng? initPosition;
 
   @override
   void initState() {
     super.initState();
 
-    //retrieve the user's initial position
-    _determinePosition().then((value) {
-      setState(() {
-        _initLat = value.latitude;
-        _initLng = value.longitude;
-        loading = false;
+    // first initialize initPosition using last known because it's faster
+    getLastKnown().then((pos) async {
+      // if location is off then
+      if (pos == null) {
+        throw Exception('pos was null');
+      }
+
+      // then determine exact position,
+      // if location is off (or other errors) it uses the last known previously set
+      await determinePosition().then((value) {
+        setState(() {
+          initPosition = LatLng(value.latitude, value.longitude);
+          loading = false;
+        });
+        cacheLocation();
+      }).catchError((Object error, StackTrace stacktrace) {
+        //if location is off and
+        print('determine pos failed\n' +
+            error.toString() +
+            stacktrace.toString());
       });
     }).catchError((Object error, StackTrace stacktrace) async {
       //if location is off
-      try {
-        var position = await Geolocator.getLastKnownPosition();
-
-        setState(() {
-          _initLat = position!.latitude;
-          _initLng = position.longitude;
-          loading = false;
-        });
-      } on Error catch(error) {
-        print('getLastKnownPos stacktrace: ' + error.stackTrace.toString());
-      }
-      // await SharedPreferences.getInstance().then((prefs) => setState(() {
-      //       _initLat = (prefs.getDouble('_initLat') ?? 0.1);
-      //       _initLng = (prefs.getDouble('_initLng') ?? 0.1);
-      //       loading = false;
-      //     }));
-      print('initializing locations from cache: $_initLat $_initLng');
-      print(stacktrace.toString());
-      return null;
+      print('last known == null');
+      initPosition = await getCachedPosition();
+      loading = false;
+      setState(() {
+      });
+      print('getLastKnown failed\n' + error.toString() + stacktrace.toString());
     });
+
+    //retrieve the user's initial position
+    // determinePosition().then((value) {
+    //   setState(() {
+    //     initPosition = LatLng(value.latitude, value.longitude);
+    //     loading = false;
+    //   });
+    // }).catchError((Object error, StackTrace stacktrace) async {
+    //   //if location is off
+    //   try {
+    //     var position = await getLastKnown();
+    //     setState(() {
+    //       initPosition = LatLng(position!.latitude, position.longitude);
+    //       loading = false;
+    //     });
+    //   } on Error catch (error) {
+    //     print('getLastKnownPos stacktrace: ' + error.stackTrace.toString());
+    //   }
+    //   print(stacktrace.toString());
+    // });
 
     //retrieve all the places
     _places = db.collection('places').orderBy('name').snapshots();
@@ -74,7 +95,7 @@ class _ExploreState extends State<Explore> {
   ///
   /// When the location services are not enabled or permissions
   /// are denied the `Future` will return an error.
-  Future<Position> _determinePosition() async {
+  Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -112,6 +133,31 @@ class _ExploreState extends State<Explore> {
     return await Geolocator.getCurrentPosition();
   }
 
+  Future<Position?> getLastKnown() async {
+    try {
+      var position = await Geolocator.getLastKnownPosition();
+      print('lastKnown:' + position.toString());
+      return position;
+    } on Error catch (error) {
+      print('getLastKnownPos stacktrace: ' + error.stackTrace.toString());
+    }
+  }
+
+  Future<LatLng> getCachedPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    var lat = (prefs.getDouble('lat') ?? 0.1);
+    var lng = (prefs.getDouble('lng') ?? 0.1);
+    return LatLng(lat, lng);
+  }
+
+  //cache latest location
+  Future<void> cacheLocation() async {
+    //print('storing location: $_currentLat $_currentLng');
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('lat', (initPosition?.latitude) ?? 0.2);
+    prefs.setDouble('lng', (initPosition?.longitude) ?? 0.2);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,10 +175,13 @@ class _ExploreState extends State<Explore> {
                     child: CircularProgressIndicator(),
                   );
                 }
+                if (initPosition == null) {
+                  return Center(child: CircularProgressIndicator());
+                }
                 return StoreMap(
                   places: snapshot.data!.docs,
                   unlockedPlaces: snapshot2.data!.docs,
-                  initialPosition: LatLng(_initLat, _initLng),
+                  initialPosition: initPosition!,
                   mapController: _mapController,
                 );
               });
@@ -227,11 +276,11 @@ class _StoreMapState extends State<StoreMap> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+    // if (loading) {
+    //   return Center(
+    //     child: CircularProgressIndicator(),
+    //   );
+    // }
 
     Widget gmap = GoogleMap(
       initialCameraPosition: CameraPosition(
