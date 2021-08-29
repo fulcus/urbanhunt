@@ -121,7 +121,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       color: Colors.white,
                                                     ),
                                                   ),
-                                                  heroTag: 'btn1',
                                                   onPressed: () async => {
                                                     await getImage(),
                                                     await imageHelper
@@ -433,13 +432,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 MainAxisAlignment.end,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
-                                              FloatingActionButton(
-                                                heroTag: 'btn2',
-                                                onPressed: () => Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute<void>(
-                                                        builder: (context) =>
-                                                            UnlockedList())),
+                                              GestureDetector(
+                                                onTap: () => Navigator.push(context,
+                                                    MaterialPageRoute<void>(builder: (context) => UnlockedList())),
                                                 child: CircleAvatar(
                                                   backgroundColor:
                                                       Colors.blueAccent,
@@ -493,12 +488,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                               ),
                                               onTap: () {
-                                                Navigator.of(context,
-                                                        rootNavigator: true)
-                                                    .pushReplacement(
-                                                        MaterialPageRoute<void>(
-                                                            builder: (context) =>
-                                                                LoginPage()));
+                                                Navigator.of(context, rootNavigator: true)
+                                                    .pushReplacement(MaterialPageRoute<void>(
+                                                            builder: (context) => LoginPage()));
                                               })
                                         ],
                                       )),

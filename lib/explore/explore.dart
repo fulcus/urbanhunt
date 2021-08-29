@@ -14,10 +14,11 @@ final userId = FirebaseAuth.instance.currentUser!.uid;
 
 class Explore extends StatefulWidget {
   @override
-  _ExploreState createState() => _ExploreState();
+  ExploreState createState() => ExploreState();
 }
 
-class _ExploreState extends State<Explore> {
+@visibleForTesting
+class ExploreState extends State<Explore> {
   late Stream<QuerySnapshot> _places;
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();
