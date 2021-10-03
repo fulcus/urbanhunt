@@ -248,7 +248,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       form.save();
 
       var data = PlaceData(name!, lockedDescription!, unlockedDescription!,
-          pickedLocation!, imageURL!, categories!);
+          imageURL!, categories!, pickedLocation!);
       data.upload();
 
       print('Added place');

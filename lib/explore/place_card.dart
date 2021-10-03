@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hunt_app/contribute/place_data.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,57 +21,19 @@ final userId = FirebaseAuth.instance.currentUser!.uid;
 final Map<String, Color> categoryColors = {};
 
 class PlaceCard extends StatefulWidget {
-  late DocumentSnapshot document;
-  late bool fullscreen;
-  late bool isLocked;
-  late bool isLiked;
-  late bool isDisliked;
+  // new card should be created for each place
+  // isLocked, isLiked, isDisliked are actually part of state
 
-  late String placeId;
-  late String name;
-  late String imagePath;
-
-  late Map<String, dynamic> address;
-  late double latitude;
-  late double longitude;
-
-  late List<String> categories;
-  late String descriptionUnlocked;
-  late String descriptionLocked;
-
-  late int likes;
-  late int dislikes;
-
+  DocumentSnapshot document;
+  PlaceData place;
+  bool fullscreen, isLocked, isLiked, isDisliked;
   late void Function() onCardClose;
 
-  PlaceCard(DocumentSnapshot document, bool fullscreen, bool isLocked,
-      bool isLiked, bool isDisliked, void Function() onCardClose,
-      {Key? key})
-      : super(key: key) {
-    this.document = document;
-
-    this.fullscreen = fullscreen;
-
-    this.isLocked = isLocked;
-    this.isLiked = isLiked;
-    this.isDisliked = isDisliked;
-
-    this.onCardClose = onCardClose;
-
-    placeId = document.id;
-    name = document['name'] as String;
-    address = document['address'] as Map<String, dynamic>;
-    categories = (document['categories'] as List)
-        .map((dynamic e) => e.toString())
-        .toList();
-    descriptionLocked = document['lockedDescr'] as String;
-    descriptionUnlocked = document['unlockedDescr'] as String;
-    latitude = document['location'].latitude as double;
-    longitude = document['location'].longitude as double;
-    imagePath = document['imgpath'] as String;
-    likes = document['likes'] as int;
-    dislikes = document['dislikes'] as int;
-  }
+  PlaceCard(this.document, this.isLocked, this.isLiked, this.isDisliked,
+      this.onCardClose,
+      {this.fullscreen = false, Key? key})
+      : place = PlaceData.fromSnapshot(document),
+        super(key: key);
 
   @override
   _PlaceCardState createState() => _PlaceCardState();
@@ -104,10 +67,10 @@ class _PlaceCardState extends State<PlaceCard> {
     }
 
     if (widget.isLocked) {
-      description = widget.descriptionLocked;
+      description = widget.place.lockedDescription;
       imageBanner = imageBannerLocked();
     } else {
-      description = widget.descriptionUnlocked;
+      description = widget.place.unlockedDescription;
       imageBanner = imageBannerUnlocked();
     }
 
@@ -138,7 +101,7 @@ class _PlaceCardState extends State<PlaceCard> {
                   GestureDetector(onTap: like, child: likeIcon),
                   SizedBox(width: 4.0),
                   Text(
-                    (widget.likes + (widget.isLiked ? 1 : 0)).toString(),
+                    (widget.place.likes + (widget.isLiked ? 1 : 0)).toString(),
                     style: TextStyle(
                         fontSize: 11.0,
                         fontWeight: FontWeight.w600,
@@ -148,7 +111,8 @@ class _PlaceCardState extends State<PlaceCard> {
                   GestureDetector(onTap: dislike, child: dislikeIcon),
                   SizedBox(width: 4.0),
                   Text(
-                    (widget.dislikes + (widget.isDisliked ? 1 : 0)).toString(),
+                    (widget.place.dislikes + (widget.isDisliked ? 1 : 0))
+                        .toString(),
                     style: TextStyle(
                         fontSize: 11.0,
                         fontWeight: FontWeight.w600,
@@ -167,16 +131,16 @@ class _PlaceCardState extends State<PlaceCard> {
                   Column(children: [
                     // Open directions in Google Maps
                     GmapButton(
-                      latitude: widget.latitude,
-                      longitude: widget.longitude,
+                      latitude: widget.place.latitude,
+                      longitude: widget.place.longitude,
                     )
                   ]),
                   SizedBox(width: 30.0),
                   Column(children: [
                     // Share GPS position with a friend
                     ShareButton(
-                      latitude: widget.latitude,
-                      longitude: widget.longitude,
+                      latitude: widget.place.latitude,
+                      longitude: widget.place.longitude,
                     )
                   ])
                 ],
@@ -185,7 +149,7 @@ class _PlaceCardState extends State<PlaceCard> {
               SizedBox(height: 6.0),
               // Name
               Text(
-                widget.name,
+                widget.place.name,
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.w900,
@@ -195,7 +159,7 @@ class _PlaceCardState extends State<PlaceCard> {
               SizedBox(height: 4.0),
               // Address
               Text(
-                widget.address['street'] as String,
+                widget.place.street,
                 style: TextStyle(
                   fontSize: 14.0,
                 ),
@@ -251,6 +215,11 @@ class _PlaceCardState extends State<PlaceCard> {
     }
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<bool> _checkGPS() async {
     _isGPSon = await Geolocator.isLocationServiceEnabled();
     return _isGPSon;
@@ -281,8 +250,8 @@ class _PlaceCardState extends State<PlaceCard> {
     var _distance = 0.0;
     var _distanceUnit = ' km';
 
-    var _meterDistance = Geolocator.distanceBetween(
-        startLatitude, startLongitude, widget.latitude, widget.longitude);
+    var _meterDistance = Geolocator.distanceBetween(startLatitude,
+        startLongitude, widget.place.latitude, widget.place.longitude);
 
     if (_meterDistance > 999.0) {
       _distance = _meterDistance / 1000.0;
@@ -299,8 +268,8 @@ class _PlaceCardState extends State<PlaceCard> {
     Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((pos) {
       setState(() {
-        var posDistance = Geolocator.distanceBetween(
-            pos.latitude, pos.longitude, widget.latitude, widget.longitude);
+        var posDistance = Geolocator.distanceBetween(pos.latitude,
+            pos.longitude, widget.place.latitude, widget.place.longitude);
 
         if (widget.isLocked && posDistance < UNLOCK_RANGE_METERS) {
           widget.isLocked = false;
@@ -359,12 +328,12 @@ class _PlaceCardState extends State<PlaceCard> {
   Future<void> _dbUpdateLikes(int likesIncrement) async {
     var liked = likesIncrement > 0 ? true : false;
 
-    var placeRef = db.collection('places').doc(widget.placeId);
+    var placeRef = db.collection('places').doc(widget.place.id);
     var unlockedPlaceRef = db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
-        .doc(widget.placeId);
+        .doc(widget.place.id);
 
     return db
         .runTransaction((transaction) async {
@@ -391,12 +360,12 @@ class _PlaceCardState extends State<PlaceCard> {
   Future<void> _dbUpdateDislikes(int dislikesIncrement) async {
     var disliked = dislikesIncrement > 0 ? true : false;
 
-    var placeRef = db.collection('places').doc(widget.placeId);
+    var placeRef = db.collection('places').doc(widget.place.id);
     var unlockedPlaceRef = db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
-        .doc(widget.placeId);
+        .doc(widget.place.id);
 
     return db
         .runTransaction((transaction) async {
@@ -418,7 +387,7 @@ class _PlaceCardState extends State<PlaceCard> {
         })
         .then((value) => print('Dislikes count updated to $value'))
         .catchError(
-            (Error error) => print('Failed to update dislikes: $error'));
+            (Object error) => print('Failed to update dislikes: $error'));
   }
 
   // @param fromLikeToDislike == true : add dislike and remove like and vice versa
@@ -426,12 +395,12 @@ class _PlaceCardState extends State<PlaceCard> {
     var likesUpdate = fromLikeToDislike ? -1 : 1;
     var dislikesUpdate = fromLikeToDislike ? 1 : -1;
 
-    var placeRef = db.collection('places').doc(widget.placeId);
+    var placeRef = db.collection('places').doc(widget.place.id);
     var unlockedPlaceRef = db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
-        .doc(widget.placeId);
+        .doc(widget.place.id);
 
     return db
         .runTransaction((transaction) async {
@@ -469,7 +438,7 @@ class _PlaceCardState extends State<PlaceCard> {
         db.collection('users').doc(userId).collection('unlockedPlaces');
     var data = <String, dynamic>{'liked': false, 'disliked': false};
 
-    return await unlockedPlaces.doc(widget.placeId).set(data);
+    return await unlockedPlaces.doc(widget.place.id).set(data);
   }
 
   // Frontend
@@ -531,7 +500,7 @@ class _PlaceCardState extends State<PlaceCard> {
                 ).createShader(rect),
                 blendMode: BlendMode.darken,
                 child: Center(
-                    child: Image.network(widget.imagePath, height: 150.0)),
+                    child: Image.network(widget.place.imageURL, height: 150.0)),
               ),
               ClipRRect(
                 child: BackdropFilter(
@@ -574,7 +543,7 @@ class _PlaceCardState extends State<PlaceCard> {
           colors: [Colors.black, Colors.transparent],
         ).createShader(rect),
         blendMode: BlendMode.darken,
-        child: Image.network(widget.imagePath, height: 150.0),
+        child: Image.network(widget.place.imageURL, height: 150.0),
       ),
     );
   }
@@ -588,13 +557,13 @@ class _PlaceCardState extends State<PlaceCard> {
       color: Colors.white,
     );
 
-    for (var i = 0; i < widget.categories.length; i++) {
+    for (var i = 0; i < widget.place.categories.length; i++) {
       tags.add(Container(
         margin: EdgeInsets.only(right: 6.0),
         padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-        child: Text(widget.categories[i], style: textStyle),
+        child: Text(widget.place.categories[i], style: textStyle),
         decoration: BoxDecoration(
-          color: categoryColors[widget.categories[i]] ?? Colors.blue[300],
+          color: categoryColors[widget.place.categories[i]] ?? Colors.blue[300],
           borderRadius: BorderRadius.circular(12.0),
         ),
       ));

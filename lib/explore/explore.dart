@@ -53,11 +53,10 @@ class ExploreState extends State<Explore> {
       //if location is off
       print('last known == null');
       initPosition = await getCachedPosition();
-      setState(() {
-      });
+      setState(() {});
       print('getLastKnown failed\n' + error.toString() + stacktrace.toString());
     });
-    
+
     //retrieve all the places
     _places = db.collection('places').orderBy('name').snapshots();
 
@@ -166,7 +165,6 @@ class ExploreState extends State<Explore> {
     prefs.setDouble('lat', (initPosition?.latitude) ?? 0.2);
     prefs.setDouble('lng', (initPosition?.longitude) ?? 0.2);
   }
-
 }
 
 class PlaceMap extends StatefulWidget {
@@ -208,7 +206,6 @@ class _PlaceMapState extends State<PlaceMap> {
 
   @override
   Widget build(BuildContext context) {
-
     Widget gmap = GoogleMap(
       initialCameraPosition: CameraPosition(
         target: widget.initialPosition,
@@ -299,7 +296,7 @@ class _PlaceMapState extends State<PlaceMap> {
     return await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(), iconPath);
   }
-  
+
   void _updateCameraInfo(CameraPosition cameraPosition) {
     _currentCameraBearing = cameraPosition.bearing;
     _currentCameraTilt = cameraPosition.tilt;
@@ -339,8 +336,8 @@ class _PlaceMapState extends State<PlaceMap> {
         },
       ));
 
-      _placeCard = PlaceCard(
-          document, false, isLocked, isLiked, isDisliked, _onCardClose);
+      _placeCard =
+          PlaceCard(document, isLocked, isLiked, isDisliked, _onCardClose);
     });
   }
 
