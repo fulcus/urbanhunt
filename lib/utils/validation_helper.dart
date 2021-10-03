@@ -1,4 +1,3 @@
-
 class ValidationHelper {
 
   String? validateEmail(String? value) {
