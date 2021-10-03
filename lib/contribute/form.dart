@@ -44,7 +44,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   final ValidationHelper validationHelper = ValidationHelper();
 
   File? _image;
-  String? name, lockedDescription, unlockedDescription, imageURL;
+  String? name, lockedDescription, unlockedDescription;
   List<String>? categories;
   LocationResult? pickedLocation;
 
@@ -241,22 +241,23 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     super.dispose();
   }
 
-  void _handleSubmitted() {
+  Future<void> _handleSubmitted() async {
     final form = _formKey.currentState!;
 
     if (form.validate() && _validateImage() && _validateLocation()) {
       form.save();
 
+      var imageURL = await ImageHelper().uploadFile(_image!);
       var data = PlaceData(name!, lockedDescription!, unlockedDescription!,
-          imageURL!, categories!, pickedLocation!);
+          imageURL, categories!, pickedLocation!);
       data.upload();
 
       print('Added place');
-      print(
-          ' $name, $lockedDescription, $unlockedDescription, $pickedLocation, $imageURL, $categories');
+      print('$name, $lockedDescription, $unlockedDescription, $pickedLocation, '
+          '$categories');
       //showInSnackBar('Added Place');
 
-      // todo replace with thank you and then (on add more) replace again with new form
+      // todo creates black screen
 
       Navigator.pushReplacement<void, void>(
         _formKey.currentState!.context,
@@ -295,7 +296,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   bool _validateImage() {
-    if (_image == null || imageURL == null || imageURL!.isEmpty) {
+    if (_image == null) {
       _showInSnackBar('Please select an image');
     }
     return _image != null;
@@ -327,7 +328,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       print('No image selected.');
     } else {
       _image = File(pickedFile.path);
-      imageURL = await ImageHelper().uploadFile(_image!);
       setState(() {});
     }
   }

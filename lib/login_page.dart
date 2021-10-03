@@ -28,7 +28,7 @@ StreamBuilder redirectHomeOrLogin() {
       final hasUser = snapshot.hasData;
       if (hasUser && FirebaseAuth.instance.currentUser!.emailVerified) {
         // return BottomNavContainer();
-        return ProvidedStylesExample(menuScreenContext: context);
+        return Navbar(menuScreenContext: context);
       } else {
         return LoginPage();
       }
@@ -319,7 +319,7 @@ class _LoginPageState extends State<LoginPage> {
             if (ok) {
               pushNewScreen<void>(
                 context,
-                screen: ProvidedStylesExample(
+                screen: Navbar(
                   menuScreenContext: context,
                 ),
               );
@@ -344,7 +344,7 @@ class _LoginPageState extends State<LoginPage> {
           if (ok) {
             pushNewScreen<void>(
               context,
-              screen: ProvidedStylesExample(
+              screen: Navbar(
                 menuScreenContext: context,
               ),
             );
@@ -402,7 +402,7 @@ class _LoginPageState extends State<LoginPage> {
           if (ok) {
             pushNewScreen<void>(
               context,
-              screen: ProvidedStylesExample(
+              screen: Navbar(
                 menuScreenContext: context,
               ),
             );
@@ -554,7 +554,7 @@ class _SignupPageState extends State<SignupPage> {
             if (ok) {
               pushNewScreen<void>(
                 context,
-                screen: ProvidedStylesExample(
+                screen: Navbar(
                   menuScreenContext: context,
                 ),
               );

@@ -9,15 +9,15 @@ import 'package:hunt_app/explore/explore.dart';
 
 BuildContext? testContext;
 
-class ProvidedStylesExample extends StatefulWidget {
+class Navbar extends StatefulWidget {
   final BuildContext? menuScreenContext;
-  ProvidedStylesExample({Key? key, this.menuScreenContext}) : super(key: key);
+  Navbar({Key? key, this.menuScreenContext}) : super(key: key);
 
   @override
-  _ProvidedStylesExampleState createState() => _ProvidedStylesExampleState();
+  _NavbarState createState() => _NavbarState();
 }
 
-class _ProvidedStylesExampleState extends State<ProvidedStylesExample> {
+class _NavbarState extends State<Navbar> {
   late PersistentTabController _controller;
   late bool _hideNavBar;
 

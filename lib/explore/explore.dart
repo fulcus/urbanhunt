@@ -33,7 +33,7 @@ class ExploreState extends State<Explore> {
     getLastKnown().then((pos) async {
       // if location is off then
       if (pos == null) {
-        throw Exception('pos was null');
+        print('pos was null');
       }
 
       // then determine exact position,
