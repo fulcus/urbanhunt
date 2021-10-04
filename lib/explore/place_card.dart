@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 // Unlock distance threshold
 const double UNLOCK_RANGE_METERS = 15.0;
 
+//TODO probably they need to be local variable for testing purposes
 // Firebase db instance
 final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
@@ -593,22 +594,23 @@ class GmapButton extends StatelessWidget {
         decoration: BoxDecoration(
             border: Border.all(color: color),
             borderRadius: BorderRadius.all(Radius.circular(20))),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(width: 3.0),
-            Icon(Icons.navigation, color: color),
-            SizedBox(width: 2.0),
-            Text(
-              'Start',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w400,
-                fontSize: 15.0,
+        //child: Flexible(
+          child: Column(
+            children: [
+              SizedBox(width: 3.0),
+              Icon(Icons.navigation, color: color),
+              SizedBox(width: 2.0),
+              Text(
+                'Start',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 15.0,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        //)
       ),
       onTap: () {
         openMap(latitude, longitude);

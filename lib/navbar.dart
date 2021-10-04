@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import 'package:hunt_app/contribute/form.dart';
@@ -126,21 +127,7 @@ class _NavbarState extends State<Navbar> {
         popActionScreens: PopActionScreensType.all,
         bottomScreenMargin: 0.0,
         onWillPop: (context) async {
-          await showDialog<void>(
-            context: context!,
-            useSafeArea: true,
-            builder: (context) => Container(
-              height: 50.0,
-              width: 50.0,
-              color: Colors.white,
-              child: ElevatedButton(
-                child: Text("Close"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          );
+          SystemNavigator.pop();
           return false;
         },
         selectedTabScreenContext: (context) {

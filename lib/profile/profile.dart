@@ -450,37 +450,83 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         ],
                                       )),
 
-                                  //LOGOUT button
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
+                                  Row(
+                                    children: [
+                                      //LOGOUT button
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 25.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            GestureDetector(
+                                                child: Container(
+                                                  width: 100.0,
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.black87),
+                                                      borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(width: 6.0),
+                                                      Icon(Icons.exit_to_app,
+                                                          color: Colors.black87),
+                                                      SizedBox(width: 4.0),
+                                                      Text(
+                                                        'Logout',
+                                                        style: TextStyle(
+                                                          color: Colors.black87,
+                                                          fontWeight:
+                                                          FontWeight.bold,
+                                                          fontSize: 18.0,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                onTap: () {
+                                                  Navigator.of(context, rootNavigator: true)
+                                                      .pushAndRemoveUntil(MaterialPageRoute<void>(
+                                                      builder: (context) => LoginPage()),
+                                                        (route) => false,
+                                                  );
+                                                })
+                                          ],
+                                        )),
+
+                                    //DELETE ACCOUNT BUTTON
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         children: <Widget>[
                                           GestureDetector(
                                               child: Container(
-                                                width: 100.0,
+                                                width: 170.0,
                                                 decoration: BoxDecoration(
                                                     border: Border.all(
                                                         color: Colors.black87),
                                                     borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                20))),
+                                                    BorderRadius.all(
+                                                        Radius.circular(20))),
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.start,
+                                                  MainAxisAlignment.start,
                                                   children: [
                                                     SizedBox(width: 6.0),
-                                                    Icon(Icons.exit_to_app,
+                                                    Icon(Icons.delete_outline,
                                                         color: Colors.black87),
                                                     SizedBox(width: 4.0),
                                                     Text(
-                                                      'Logout',
+                                                      'Delete Account',
                                                       style: TextStyle(
                                                         color: Colors.black87,
                                                         fontWeight:
-                                                            FontWeight.bold,
+                                                        FontWeight.bold,
                                                         fontSize: 18.0,
                                                       ),
                                                     ),
@@ -488,12 +534,17 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                               ),
                                               onTap: () {
+                                                _myUser.delete();
                                                 Navigator.of(context, rootNavigator: true)
-                                                    .pushReplacement(MaterialPageRoute<void>(
-                                                            builder: (context) => LoginPage()));
+                                                    .pushAndRemoveUntil(MaterialPageRoute<void>(
+                                                    builder: (context) => LoginPage()),
+                                                      (route) => false,
+                                                );
                                               })
                                         ],
-                                      )),
+                                      ),
+                                    )
+                                  ],)
                                 ],
                               ),
                             ),
@@ -701,7 +752,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 onPressed: () {
                   setState(() {
                     _isNameButton ? _status = true : _enabled = true;
-                    //FocusScope.of(context).requestFocus(FocusNode());
+                    FocusScope.of(context).requestFocus(FocusNode());
                   });
                 },
               )),

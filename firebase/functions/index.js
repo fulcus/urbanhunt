@@ -18,6 +18,19 @@ exports.addPlacePoints = functions.firestore
     docRef.update({ score: admin.firestore.FieldValue.increment(5) });
   });
 
+exports.deleteProfile = functions.auth.user().onDelete(async (user) => {
+      const batch = db.batch();
+      const profile = db.collection("users").doc(user.uid);
+
+      batch.delete(profile);
+
+      // Any other necessary cleanup (e.g. delete likes and dislikes of that user -> optional)
+
+      await batch.commit();
+
+      console.log(`Deleted profile ${user.uid}`);
+  });
+
 //todo check with security rules: when user added score == 0 and username is unique
 //exports.addUser = functions.auth.user().onCreate((user) => {
 //  db.collection("users").doc(user.uid).set({ score: 0 });

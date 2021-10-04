@@ -26,6 +26,7 @@ StreamBuilder redirectHomeOrLogin() {
       }
 
       final hasUser = snapshot.hasData;
+      //TODO check if it works now that we added email verification
       if (hasUser && FirebaseAuth.instance.currentUser!.emailVerified) {
         // return BottomNavContainer();
         return Navbar(menuScreenContext: context);
@@ -139,7 +140,8 @@ Future<bool> signupAndLoginEmailPassword(String email, String password) async {
       // redundant
       //User logging in for the first time
       var name = userCredential.user!.displayName;
-      print('$name');
+      print(name);
+      userCredential.user!.sendEmailVerification(ActionCodeSettings(url: 'https://hunt-app-ef3f2.firebaseapp.com/__/auth/action', handleCodeInApp: true));
       await _addUserToDB(userCredential.user!.uid, null);
     }
     return loginEmailPassword(email, password);

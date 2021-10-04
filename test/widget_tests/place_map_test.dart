@@ -7,6 +7,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/explore/explore.dart';
@@ -47,11 +48,13 @@ Future<void> main() async {
       'address': <String, dynamic> {
         'city': 'Milan',
         'country': 'Italy',
-        'address': '6, Viale Brianza'
+        'street': '6, Viale Brianza'
       },
-      'categories': <String, dynamic> {},
+      'categories': <dynamic>[
+        'food'
+      ],
       'dislikes': 0,
-      'imgpath': null,
+      'imgpath': 'https://camo.githubusercontent.com/b4c566de1ceca472d9c01c7558999fa947a045164019cd180d7713f17fafa9c2/68747470733a2f2f692e6962622e636f2f516d567a4a77562f557365722d486f6d65706167652e706e67',
       'likes': 0,
       'location': GeoPoint(0, 0),
       'lockedDescr': 'none',
@@ -98,15 +101,19 @@ Future<void> main() async {
     expect(find.descendant(of: paddingFinder, matching: find.byType(IconButton)), findsOneWidget);
     expect(find.descendant(of: paddingFinder, matching: find.byType(Icon)), findsOneWidget);
 
-    expect(find.descendant(of: paddingFinder, matching: find.byIcon(Icons.explore)), findsNothing);
+    expect(find.descendant(of: paddingFinder, matching: find.byIcon(Icons.my_location)), findsOneWidget);
+    //await tester.drag(find.byType(GoogleMap), Offset(10, 10));
+    /*final controller = await mapController.future;
+    await controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(10, 10))));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.my_location));
+    await tester.pump();*/
 
-    await tester.pump();
-
-    //expect()
+    expect(initialPosition, LatLng(0, 0));
 
 
+    expect(find.descendant(of: paddingFinder, matching: find.byIcon(Icons.explore)), findsNothing);
     var testGesture = await tester.createGesture();
     await testGesture.downWithCustomEvent(Offset(10, 30), PointerDownEvent(
         position: Offset(48, 20),orientation: 34));
