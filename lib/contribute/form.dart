@@ -19,7 +19,7 @@ class Contribute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: _scaffoldMessengerKey,
+      //key: _scaffoldMessengerKey, //TODO use some alternative
       child: Scaffold(
         appBar: AppBar(title: Text('Add new place')),
         body: const AddPlaceForm(),
@@ -67,166 +67,168 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       });
     });
 
-    return GestureDetector(
-      onTap: () {
-        _unfocus(context);
-      },
-      child: Form(
-        key: _formKey,
-        autovalidateMode: _autoValidateMode,
-        child: Scrollbar(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              SizedBox(height: 35),
-              TextFormField(
-                focusNode: _name,
-                textInputAction: TextInputAction.next,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
-                  filled: true,
-                  icon: const Icon(Icons.place_outlined),
-                  hintText: 'Add name',
-                  //helperText: 'Name of the new place',
-                  labelText: 'Name',
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () {
+          _unfocus(context);
+        },
+        child: Form(
+          key: _formKey,
+          autovalidateMode: _autoValidateMode,
+          child: Scrollbar(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                SizedBox(height: 35),
+                TextFormField(
+                  focusNode: _name,
+                  textInputAction: TextInputAction.next,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    filled: true,
+                    icon: const Icon(Icons.place_outlined),
+                    hintText: 'Add name',
+                    //helperText: 'Name of the new place',
+                    labelText: 'Name',
+                  ),
+                  onSaved: (value) {
+                    name = value!;
+                  },
+                  validator: validationHelper.validatePlaceName,
                 ),
-                onSaved: (value) {
-                  name = value!;
-                },
-                validator: validationHelper.validatePlaceName,
-              ),
-              sizedBoxSpace,
-              TextFormField(
-                focusNode: _lockedDescription,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  filled: true,
-                  icon: const Icon(Icons.lock_outline),
-                  hintText: 'Add short description',
-                  //helperText: 'Short description shown when place is locked',
-                  labelText: 'Locked place description',
+                sizedBoxSpace,
+                TextFormField(
+                  focusNode: _lockedDescription,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    filled: true,
+                    icon: const Icon(Icons.lock_outline),
+                    hintText: 'Add short description',
+                    //helperText: 'Short description shown when place is locked',
+                    labelText: 'Locked place description',
+                  ),
+                  maxLines: 1,
+                  onSaved: (value) {
+                    lockedDescription = value!;
+                  },
+                  validator: validationHelper.validateLockedDescr,
                 ),
-                maxLines: 1,
-                onSaved: (value) {
-                  lockedDescription = value!;
-                },
-                validator: validationHelper.validateLockedDescr,
-              ),
-              sizedBoxSpace,
-              TextFormField(
-                focusNode: _unlockedDescription,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  filled: true,
-                  icon: const Icon(Icons.lock_open_outlined),
-                  hintText: 'Add long description',
-                  //helperText: 'Full description of the place',
-                  labelText: 'Unlocked place description',
+                sizedBoxSpace,
+                TextFormField(
+                  focusNode: _unlockedDescription,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    filled: true,
+                    icon: const Icon(Icons.lock_open_outlined),
+                    hintText: 'Add long description',
+                    //helperText: 'Full description of the place',
+                    labelText: 'Unlocked place description',
+                  ),
+                  maxLines: 3,
+                  onSaved: (value) {
+                    unlockedDescription = value!;
+                  },
+                  validator: validationHelper.validateUnlockedDescr,
                 ),
-                maxLines: 3,
-                onSaved: (value) {
-                  unlockedDescription = value!;
-                },
-                validator: validationHelper.validateUnlockedDescr,
-              ),
-              sizedBoxSpace,
-              _multiChoice,
-              sizedBoxSpace,
-              Center(
-                child: _image == null
-                    ? const Text('No image selected.')
-                    : Stack(
-                        children: <Widget>[
-                          Container(
-                            height: 200,
-                            width: 200,
-                            child: Image.file(
-                              _image!,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _image = null;
-                                });
-                              },
-                              child: const Icon(
-                                Icons.close,
-                                // color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+                sizedBoxSpace,
+                _multiChoice,
+                sizedBoxSpace,
+                Center(
+                  child: _image == null
+                      ? const Text('No image selected.')
+                      : Stack(
+                    children: <Widget>[
+                      Container(
+                        height: 200,
+                        width: 200,
+                        child: Image.file(
+                          _image!,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-              ),
-              sizedBoxSpace,
-              TextButton.icon(
-                onPressed: () => getImage(),
-                label: const Text('Choose a picture'),
-                icon: const Icon(Icons.add_a_photo),
-                style: ButtonStyle(
-                    //elevation: MaterialStateProperty.all<double>(10),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-                    overlayColor: MaterialStateProperty.resolveWith(
-                      (states) {
-                        return states.contains(MaterialState.pressed)
-                            ? Colors.blue[50]
-                            : null;
-                      },
-                    ),
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            side: BorderSide(color: Colors.blue)))),
-              ),
-              sizedBoxSpace,
-              // todo make address prettier
-              pickedLocation == null
-                  ? Container()
-                  : Text(pickedLocation!.formattedAddress ?? 'No location'),
-              sizedBoxSpace,
-              TextButton.icon(
-                label: const Text('Select place location'),
-                icon: const Icon(Icons.pin_drop),
-                onPressed: () => openLocationPicker(context),
-                style: ButtonStyle(
-                    //elevation: MaterialStateProperty.all<double>(10),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-                    overlayColor: MaterialStateProperty.resolveWith(
-                      (states) {
-                        return states.contains(MaterialState.pressed)
-                            ? Colors.blue[50]
-                            : null;
-                      },
-                    ),
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            side: BorderSide(color: Colors.blue)))),
-              ),
-              sizedBoxSpace,
-              Center(
-                child: ElevatedButton(
-                  child: const Text('Submit'),
-                  onPressed: _handleSubmitted,
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _image = null;
+                            });
+                          },
+                          child: const Icon(
+                            Icons.close,
+                            // color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 100),
-            ],
+                sizedBoxSpace,
+                TextButton.icon(
+                  onPressed: () => getImage(),
+                  label: const Text('Choose a picture'),
+                  icon: const Icon(Icons.add_a_photo),
+                  style: ButtonStyle(
+                    //elevation: MaterialStateProperty.all<double>(10),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                      overlayColor: MaterialStateProperty.resolveWith(
+                            (states) {
+                          return states.contains(MaterialState.pressed)
+                              ? Colors.blue[50]
+                              : null;
+                        },
+                      ),
+                      foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                      backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              side: BorderSide(color: Colors.blue)))),
+                ),
+                sizedBoxSpace,
+                // todo make address prettier
+                pickedLocation == null
+                    ? Container()
+                    : Text(pickedLocation!.formattedAddress ?? 'No location'),
+                sizedBoxSpace,
+                TextButton.icon(
+                  label: const Text('Select place location'),
+                  icon: const Icon(Icons.pin_drop),
+                  onPressed: () => openLocationPicker(context),
+                  style: ButtonStyle(
+                    //elevation: MaterialStateProperty.all<double>(10),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                      overlayColor: MaterialStateProperty.resolveWith(
+                            (states) {
+                          return states.contains(MaterialState.pressed)
+                              ? Colors.blue[50]
+                              : null;
+                        },
+                      ),
+                      foregroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                      backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.white),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              side: BorderSide(color: Colors.blue)))),
+                ),
+                sizedBoxSpace,
+                Center(
+                  child: ElevatedButton(
+                    child: const Text('Submit'),
+                    onPressed: _handleSubmitted,
+                  ),
+                ),
+                const SizedBox(height: 100),
+              ],
+            ),
           ),
         ),
       ),
@@ -257,17 +259,14 @@ class AddPlaceFormState extends State<AddPlaceForm> {
           '$categories');
       //showInSnackBar('Added Place');
 
-      // todo creates black screen
-
-      Navigator.pushReplacement<void, void>(
-        _formKey.currentState!.context,
-        MaterialPageRoute<void>(
-          builder: (context) => AddPlaceForm(),
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute<void>(builder: (context) => Contribute(),
         ),
       );
 
-      Navigator.of(_formKey.currentState!.context)
-          .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+      Navigator.of(context)
+          .push(MaterialPageRoute<void>(builder: (context) => ContributeThankYou())
+      );
     } else {
       // Start validating on every change.
       _autoValidateMode = AutovalidateMode.always;
@@ -296,7 +295,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   bool _validateImage() {
-    if (_image == null) {
+    if (_image == null) {  //TODO Null check operator used on a null value
       _showInSnackBar('Please select an image');
     }
     return _image != null;
