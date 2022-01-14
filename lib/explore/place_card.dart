@@ -200,7 +200,7 @@ class _PlaceCardState extends State<PlaceCard> {
     } else {
       return DraggableScrollableSheet(
         minChildSize: 0.44,
-        initialChildSize: 0.60,
+        initialChildSize: 0.44,
         builder: (context, scrollController) {
           return Material(
             elevation: 10,
@@ -228,7 +228,9 @@ class _PlaceCardState extends State<PlaceCard> {
 
   Future<void> _displayDist() async {
     _displayDistance = await _updateDistance();
-    setState(() {});
+    if(mounted) {
+      setState(() {});
+    }
   }
 
   Future<String> _updateDistance() async {

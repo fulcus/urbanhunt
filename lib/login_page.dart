@@ -623,29 +623,48 @@ class ResetPasswordPage extends StatefulWidget {
 
 class _ResetPasswordState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   String _email = '';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Form(
-          key: _formKey,
-          child: _buildResetPasswordForm(context),
-        ),
-      ),
+    return ScaffoldMessenger(
+        key: _scaffoldMessengerKey,
+        child: Scaffold(
+          body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Form(
+              key: _formKey,
+              child: _buildResetPasswordForm(context),
+            ),
+          ),
+        )
     );
   }
 
   Widget _buildResetPasswordButton(BuildContext context) {
+    var _firstPress = true;
     return GestureDetector(
       onTap: () {
-        if (validateForm(_formKey)) {
-          FirebaseAuth.instance.sendPasswordResetEmail(email: _email).then((_) {
-            Navigator.of(context).pop();
-          });
+        if(_firstPress) {
+          if (validateForm(_formKey)) {
+            _firstPress = false;
+            FirebaseAuth.instance.sendPasswordResetEmail(email: _email).then((_) {
+              _showInSnackBar('An email to reset your password has been sent to you.');
+            }).catchError((Object error) {
+              if(error is FirebaseAuthException){
+                switch(error.code){
+                  case 'invalid-email':
+                    _showInSnackBar('Invalid email');
+                    break;
+                  case 'user-not-found':
+                    _showInSnackBar('This email is not associated to any user');
+                    break;
+                }
+              }
+            });
+          }
         }
       },
       child: Container(
@@ -689,4 +708,12 @@ class _ResetPasswordState extends State<ResetPasswordPage> {
       ),
     );
   }
+
+  void _showInSnackBar(String value) {
+    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
+    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
+        content: Text(value),
+    ));
+  }
+
 }
