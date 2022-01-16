@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:place_picker/entities/location_result.dart';
 
 class PlaceData {
-  String lockedDescription, unlockedDescription, name, imageURL;
+  String lockedDescription, unlockedDescription, name, imageURL, creatorId;
 
   String city, country, street;
   double latitude, longitude;
@@ -12,7 +12,7 @@ class PlaceData {
   int likes = 0, dislikes = 0;
 
   PlaceData(this.name, this.lockedDescription, this.unlockedDescription,
-      this.imageURL, this.categories, LocationResult location)
+      this.imageURL, this.creatorId, this.categories, LocationResult location)
       : latitude = location.latLng!.latitude,
         longitude = location.latLng!.longitude,
         street = location.name!,
@@ -25,6 +25,7 @@ class PlaceData {
         street = document['address']['street'] as String,
         city = document['address']['city'] as String,
         country = document['address']['country'] as String,
+        creatorId = document['creatorId'] as String,
         categories = (document['categories'] as List)
             .map((dynamic e) => e.toString())
             .toList(),
@@ -49,6 +50,7 @@ class PlaceData {
       'lockedDescr': lockedDescription,
       'name': name,
       'unlockedDescr': unlockedDescription,
+      'creatorId': creatorId,
     };
 
     await places.add(jsonData);

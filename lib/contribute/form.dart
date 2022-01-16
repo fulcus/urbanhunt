@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hunt_app/api_key.dart';
@@ -253,8 +254,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       form.save();
 
       var imageURL = await ImageHelper().uploadFile(_image!);
+      var creatorId = FirebaseAuth.instance.currentUser!.uid;
       var data = PlaceData(name!, lockedDescription!, unlockedDescription!,
-          imageURL, categories!, pickedLocation!);
+          imageURL, creatorId, categories!, pickedLocation!);
       data.upload();
 
       print('Added place');
