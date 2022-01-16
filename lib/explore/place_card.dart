@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -160,7 +161,7 @@ class _PlaceCardState extends State<PlaceCard> {
               SizedBox(height: 4.0),
               // Address
               Text(
-                widget.place.street,
+                widget.place.street+' - '+ widget.place.city+' ('+ widget.place.country+')',
                 style: TextStyle(
                   fontSize: 14.0,
                 ),
@@ -191,11 +192,13 @@ class _PlaceCardState extends State<PlaceCard> {
     );
 
     if (widget.fullscreen) {
-      return Material(
-        elevation: 10,
-        shadowColor: Colors.black,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-        child: content,
+      return Scaffold(
+        appBar: AppBar(title: Text('Unlocked Place')),
+        body: Material(
+          elevation: 10,
+          shadowColor: Colors.black,
+          child: content,
+        ),
       );
     } else {
       return DraggableScrollableSheet(
@@ -277,9 +280,10 @@ class _PlaceCardState extends State<PlaceCard> {
         if (widget.isLocked && posDistance < UNLOCK_RANGE_METERS) {
           widget.isLocked = false;
           _dbUnlockPlace();
+          //TODO changeNotifier when unlocked rebuild lock
           // somehow trigger update for marker icon with unlocked icon (for marker with id document.id)
         } else {
-          // todo display "you are too far"
+          _showInFlushBar("You are too far.");
         }
       });
     }).catchError((Object error, StackTrace stacktrace) {
@@ -303,7 +307,7 @@ class _PlaceCardState extends State<PlaceCard> {
         widget.isDisliked = false;
       });
     } else {
-      // todo display "cannot like, too far"
+      _showInFlushBar("You first need to unlock this place.");
     }
   }
 
@@ -322,8 +326,18 @@ class _PlaceCardState extends State<PlaceCard> {
         widget.isLiked = false;
       });
     } else {
-      // todo display "cannot like, too far"
+      _showInFlushBar("You first need to unlock this place.");
     }
+  }
+
+  void _showInFlushBar(String message) {
+    Flushbar<dynamic>(
+      title: "",
+      message: message,
+      duration: Duration(seconds: 5),
+      padding: EdgeInsets.only(bottom: 65),
+      icon: Icon(Icons.error_outline, color: Colors.transparent),
+    ).show(context);
   }
 
   // see https://firebase.flutter.dev/docs/firestore/usage/#transactions
@@ -647,15 +661,29 @@ class ShareButton extends StatelessWidget {
     var color = Colors.blue[600] ?? Colors.blue;
 
     return GestureDetector(
-      child: CircleAvatar(
-        backgroundColor: color,
-        radius: 18.0,
-        child: Icon(
-          Icons.share,
-          color: Colors.white,
-          size: 18.0,
-        ),
+      child: Container(
+      width: 72.0,
+      decoration: BoxDecoration(
+          border: Border.all(color: color),
+          borderRadius: BorderRadius.all(Radius.circular(20))),
+      //child: Flexible(
+      child: Column(
+        children: [
+          SizedBox(width: 3.0),
+          Icon(Icons.share, color: color),
+          SizedBox(width: 2.0),
+          Text(
+            'Share',
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w400,
+              fontSize: 15.0,
+            ),
+          ),
+        ],
       ),
+      //)
+    ),
       onTap: () {
         Share.share(
             'Join me here! https://maps.google.com/?q=$latitude,$longitude');

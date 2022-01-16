@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/explore/place_card.dart';
-import 'package:hunt_app/profile/profile.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
@@ -31,73 +30,41 @@ class _UnlockedListState extends State<UnlockedList> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Scaffold(
-            body: Container(
-              margin: EdgeInsets.only(top: 65.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back_outlined,
-                        color: Colors.grey,
-                        size: 18.0,
-                      ),
-                      onPressed: () => Navigator.pop(context,
-                          MaterialPageRoute<void>(builder: (context) => Profile())),
-                    ),
+    return Scaffold(
+      appBar: AppBar(title: Text('My unlocked places')),
+      body: Container(
+        margin: EdgeInsets.only(top: 20),
+        child: Column(
+            children: <Widget> [
+              StreamBuilder<QuerySnapshot>(
+                  stream: _unlockedPlaces,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      if(snapshot.data!.docs.isEmpty) {
+                        return Align(
+                          child: Text(
+                            'You have not unlocked any place yet. Get to work!',
+                            style: TextStyle(fontSize: 24),
+                          ),
+                        );
+                      }
+                      else {
+                        var placeIds = <String>[];
 
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 15.0, top: 10.0),
-                    child: RichText(
-                        text: TextSpan(
-                            text: 'Unlocked',
-                            style: TextStyle(
-                                color: Colors.deepPurple,
-                                fontSize: 30.0,
-                                fontWeight: FontWeight.bold),
-                            children: [
-                              TextSpan(
-                                  text: 'Places',
-                                  style: TextStyle(
-                                      color: Colors.pink,
-                                      fontSize: 30.0,
-                                      fontWeight: FontWeight.bold))
-                            ])),
-                  ),
-                  Container(
-                      child: StreamBuilder<QuerySnapshot>(
-                          stream: _unlockedPlaces,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              if(snapshot.data!.docs.isEmpty) {
-                                return Center(
-                                  child: Text('You have not unlocked any place yet. Get to work!')
-                                );
-                              }
-                              else {
-                                var placeIds = <String>[];
-
-                                for(var i in snapshot.data!.docs) {
-                                  placeIds.add(i.id);
-                                }
-                                return Helper(placeIds, snapshot.data!.docs);
-                              }
-                            } else {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                          }))
-                ],
-              ),
-            )),
-      ],
+                        for(var i in snapshot.data!.docs) {
+                          placeIds.add(i.id);
+                        }
+                        return Helper(placeIds, snapshot.data!.docs);
+                      }
+                    } else {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  })
+            ]
+        ),
+      )
     );
   }
 }
@@ -147,7 +114,7 @@ class _HelperState extends State<Helper> {
                         widget.unlocked[index].get('liked') as bool,
                         widget.unlocked[index].get('disliked') as bool,
                         currUlkPlace.get('address.city').toString(),
-                        //currUlkPlace.get('address.country').toString(), //TODO fix incoherency in the DB => country
+                        currUlkPlace.get('address.country').toString(),
                         currUlkPlace.get('address.street').toString(),
                         currUlkPlace.get('imgpath').toString(),
                         currUlkPlace.get('name').toString()
@@ -171,7 +138,7 @@ class UnlockedListRow extends StatelessWidget {
   final bool isLiked;
   final bool isDisliked;
   final String city;
-  //final String country;
+  final String country;
   final String street;
   final String imgPath;
   final String name;
@@ -181,7 +148,7 @@ class UnlockedListRow extends StatelessWidget {
       this.isLiked,
       this.isDisliked,
       this.city,
-      //this.country,
+      this.country,
       this.street,
       this.imgPath,
       this.name,
@@ -201,7 +168,7 @@ class UnlockedListRow extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
               border: Border.all(
-                  color: Colors.blueAccent,
+                  color: Colors.blue,
                   width: 3.0,
                   style: BorderStyle.solid),
               borderRadius: BorderRadius.circular(50.0)),
@@ -250,7 +217,7 @@ class UnlockedListRow extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: Text(
-                          city,
+                          city+' ('+country+')',
                           style: TextStyle(fontSize: 12),
                         ),
                       ),

@@ -348,8 +348,11 @@ class _PlaceMapState extends State<PlaceMap> {
   }
 
   Future<void> _setCurrentLocation() async {
-    // todo handle exception location is disabled
-    var currentLocation = await Geolocator.getCurrentPosition();
+    var currentLocation = await Geolocator.getCurrentPosition().catchError((Object error) async {
+      if(error is LocationServiceDisabledException) {
+        await Geolocator.requestPermission();
+      }
+    });
     var cPosition = CameraPosition(
       zoom: 14,
       bearing: _currentCameraBearing,

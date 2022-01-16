@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hunt_app/login_page.dart';
+import 'package:hunt_app/profile/custom_alert_dialog.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:one_context/one_context.dart';
@@ -534,12 +535,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                               ),
                                               onTap: () {
-                                                _myUser.delete();
-                                                Navigator.of(context, rootNavigator: true)
-                                                    .pushAndRemoveUntil(MaterialPageRoute<void>(
-                                                    builder: (context) => LoginPage()),
-                                                      (route) => false,
-                                                );
+                                                showDialog<dynamic>(
+                                                barrierColor: Colors.black26,
+                                                context: context,
+                                                builder: (context) {
+                                                  return CustomAlertDialog(
+                                                    title: "Delete account",
+                                                    description: "You will lose all your progress.\n"
+                                                        "Are you sure to delete your account?\n",
+                                                  );
+                                                });
                                               })
                                         ],
                                       ),
@@ -564,15 +569,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> getImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) {
-      print('No image selected.');
-    } else {
-      setState(() {
-        _image = File(pickedFile.path);
-        print('file picked');
-      });
-    }
+    await picker.pickImage(source: ImageSource.gallery)
+        .then((image) async {
+      if(image!=null) {
+        print("image selected");
+        setState(() {
+          _image = File(image.path);
+        });
+      }
+      else {
+        print("image not selected");
+      }
+    });
   }
 
   void _isEmailAuthProvider() {

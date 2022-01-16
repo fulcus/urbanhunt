@@ -42,7 +42,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   final ValidationHelper validationHelper = ValidationHelper();
 
   File? _image;
-  bool _imageSelected = false;
   String? name, lockedDescription, unlockedDescription;
   List<String>? categories;
   LocationResult? pickedLocation;
@@ -304,7 +303,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   bool _validateImage() {
-    if (!_imageSelected) {
+    if (_image == null) {
       _showInSnackBar('Please select an image');
       return false;
     }
@@ -342,11 +341,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         setState(() {
           _image = File(image.path);
         });
-        _imageSelected = true;
       }
       else {
         print("image not selected");
-        _imageSelected = false;
       }
     });
   }
