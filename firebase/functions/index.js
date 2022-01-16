@@ -11,10 +11,19 @@ exports.unlockPlacePoints = functions.firestore
     docRef.update({ score: admin.firestore.FieldValue.increment(1) });
   });
 
+//TODO check if callable function inside firestore function works
+exports.getUid = functions.https.onCall((data, context) => {
+  const uid = context.auth.uid;
+  return{
+  userId: uid
+  }
+});
+
 exports.addPlacePoints = functions.firestore
   .document("places/{placeId}")
   .onCreate((snapshot, context) => {
-    const docRef = db.collection("users").doc(context.auth.uid);
+    const uid = functions.httpsCallable('getUid');
+    const docRef = db.collection("users").doc(uid);
     docRef.update({ score: admin.firestore.FieldValue.increment(5) });
   });
 

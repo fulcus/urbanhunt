@@ -7,4 +7,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACTION_SEND" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/> <!--not needed-->
+
+    <application android:label="@string/app_name">
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+        <provider
+            android:authorities="com.facebook.app.FacebookContentProvider1141983086293342"
+            android:name="com.facebook.FacebookContentProvider"
+            android:exported="true" />
+    </application>
+
 </manifest>
