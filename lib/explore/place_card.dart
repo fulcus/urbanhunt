@@ -16,7 +16,6 @@ const double UNLOCK_RANGE_METERS = 15.0;
 // Firebase db instance
 final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
-final userId = FirebaseAuth.instance.currentUser!.uid;
 
 // Map category tag to its color
 final Map<String, Color> categoryColors = {};
@@ -41,6 +40,7 @@ class PlaceCard extends StatefulWidget {
 }
 
 class _PlaceCardState extends State<PlaceCard> {
+  final userId = FirebaseAuth.instance.currentUser!.uid;
   String _displayDistance = '';
   bool _isGPSon = false;
 

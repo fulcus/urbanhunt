@@ -7,7 +7,6 @@ import 'package:hunt_app/profile/profile.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
-final userId = FirebaseAuth.instance.currentUser!.uid;
 
 
 class UnlockedList extends StatefulWidget {
@@ -17,6 +16,7 @@ class UnlockedList extends StatefulWidget {
 
 class _UnlockedListState extends State<UnlockedList> {
   late Stream<QuerySnapshot> _unlockedPlaces;
+  final userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {

@@ -14,7 +14,7 @@ import 'package:hunt_app/utils/network.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);
-//TODO global keys here gives exception when logging out (but without consequences)
+//TODO global keys here gives exception when logging out: Duplicate GlobalKey detected in widget tree. (but without consequences)
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey1 = GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey2 = GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey3 = GlobalKey<ScaffoldMessengerState>();

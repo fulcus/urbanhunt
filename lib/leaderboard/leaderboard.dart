@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
-final User myUser = FirebaseAuth.instance.currentUser!;
+
 
 class LeaderBoard extends StatelessWidget {
   const LeaderBoard({Key? key}) : super(key: key);
@@ -41,6 +41,7 @@ class CountryLeaderBoard extends StatefulWidget {
 }
 
 class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
+  final User myUser = FirebaseAuth.instance.currentUser!;
   Stream<QuerySnapshot>? _bestUsers;
   Color _rowColor = Colors.transparent;
   int _position = 0;
@@ -142,6 +143,7 @@ class GlobalLeaderBoard extends StatefulWidget {
 }
 
 class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
+  final User myUser = FirebaseAuth.instance.currentUser!;
   late Stream<QuerySnapshot> _bestUsers;
   Color _rowColor = Colors.transparent;
   int _position = 0;

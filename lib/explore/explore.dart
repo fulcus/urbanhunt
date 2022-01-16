@@ -10,7 +10,6 @@ import 'package:hunt_app/explore/place_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final db = FirebaseFirestore.instance;
-final userId = FirebaseAuth.instance.currentUser!.uid;
 
 class Explore extends StatefulWidget {
   @override
@@ -22,6 +21,7 @@ class ExploreState extends State<Explore> {
   late Stream<QuerySnapshot> _places;
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();
+  final userId = FirebaseAuth.instance.currentUser!.uid;
 
   LatLng? initPosition;
 
