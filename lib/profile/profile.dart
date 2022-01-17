@@ -67,8 +67,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 var url = snapshot.data!.docs[0].get('imageURL').toString();
                 var username =
                     snapshot.data!.docs[0].get('username').toString();
-                var countryName =
+                var countryCode =
                     snapshot.data!.docs[0].get('country').toString();
+                var countryName = CountryParser.parse(countryCode).name;
+                var score = snapshot.data!.docs[0].get('score').toString();
+
+
 
                 return Container(
                   color: Colors.white,
@@ -77,7 +81,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                       Column(
                         children: <Widget>[
                           Container(
-                            height: 250.0,
+                            height: 230.0,
                             color: Colors.white,
                             child: Column(
                               children: <Widget>[
@@ -136,6 +140,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                               ],
                             ),
                           ),
+
+                          Divider(height: 1),
+
                           Container(
                             color: Colors.white,
                             child: Padding(
@@ -400,15 +407,53 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 showPhoneCode: false,
                                                 onSelect: (country) {
                                                   countryName = country.name;
-                                                  _updateCountry(countryName);
+                                                  _updateCountry(country.countryCode);
                                                 }),
                                           ),
                                         ],
                                       )),
 
                                   Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 25.0, right: 25.0, top: 25.0),
+                                    child: Container(
+                                      child: Row(children: [
+                                        Text(
+                                          'Total Score: ',
+                                          style: TextStyle(fontSize: 16,
+                                              fontWeight:FontWeight.bold),
+                                        ),
+                                        Container(child: Center(
+                                            child: Text(
+                                                score,
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.blueAccent
+                                                ))
+                                        ),
+                                          width: 30.0,
+                                          height: 30.0,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: Colors.amber),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        Text(
+                                          ' ',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        Icon(Icons.vpn_key, color: Colors.amber)
+                                      ]),
+                                    ),
+                                  ),
+
+                                  Divider(height: 40),
+
+                                  Padding(
                                       padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
+                                          left: 25.0, right: 25.0, top: 10.0, bottom: 10.0),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -422,7 +467,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                               Text(
                                                 'My Unlocked Places',
                                                 style: TextStyle(
-                                                    fontSize: 18.0,
+                                                    fontSize: 16.0,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               ),
@@ -439,10 +484,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 child: CircleAvatar(
                                                   backgroundColor:
                                                       Colors.blueAccent,
-                                                  radius: 25.0,
+                                                  radius: 14.0,
                                                   child: Icon(
                                                     Icons.lock_open,
                                                     color: Colors.white,
+                                                    size: 16.0,
                                                   ),
                                                 ),
                                               )
@@ -451,7 +497,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         ],
                                       )),
 
+                                  Divider(height: 40),
+
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
                                       //LOGOUT button
                                       Padding(
@@ -462,7 +511,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           children: <Widget>[
                                             GestureDetector(
                                                 child: Container(
-                                                  width: 100.0,
+                                                  width: 120.0,
+                                                  height: 60.0,
                                                   decoration: BoxDecoration(
                                                       border: Border.all(
                                                           color: Colors.black87),
@@ -470,8 +520,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       BorderRadius.all(
                                                           Radius.circular(20))),
                                                   child: Row(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
                                                       SizedBox(width: 6.0),
                                                       Icon(Icons.exit_to_app,
@@ -483,7 +533,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                           color: Colors.black87,
                                                           fontWeight:
                                                           FontWeight.bold,
-                                                          fontSize: 18.0,
+                                                          fontSize: 16.0,
                                                         ),
                                                       ),
                                                     ],
@@ -507,7 +557,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         children: <Widget>[
                                           GestureDetector(
                                               child: Container(
-                                                width: 170.0,
+                                                width: 120.0,
+                                                height: 60.0,
                                                 decoration: BoxDecoration(
                                                     border: Border.all(
                                                         color: Colors.black87),
@@ -515,20 +566,20 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                     BorderRadius.all(
                                                         Radius.circular(20))),
                                                 child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
                                                   children: [
                                                     SizedBox(width: 6.0),
                                                     Icon(Icons.delete_outline,
                                                         color: Colors.black87),
                                                     SizedBox(width: 4.0),
                                                     Text(
-                                                      'Delete Account',
+                                                      'Delete\nAccount',
                                                       style: TextStyle(
                                                         color: Colors.black87,
                                                         fontWeight:
                                                         FontWeight.bold,
-                                                        fontSize: 18.0,
+                                                        fontSize: 16.0,
                                                       ),
                                                     ),
                                                   ],
@@ -610,7 +661,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     if (value.length < 3) {
       return 'Name has to be at least 3 characters long.';
     }
-    if (value.length > 50) {
+    if (value.length > 20) {
       return 'Name has to be at most 50 characters long.';
     }
     final nameExp = RegExp(r'^[a-zA-Z0-9_]+$');

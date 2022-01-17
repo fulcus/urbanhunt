@@ -7,8 +7,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hunt_app/contribute/place_data.dart';
+import 'package:hunt_app/explore/unlocked_popup.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'explore.dart';
 
 // Unlock distance threshold
 const double UNLOCK_RANGE_METERS = 15.0;
@@ -37,15 +40,15 @@ class PlaceCard extends StatefulWidget {
         super(key: key);
 
   @override
-  _PlaceCardState createState() => _PlaceCardState();
+  PlaceCardState createState() => PlaceCardState();
 }
 
-class _PlaceCardState extends State<PlaceCard> {
+class PlaceCardState extends State<PlaceCard> {
   final userId = FirebaseAuth.instance.currentUser!.uid;
   String _displayDistance = '';
   bool _isGPSon = false;
 
-  _PlaceCardState();
+  PlaceCardState();
 
   @override
   void initState() {
@@ -219,10 +222,6 @@ class _PlaceCardState extends State<PlaceCard> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   Future<bool> _checkGPS() async {
     _isGPSon = await Geolocator.isLocationServiceEnabled();
@@ -280,8 +279,20 @@ class _PlaceCardState extends State<PlaceCard> {
         if (widget.isLocked && posDistance < UNLOCK_RANGE_METERS) {
           widget.isLocked = false;
           _dbUnlockPlace();
-          //TODO changeNotifier when unlocked rebuild lock
-          // somehow trigger update for marker icon with unlocked icon (for marker with id document.id)
+
+          // somehow trigger update for marker icon with unlocked icon => replace Explore page
+          Navigator.of(context)
+              .pushReplacement(MaterialPageRoute<void>(builder: (context) => Explore(),
+          ),
+          );
+
+          showDialog<dynamic>(
+              barrierColor: Colors.black26,
+              context: context,
+              builder: (context) {
+                return UnlockedPopup();
+              });
+
         } else {
           _showInFlushBar("You are too far.");
         }

@@ -12,6 +12,8 @@ class ContributeThankYou extends StatelessWidget {
           children: [
             Card(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset('assets/images/locks-pattern-cropped.jpg'),
                   SizedBox(height: 12),
@@ -21,7 +23,20 @@ class ContributeThankYou extends StatelessWidget {
                         style: TextStyle(fontSize: 26),
                         textAlign: TextAlign.center),
                   ),
-                  SizedBox(height: 26)
+                  SizedBox(height: 13),
+                  Container(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            '+ 5 ',
+                            style: TextStyle(fontSize: 21),
+                          ),
+                          Icon(Icons.vpn_key, color: Colors.amber)
+                        ]),
+                  ),
+                  SizedBox(height: 26),
                 ],
               ),
             ),

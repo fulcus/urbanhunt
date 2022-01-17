@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flag/flag.dart';
+import 'package:flutter/material.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
@@ -115,12 +115,31 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                                     _position++;
                                   }
                                 }
+
+                                /*var users = snapshot.data!.docs;
+                                Iterable<QueryDocumentSnapshot<Object?>> topUsers;
+                                if(users.length > 50) {
+                                  topUsers = users.getRange(0, 50);
+                                }
+                                else{
+                                  topUsers = users;
+                                }
+                                List<String> topUsersIds = List.empty(growable: true);
+                                for(QueryDocumentSnapshot<Object?> user in topUsers) {
+                                  topUsersIds.add(user.id);
+                                }
+                                if(topUsersIds.contains(myUser.uid)) {
+                                  _myUserInTop = true;
+                                }*/
+
                                 return LeaderBoardRow(
                                     currListUser.get('username').toString(),
                                     currListUser.get('imageURL').toString(),
                                     currListUser.get('score').toString(),
+                                    currListUser.get('country').toString(),
                                     _position,
-                                    _rowColor);
+                                    _rowColor,
+                                    false);
                               });
                         } else {
                           return Center(
@@ -208,8 +227,10 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                                     currListUser.get('username').toString(),
                                     currListUser.get('imageURL').toString(),
                                     currListUser.get('score').toString(),
+                                    currListUser.get('country').toString(),
                                     _position,
-                                    _rowColor);
+                                    _rowColor,
+                                    true);
                               });
                         } else {
                           return Center(
@@ -228,12 +249,13 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
 
 // Row of leaderboard that contains pic, text, medal, button
 class LeaderBoardRow extends StatelessWidget {
-  final String username, imageURL, score;
+  final String username, imageURL, score, country;
   final int position;
   final Color rowColor;
+  final bool isGlobal;
 
   LeaderBoardRow(
-      this.username, this.imageURL, this.score, this.position, this.rowColor,
+      this.username, this.imageURL, this.score, this.country, this.position, this.rowColor, this.isGlobal,
       {Key? key})
       : super(key: key);
 
@@ -302,6 +324,20 @@ class LeaderBoardRow extends StatelessWidget {
                                     image: DecorationImage(
                                         image: ImageHelper().showImage(imageURL, 'assets/images/as.png'),
                                         fit: BoxFit.cover)))),
+                      ],
+                    ),
+                  ),
+                  if(isGlobal)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: Flag.fromString(country, height: 20, width: 20),
+                        )
                       ],
                     ),
                   ),

@@ -39,9 +39,11 @@ class ExploreState extends State<Explore> {
       // then determine exact position,
       // if location is off (or other errors) it uses the last known previously set
       await determinePosition().then((value) {
-        setState(() {
-          initPosition = LatLng(value.latitude, value.longitude);
-        });
+        if (mounted) {
+          setState(() {
+            initPosition = LatLng(value.latitude, value.longitude);
+          });
+        }
         cacheLocation();
       }).catchError((Object error, StackTrace stacktrace) {
         //if location is off and
