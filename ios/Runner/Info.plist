@@ -3,8 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Finding Ice Cream stores near you</string>
+	<string>Finding cool places near you</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Need current location access</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>

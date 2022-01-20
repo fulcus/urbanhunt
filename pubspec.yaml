@@ -21,7 +21,7 @@ dependencies:
   google_sign_in: ^5.0.2
   page_transition:
   image_picker: ^0.8.2
-  place_picker: ^0.9.19-nullsafety
+  place_picker: ^0.9.20-nullsafety
   country_picker: ^2.0.7
   url_launcher: ^6.0.3
   cached_network_image: ^3.1.0

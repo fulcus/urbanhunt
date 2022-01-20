@@ -10,9 +10,9 @@ import GoogleMaps
   ) -> Bool {
     // TODO: Replace this with an API key that has Google Maps for iOS enabled
     // See https://developers.google.com/maps/documentation/ios-sdk/get-api-key
-    GMSServices.provideAPIKey("ADD_A_KEY_HERE")
+    GMSServices.provideAPIKey("AIzaSyDkWviZPvlGK-a4JYFBTR8FDF-qa5rVvWQ")
     GeneratedPluginRegistrant.register(with: self)
-      
+    //FirebaseApp.configure() // found in firebase sdk setup
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
