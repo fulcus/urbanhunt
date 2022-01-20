@@ -84,10 +84,27 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(left: 15.0),
-                child: Text(
-                  '$myCountry Rank Board: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Flag.fromString('$myCountry', height: 20, width: 20),
+                          )
+                        ],
+                      ),
+                    ),
+                    Text(
+                      ' $myCountry Rank Board: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  ],
+                )
               ),
               Flexible(
                   child: StreamBuilder<QuerySnapshot>(

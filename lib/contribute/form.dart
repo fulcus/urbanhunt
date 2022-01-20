@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hunt_app/api_key.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/utils/image_helper.dart';
@@ -298,7 +297,13 @@ class AddPlaceFormState extends State<AddPlaceForm> {
       content: Container(
         child: Text(value),
         height: 70.0,
-      )
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(14),
+          topLeft: Radius.circular(14),
+        ),
+      ),
     ));
   }
 

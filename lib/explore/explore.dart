@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -216,6 +215,7 @@ class _PlaceMapState extends State<PlaceMap> {
       markers: customMarkers,
       onMapCreated: (mapController) {
         widget.mapController.complete(mapController);
+        mapController.setMapStyle('[{"featureType": "poi","stylers": [{"visibility": "off"}]}]');
         setState(() {});
       },
       onCameraMove: _updateCameraInfo,
@@ -268,9 +268,9 @@ class _PlaceMapState extends State<PlaceMap> {
     customMarkers = {};
 
     _markerIconUnlocked =
-        await _createMarkerImageFromAsset('assets/images/open-lock.png');
+        await _createMarkerImageFromAsset('assets/images/manette-blue.png');
     _markerIconLocked =
-        await _createMarkerImageFromAsset('assets/images/locked-padlock.png');
+        await _createMarkerImageFromAsset('assets/images/manette-red.png');
 
     for (var document in widget.places) {
       // retrieve the place from the unlockedPlaces collection, if present

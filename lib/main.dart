@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:one_context/one_context.dart';
 
 import 'login_page.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    _portraitModeOnly();
     return MaterialApp(
       builder: OneContext().builder, // needed?
       title: 'UrbanHunt',
@@ -29,6 +31,23 @@ class App extends StatelessWidget {
       //   '/second': (context) => LeaderBoard(),
       // },
     );
+  }
+
+  /// blocks rotation; sets orientation to: portrait
+  void _portraitModeOnly() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  void _enableRotation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 }
 

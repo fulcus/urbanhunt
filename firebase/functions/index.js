@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 const db = admin.firestore();
+const storage = admin.storage()
 
 exports.unlockPlacePoints = functions.firestore
   .document("users/{userId}/unlockedPlaces/{placeId}")
@@ -30,6 +31,18 @@ exports.deleteProfile = functions.auth.user().onDelete(async (user) => {
       await batch.commit();
 
       console.log(`Deleted profile ${user.uid}`);
+  });
+
+//clean storage after deleting a user
+exports.firestoreDeleteProfileCleanUp = functions.firestore
+    .document('users/{userId}')
+    .onDelete((snapshot,context) => {
+
+      const userId = context.params.userId
+      const defaultBucket = storage.bucket();
+      const file = defaultBucket.file("profile/" + userId);
+
+      return file.delete();
   });
 
 //todo check with security rules: when user added score == 0 and username is unique

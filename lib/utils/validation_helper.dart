@@ -37,7 +37,7 @@ class ValidationHelper {
     if (value.length < 3) {
       return 'Name is too short, use at least 3 characters';
     }
-    if (value.length > 50) {
+    if (value.length > 20) {
       return 'Name is too long, use at most 50 characters';
     }
     return null;

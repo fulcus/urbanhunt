@@ -89,105 +89,133 @@ class PlaceCardState extends State<PlaceCard> {
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // scroll hint and close button
-        topBar(),
-        // Image
-        imageBanner,
-        // Below Image: Place info
-        Padding(
-          padding: EdgeInsets.only(top: 8.0, left: 32.0, right: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Like/Dislike and Category tags
-              Row(
-                children: <Widget>[
-                  // Like Dislike stats
-                  GestureDetector(onTap: like, child: likeIcon),
-                  SizedBox(width: 4.0),
-                  Text(
-                    (widget.place.likes + (widget.isLiked ? 1 : 0)).toString(),
-                    style: TextStyle(
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green[600]),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height*0.8,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Image
+              imageBanner,
+              // scroll hint and close button
+              Positioned(child: topBar(), right: 0, left: 0, top: 1),
+              // Below Image: Place info
+              Positioned(
+                right: 0,
+                left: 0,
+                top: 162,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      topLeft: Radius.circular(8),
+                    ),
                   ),
-                  SizedBox(width: 16.0),
-                  GestureDetector(onTap: dislike, child: dislikeIcon),
-                  SizedBox(width: 4.0),
-                  Text(
-                    (widget.place.dislikes + (widget.isDisliked ? 1 : 0))
-                        .toString(),
-                    style: TextStyle(
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red[600]),
+                  padding: EdgeInsets.only(top: 10.0, left: 32.0, right: 32.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // Like/Dislike and Category tags
+                      Row(
+                        children: <Widget>[
+                          // Like Dislike stats
+                          GestureDetector(onTap: like, child: likeIcon),
+                          SizedBox(width: 4.0),
+                          Text(
+                            (widget.place.likes + (widget.isLiked ? 1 : 0)).toString(),
+                            style: TextStyle(
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green[600]),
+                          ),
+                          SizedBox(width: 16.0),
+                          GestureDetector(onTap: dislike, child: dislikeIcon),
+                          SizedBox(width: 4.0),
+                          Text(
+                            (widget.place.dislikes + (widget.isDisliked ? 1 : 0))
+                                .toString(),
+                            style: TextStyle(
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red[600]),
+                          ),
+                          // Sep
+                          Spacer(),
+                          // Category tags
+                          Row(children: categoriesTags()),
+                        ],
+                      ),
+                      // Sep
+                      SizedBox(height: 10.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Name
+                              Text(
+                                widget.place.name,
+                                style: TextStyle(
+                                  fontSize: 22.0,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              // Sep
+                              SizedBox(height: 4.0),
+                              // Address
+                              Text(
+                                widget.place.street+'\n'+ widget.place.city+' ('+ widget.place.country+')',
+                                style: TextStyle(
+                                    fontSize: 12.0,
+                                    color: Colors.grey
+                                ),
+                              ),
+                              // Sep
+                              SizedBox(height: 10.0),
+                              // Distance
+                              if (_isGPSon)
+                                Text(
+                                  _displayDistance,
+                                  style: TextStyle(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.black45,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              // Open directions in Google Maps
+                              GmapButton(
+                                latitude: widget.place.latitude,
+                                longitude: widget.place.longitude,
+                              ),
+                              SizedBox(height: 12.0),
+                              // Share GPS position with a friend
+                              ShareButton(
+                                latitude: widget.place.latitude,
+                                longitude: widget.place.longitude,
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                      // Sep
+                      SizedBox(height: 10.0),
+                      Divider(height: 8),
+                      // Description
+                      Text('Description:', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w600)),
+                      SizedBox(height: 4.0),
+                      Text(description, style: TextStyle(fontSize: 12.0)),
+                      // Sep
+                      SizedBox(height: 370.0),
+                    ],
                   ),
-                  // Sep
-                  Spacer(),
-                  // Category tags
-                  Row(children: categoriesTags()),
-                ],
-              ),
-              // Sep
-              SizedBox(height: 6.0),
-              Row(
-                children: [
-                  Column(children: [
-                    // Open directions in Google Maps
-                    GmapButton(
-                      latitude: widget.place.latitude,
-                      longitude: widget.place.longitude,
-                    )
-                  ]),
-                  SizedBox(width: 30.0),
-                  Column(children: [
-                    // Share GPS position with a friend
-                    ShareButton(
-                      latitude: widget.place.latitude,
-                      longitude: widget.place.longitude,
-                    )
-                  ])
-                ],
-              ),
-              // Sep
-              SizedBox(height: 6.0),
-              // Name
-              Text(
-                widget.place.name,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w900,
                 ),
               ),
-              // Sep
-              SizedBox(height: 4.0),
-              // Address
-              Text(
-                widget.place.street+' - '+ widget.place.city+' ('+ widget.place.country+')',
-                style: TextStyle(
-                  fontSize: 14.0,
-                ),
-              ),
-              // Sep
-              SizedBox(height: 4.0),
-              // Distance
-              if (_isGPSon)
-                Text(
-                  _displayDistance,
-                  style: TextStyle(
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black45,
-                  ),
-                ),
-              SizedBox(height: 4.0),
-              // Sep
-              SizedBox(height: 8.0),
-              // Description
-              Text(description, style: TextStyle(fontSize: 12.0)),
-              // Sep
-              SizedBox(height: 32.0),
             ],
           ),
         ),
@@ -196,10 +224,14 @@ class PlaceCardState extends State<PlaceCard> {
 
     if (widget.fullscreen) {
       return Scaffold(
-        appBar: AppBar(title: Text('Unlocked Place')),
+        appBar: AppBar(
+          title: Text('Unlocked Place'),
+          elevation: 0.0,
+          bottomOpacity: 0.0,
+        ),
         body: Material(
           elevation: 10,
-          shadowColor: Colors.black,
+          color: Colors.blue,
           child: content,
         ),
       );
@@ -346,7 +378,11 @@ class PlaceCardState extends State<PlaceCard> {
       title: "",
       message: message,
       duration: Duration(seconds: 5),
-      padding: EdgeInsets.only(bottom: 65),
+      padding: EdgeInsets.only(bottom: 60),
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(14),
+        topLeft: Radius.circular(14),
+      ),
       icon: Icon(Icons.error_outline, color: Colors.transparent),
     ).show(context);
   }
@@ -382,7 +418,7 @@ class PlaceCardState extends State<PlaceCard> {
           return newLikesCount;
         })
         .then((value) => print('Likes count updated to $value'))
-        .catchError((Error error) => print('Failed to update likes: $error'));
+        .catchError((Object error, StackTrace stacktrace) => print('Failed to update likes: $error'));
   }
 
   Future<void> _dbUpdateDislikes(int dislikesIncrement) async {
@@ -415,7 +451,7 @@ class PlaceCardState extends State<PlaceCard> {
         })
         .then((value) => print('Dislikes count updated to $value'))
         .catchError(
-            (Object error) => print('Failed to update dislikes: $error'));
+            (Object error,  StackTrace stacktrace) => print('Failed to update dislikes: $error'));
   }
 
   // @param fromLikeToDislike == true : add dislike and remove like and vice versa
@@ -456,7 +492,7 @@ class PlaceCardState extends State<PlaceCard> {
         })
         .then((value) => print('Dislikes count updated to $value'))
         .catchError(
-            (Error error) => print('Failed to update dislikes: $error'));
+            (Object error, StackTrace stacktrace) => print('Failed to update dislikes: $error'));
   }
 
   Future<void> _dbUnlockPlace() async {
@@ -476,7 +512,7 @@ class PlaceCardState extends State<PlaceCard> {
       height: 4.0,
       decoration: BoxDecoration(
         color: Colors.blueGrey[100],
-        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+        borderRadius: BorderRadius.all(Radius.circular(14.0)),
       ),
     );
 
@@ -494,16 +530,18 @@ class PlaceCardState extends State<PlaceCard> {
       height: 24.0,
       child: Row(
         children: <Widget>[
-          Expanded(child: Container()),
+          Expanded(child: Container(color: Colors.transparent)),
           Expanded(
               child: Container(
-            alignment: Alignment.center,
-            child: scrollHint,
+                color: Colors.transparent,
+                alignment: Alignment.center,
+                child: scrollHint,
           )),
           Expanded(
               child: Container(
-            alignment: Alignment.centerRight,
-            child: closeIcon,
+                color: Colors.transparent,
+                alignment: Alignment.centerRight,
+                child: closeIcon,
           )),
         ],
       ),
@@ -516,7 +554,7 @@ class PlaceCardState extends State<PlaceCard> {
       children: <Widget>[
         Container(
           width: double.infinity,
-          height: 150.0,
+          height: 180.0,
           alignment: Alignment.center,
           child: Stack(
             children: <Widget>[
@@ -528,9 +566,24 @@ class PlaceCardState extends State<PlaceCard> {
                 ).createShader(rect),
                 blendMode: BlendMode.darken,
                 child: Center(
-                    child: Image.network(widget.place.imageURL, height: 150.0)),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(14),
+                        topLeft: Radius.circular(14),
+                      ),
+                      child: Image.network(
+                        widget.place.imageURL,
+                        height: 180.0,
+                        width: MediaQuery.of(context).size.width,
+                        fit: BoxFit.cover,
+                      )),
+                    )
               ),
               ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(14),
+                  topLeft: Radius.circular(14),
+                ),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                   child: Container(
@@ -542,8 +595,7 @@ class PlaceCardState extends State<PlaceCard> {
             ],
           ),
         ),
-        Align(
-          alignment: Alignment.center,
+        Positioned(
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -562,16 +614,27 @@ class PlaceCardState extends State<PlaceCard> {
   Widget imageBannerUnlocked() {
     return Container(
       width: double.infinity,
-      height: 150.0,
+      height: 180.0,
       alignment: Alignment.center,
-      child: ShaderMask(
-        shaderCallback: (rect) => LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.center,
-          colors: [Colors.black, Colors.transparent],
-        ).createShader(rect),
-        blendMode: BlendMode.darken,
-        child: Image.network(widget.place.imageURL, height: 150.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(14),
+          topLeft: Radius.circular(14),
+        ),
+        child:  ShaderMask(
+          shaderCallback: (rect) => LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.center,
+            colors: [Colors.black, Colors.transparent],
+          ).createShader(rect),
+          blendMode: BlendMode.darken,
+          child: Image.network(
+            widget.place.imageURL,
+            height: 180.0,
+            width: MediaQuery.of(context).size.width,
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
     );
   }
