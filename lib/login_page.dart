@@ -262,6 +262,12 @@ void _showInSnackBar(String value, GlobalKey<ScaffoldMessengerState> _scaffoldMe
   _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
   _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
     content: Text(value),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(14),
+        topLeft: Radius.circular(14),
+      ),
+    ),
   ));
 }
 
@@ -568,9 +574,9 @@ class _LoginPageState extends State<LoginPage> {
             width: 200.0,
             child: Stack(
               children: [
-                heading1('City', 0.0, 0.0),
+                heading1('Urban', 0.0, 0.0),
                 heading1('Hunt', 25.0, 75.0),
-                iconLock(156.0, 65.0),
+                iconLock(246.0, 65.0),
               ],
             ),
           ),

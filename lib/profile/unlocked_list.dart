@@ -41,10 +41,12 @@ class _UnlockedListState extends State<UnlockedList> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       if(snapshot.data!.docs.isEmpty) {
-                        return Align(
+                        return Padding(
+                          padding: EdgeInsets.only(
+                              left: 25.0, right: 25.0, top: 2.0),
                           child: Text(
-                            'You have not unlocked any place yet. Get to work!',
-                            style: TextStyle(fontSize: 24),
+                            'You have not unlocked any place yet.\nGet to work!',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                           ),
                         );
                       }

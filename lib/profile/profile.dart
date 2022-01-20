@@ -38,6 +38,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   final ImageHelper imageHelper = ImageHelper();
   final GlobalKey<FormFieldState> _nameFormKey = GlobalKey<FormFieldState>();
   final GlobalKey<FormFieldState> _pswFormKey = GlobalKey<FormFieldState>();
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final TextEditingController _nameController = TextEditingController();
 
   late User _myUser;
@@ -58,271 +59,160 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: StreamBuilder<QuerySnapshot>(
-            stream: _myUserData,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var url = snapshot.data!.docs[0].get('imageURL').toString();
-                var username =
-                    snapshot.data!.docs[0].get('username').toString();
-                var countryCode =
-                    snapshot.data!.docs[0].get('country').toString();
-                var countryName = CountryParser.parse(countryCode).name;
-                var score = snapshot.data!.docs[0].get('score').toString();
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: Scaffold(
+          appBar: AppBar(title: Text('Profile')),
+          body: StreamBuilder<QuerySnapshot>(
+              stream: _myUserData,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  var url = snapshot.data!.docs[0].get('imageURL').toString();
+                  var username =
+                  snapshot.data!.docs[0].get('username').toString();
+                  var countryCode =
+                  snapshot.data!.docs[0].get('country').toString();
+                  var countryName = CountryParser.parse(countryCode).name;
+                  var score = snapshot.data!.docs[0].get('score').toString();
 
 
 
-                return Container(
-                  color: Colors.white,
-                  child: ListView(
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Container(
-                            height: 230.0,
-                            color: Colors.white,
-                            child: Column(
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.only(top: 30.0),
-                                  child: Stack(
-                                      fit: StackFit.loose,
-                                      children: <Widget>[
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                                width: 140.0,
-                                                height: 140.0,
-                                                decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                      image: imageHelper.showImage(
-                                                          url,
-                                                          'assets/images/as.png'),
-                                                      fit: BoxFit.cover,
-                                                    )))
-                                          ],
-                                        ),
-                                        Padding(
-                                            padding: EdgeInsets.only(
-                                                top: 90.0, right: 100.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                FloatingActionButton(
-                                                  child: CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.blueAccent,
-                                                    radius: 25.0,
-                                                    child: Icon(
-                                                      Icons.camera_alt,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  onPressed: () async => {
-                                                    await getImage(),
-                                                    await imageHelper
-                                                        .uploadImage(
-                                                            _image!, _myUser)
-                                                  },
-                                                )
-                                              ],
-                                            )),
-                                      ]),
-                                )
-                              ],
-                            ),
-                          ),
-
-                          Divider(height: 1),
-
-                          Container(
-                            color: Colors.white,
-                            child: Padding(
-                              padding: EdgeInsets.only(bottom: 25.0),
+                  return Container(
+                    color: Colors.white,
+                    child: ListView(
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Container(
+                              height: 230.0,
+                              color: Colors.white,
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 10.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        mainAxisSize: MainAxisSize.max,
+                                    padding: EdgeInsets.only(top: 30.0),
+                                    child: Stack(
+                                        fit: StackFit.loose,
                                         children: <Widget>[
-                                          Column(
+                                          Row(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                             mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
+                                            MainAxisAlignment.center,
                                             children: <Widget>[
-                                              Text(
-                                                'Personal Information',
-                                                style: TextStyle(
-                                                    fontSize: 18.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
+                                              Container(
+                                                  width: 140.0,
+                                                  height: 140.0,
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                        image: imageHelper.showImage(
+                                                            url,
+                                                            'assets/images/as.png'),
+                                                        fit: BoxFit.cover,
+                                                      )))
                                             ],
                                           ),
-                                        ],
-                                      )),
+                                          Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 90.0, right: 100.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  FloatingActionButton(
+                                                    child: CircleAvatar(
+                                                      backgroundColor:
+                                                      Colors.blueAccent,
+                                                      radius: 25.0,
+                                                      child: Icon(
+                                                        Icons.camera_alt,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    onPressed: () async => {
+                                                      await getImage(),
+                                                      await imageHelper
+                                                          .uploadImage(
+                                                          _image!, _myUser)
+                                                    },
+                                                  )
+                                                ],
+                                              )),
+                                        ]),
+                                  )
+                                ],
+                              ),
+                            ),
 
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              Text(
-                                                'Name',
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              _status
-                                                  ? _getEditIcon()
-                                                  : Container(),
-                                            ],
-                                          )
-                                        ],
-                                      )),
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 2.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Flexible(
-                                              child: TextFormField(
-                                            key: _nameFormKey,
-                                            controller: _nameController
-                                              ..text = username,
-                                            decoration: const InputDecoration(
-                                              hintText: 'Enter Your Name',
+                            Divider(height: 1),
+
+                            Container(
+                              color: Colors.white,
+                              child: Padding(
+                                padding: EdgeInsets.only(bottom: 25.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 10.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Text(
+                                                  'Personal Information',
+                                                  style: TextStyle(
+                                                      fontSize: 18.0,
+                                                      fontWeight:
+                                                      FontWeight.bold),
+                                                ),
+                                              ],
                                             ),
-                                            enabled: !_status,
-                                            autofocus: !_status,
-                                            autovalidateMode: AutovalidateMode
-                                                .onUserInteraction,
-                                            onChanged: (name) => {
-                                              if (_nameController.text !=
-                                                  username)
-                                                {
-                                                  _isUsernameUnique(
-                                                      _nameController.text),
-                                                  _newName =
-                                                      _nameController.text,
-                                                  _onChanged = true,
-                                                }
-                                            },
-                                            validator: _validateName,
-                                          )),
-                                        ],
-                                      )),
-                                  !_status ? _getActionButtons() : Container(),
+                                          ],
+                                        )),
 
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              Text(
-                                                'Email',
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      )),
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 2.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Flexible(
-                                            child: TextField(
-                                              controller:
-                                                  TextEditingController()
-                                                    ..text = _myUser.email
-                                                        .toString(),
-                                              //email cannot be changed
-                                              enabled: false,
-                                            ),
-                                          ),
-                                        ],
-                                      )),
-
-                                  //if the user is not logged with email and password, the password is not shown
-                                  if (_isEmailAuth)
                                     Padding(
                                         padding: EdgeInsets.only(
                                             left: 25.0, right: 25.0, top: 25.0),
                                         child: Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                           mainAxisSize: MainAxisSize.max,
                                           children: <Widget>[
                                             Column(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                              MainAxisAlignment.start,
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
                                                 Text(
-                                                  'Password',
+                                                  'Name',
                                                   style: TextStyle(
                                                       fontSize: 16.0,
                                                       fontWeight:
-                                                          FontWeight.bold),
+                                                      FontWeight.bold),
                                                 ),
                                               ],
                                             ),
                                             Column(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.end,
+                                              MainAxisAlignment.end,
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
-                                                _enabled
-                                                    ? _getEditIcon2()
+                                                _status
+                                                    ? _getEditIcon()
                                                     : Container(),
                                               ],
                                             )
                                           ],
                                         )),
-                                  if (_isEmailAuth)
                                     Padding(
                                         padding: EdgeInsets.only(
                                             left: 25.0, right: 25.0, top: 2.0),
@@ -330,293 +220,454 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           mainAxisSize: MainAxisSize.max,
                                           children: <Widget>[
                                             Flexible(
-                                              child: TextFormField(
-                                                key: _pswFormKey,
-                                                controller:
-                                                    TextEditingController()
-                                                      ..text = '**********',
-                                                obscureText: true,
-                                                enabled: !_enabled,
-                                                autofocus: !_enabled,
-                                                autovalidateMode:
-                                                    AutovalidateMode
-                                                        .onUserInteraction,
-                                                onChanged: (password) =>
-                                                    _newPassword = password,
-                                                validator: ValidationHelper()
-                                                    .validatePassword,
-                                              ),
+                                                child: TextFormField(
+                                                  key: _nameFormKey,
+                                                  controller: _nameController
+                                                    ..text = username,
+                                                  decoration: const InputDecoration(
+                                                    hintText: 'Enter Your Name',
+                                                  ),
+                                                  enabled: !_status,
+                                                  autofocus: !_status,
+                                                  autovalidateMode: AutovalidateMode
+                                                      .onUserInteraction,
+                                                  onChanged: (name) => {
+                                                    if (_nameController.text !=
+                                                        username)
+                                                      {
+                                                        _isUsernameUnique(
+                                                            _nameController.text),
+                                                        _newName =
+                                                            _nameController.text,
+                                                        _onChanged = true,
+                                                      }
+                                                  },
+                                                  validator: _validateName,
+                                                )),
+                                          ],
+                                        )),
+                                    !_status ? _getActionButtons() : Container(),
+
+                                    Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 25.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Text(
+                                                  'Email',
+                                                  style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                      FontWeight.bold),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         )),
-                                  !_enabled ? _getActionButtons() : Container(),
 
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
+                                    //if the user logged with email and password and the mail is not verified button to send verification
+                                    if (_isEmailAuth && !_myUser.emailVerified)
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 25.0, right: 25.0, top: 2.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
                                             children: <Widget>[
-                                              Text(
-                                                'Country',
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      )),
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 2.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Flexible(
-                                            child: TextField(
-                                              controller:
+                                              Flexible(
+                                                child: TextField(
+                                                  controller:
                                                   TextEditingController()
-                                                    ..text = countryName,
-                                              decoration: const InputDecoration(
-                                                  hintText:
-                                                      'Enter your Country'),
-                                              enabled: false,
-                                              autofocus: !_status,
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            child: CircleAvatar(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              radius: 14.0,
-                                              child: Icon(
-                                                Icons.arrow_drop_down,
-                                                color: Colors.black87,
-                                                size: 30.0,
+                                                    ..text = _myUser.email
+                                                        .toString(),
+                                                  //email cannot be changed
+                                                  enabled: false,
+                                                ),
                                               ),
-                                            ),
-                                            onTap: () => showCountryPicker(
-                                                context: context,
-                                                showPhoneCode: false,
-                                                onSelect: (country) {
-                                                  countryName = country.name;
-                                                  _updateCountry(country.countryCode);
-                                                }),
-                                          ),
-                                        ],
-                                      )),
-
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 25.0, right: 25.0, top: 25.0),
-                                    child: Container(
-                                      child: Row(children: [
-                                        Text(
-                                          'Total Score: ',
-                                          style: TextStyle(fontSize: 16,
-                                              fontWeight:FontWeight.bold),
-                                        ),
-                                        Container(child: Center(
-                                            child: Text(
-                                                score,
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                    fontSize: 24,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.blueAccent
-                                                ))
-                                        ),
-                                          width: 30.0,
-                                          height: 30.0,
-                                          decoration: BoxDecoration(
-                                            border: Border.all(color: Colors.amber),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                        Text(
-                                          ' ',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        Icon(Icons.vpn_key, color: Colors.amber)
-                                      ]),
-                                    ),
-                                  ),
-
-                                  Divider(height: 40),
-
-                                  Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 10.0, bottom: 10.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              Text(
-                                                'My Unlocked Places',
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
                                               GestureDetector(
-                                                onTap: () => Navigator.push(context,
-                                                    MaterialPageRoute<void>(builder: (context) => UnlockedList())),
+                                                onTap: () => {
+                                                  _myUser.sendEmailVerification(ActionCodeSettings(url: 'https://hunt-app-ef3f2.firebaseapp.com/__/auth/action', handleCodeInApp: true)),
+                                                  _showInSnackBar('A verification email has been sent to your email box.')
+                                                },
                                                 child: CircleAvatar(
                                                   backgroundColor:
-                                                      Colors.blueAccent,
+                                                  Color.fromARGB(255,235,82,105),
                                                   radius: 14.0,
                                                   child: Icon(
-                                                    Icons.lock_open,
+                                                    Icons.close_rounded,
                                                     color: Colors.white,
                                                     size: 16.0,
                                                   ),
                                                 ),
                                               )
                                             ],
-                                          )
-                                        ],
-                                      )),
-
-                                  Divider(height: 40),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      //LOGOUT button
+                                          )),
+                                    if(_isEmailAuth && _myUser.emailVerified || !_isEmailAuth)
                                       Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 25.0, right: 25.0, top: 2.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: <Widget>[
+                                              Flexible(
+                                                child: TextField(
+                                                  controller:
+                                                  TextEditingController()
+                                                    ..text = _myUser.email
+                                                        .toString(),
+                                                  //email cannot be changed
+                                                  enabled: false,
+                                                ),
+                                              ),
+                                               CircleAvatar(
+                                                  backgroundColor: Colors.transparent,
+                                                  radius: 14.0,
+                                                  child: Icon(
+                                                    Icons.verified,
+                                                    color: Color.fromARGB(255,103,196,211),
+                                                    size: 20.0,
+                                                  ),
+                                                ),
+                                            ],
+                                          )),
+
+                                    //if the user is not logged with email and password, the password is not shown
+                                    if (_isEmailAuth)
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 25.0, right: 25.0, top: 25.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: <Widget>[
+                                              Column(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  Text(
+                                                    'Password',
+                                                    style: TextStyle(
+                                                        fontSize: 16.0,
+                                                        fontWeight:
+                                                        FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  _enabled
+                                                      ? _getEditIcon2()
+                                                      : Container(),
+                                                ],
+                                              )
+                                            ],
+                                          )),
+                                    if (_isEmailAuth)
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 25.0, right: 25.0, top: 2.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: <Widget>[
+                                              Flexible(
+                                                child: TextFormField(
+                                                  key: _pswFormKey,
+                                                  controller:
+                                                  TextEditingController()
+                                                    ..text = '**********',
+                                                  obscureText: true,
+                                                  enabled: !_enabled,
+                                                  autofocus: !_enabled,
+                                                  autovalidateMode:
+                                                  AutovalidateMode
+                                                      .onUserInteraction,
+                                                  onChanged: (password) =>
+                                                  _newPassword = password,
+                                                  validator: ValidationHelper()
+                                                      .validatePassword,
+                                                ),
+                                              ),
+                                            ],
+                                          )),
+                                    !_enabled ? _getActionButtons() : Container(),
+
+                                    Padding(
                                         padding: EdgeInsets.only(
                                             left: 25.0, right: 25.0, top: 25.0),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.max,
                                           children: <Widget>[
-                                            GestureDetector(
-                                                child: Container(
-                                                  width: 120.0,
-                                                  height: 60.0,
-                                                  decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                          color: Colors.black87),
-                                                      borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    children: [
-                                                      SizedBox(width: 6.0),
-                                                      Icon(Icons.exit_to_app,
-                                                          color: Colors.black87),
-                                                      SizedBox(width: 4.0),
-                                                      Text(
-                                                        'Logout',
-                                                        style: TextStyle(
-                                                          color: Colors.black87,
-                                                          fontWeight:
-                                                          FontWeight.bold,
-                                                          fontSize: 16.0,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Text(
+                                                  'Country',
+                                                  style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                      FontWeight.bold),
                                                 ),
-                                                onTap: () {
-                                                  Navigator.of(context, rootNavigator: true)
-                                                      .pushAndRemoveUntil(MaterialPageRoute<void>(
-                                                      builder: (context) => LoginPage()),
-                                                        (route) => false,
-                                                  );
-                                                })
+                                              ],
+                                            ),
+                                          ],
+                                        )),
+                                    Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 2.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            Flexible(
+                                              child: TextField(
+                                                controller:
+                                                TextEditingController()
+                                                  ..text = countryName,
+                                                decoration: const InputDecoration(
+                                                    hintText:
+                                                    'Enter your Country'),
+                                                enabled: false,
+                                                autofocus: !_status,
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              child: CircleAvatar(
+                                                backgroundColor:
+                                                Colors.transparent,
+                                                radius: 14.0,
+                                                child: Icon(
+                                                  Icons.arrow_drop_down,
+                                                  color: Colors.black87,
+                                                  size: 30.0,
+                                                ),
+                                              ),
+                                              onTap: () => showCountryPicker(
+                                                  context: context,
+                                                  showPhoneCode: false,
+                                                  onSelect: (country) {
+                                                    countryName = country.name;
+                                                    _updateCountry(country.countryCode);
+                                                  }),
+                                            ),
                                           ],
                                         )),
 
-                                    //DELETE ACCOUNT BUTTON
                                     Padding(
-                                      padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          GestureDetector(
-                                              child: Container(
-                                                width: 120.0,
-                                                height: 60.0,
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: Colors.black87),
-                                                    borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(20))),
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                  children: [
-                                                    SizedBox(width: 6.0),
-                                                    Icon(Icons.delete_outline,
-                                                        color: Colors.black87),
-                                                    SizedBox(width: 4.0),
-                                                    Text(
-                                                      'Delete\nAccount',
-                                                      style: TextStyle(
-                                                        color: Colors.black87,
-                                                        fontWeight:
-                                                        FontWeight.bold,
-                                                        fontSize: 16.0,
+                                      padding: EdgeInsets.only(
+                                          left: 25.0, right: 25.0, top: 25.0),
+                                      child: Container(
+                                        child: Row(children: [
+                                          Text(
+                                            'Total Score: ',
+                                            style: TextStyle(fontSize: 16,
+                                                fontWeight:FontWeight.bold),
+                                          ),
+                                          Container(child: Center(
+                                              child: Text(
+                                                  score,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                      fontSize: 24,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.blueAccent
+                                                  ))
+                                          ),
+                                            width: 30.0,
+                                            height: 30.0,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: Colors.amber),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          Text(
+                                            ' ',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                          Icon(Icons.vpn_key, color: Colors.amber)
+                                        ]),
+                                      ),
+                                    ),
+
+                                    Divider(height: 40),
+
+                                    Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 10.0, bottom: 10.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: <Widget>[
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Text(
+                                                  'My Unlocked Places',
+                                                  style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                      FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                GestureDetector(
+                                                  onTap: () => Navigator.push(context,
+                                                      MaterialPageRoute<void>(builder: (context) => UnlockedList())),
+                                                  child: CircleAvatar(
+                                                    backgroundColor:
+                                                    Colors.blueAccent,
+                                                    radius: 14.0,
+                                                    child: Icon(
+                                                      Icons.lock_open,
+                                                      color: Colors.white,
+                                                      size: 16.0,
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                          ],
+                                        )),
+
+                                    Divider(height: 40),
+
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        //LOGOUT button
+                                        Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 25.0, right: 25.0, top: 25.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: <Widget>[
+                                                GestureDetector(
+                                                    child: Container(
+                                                      width: 120.0,
+                                                      height: 60.0,
+                                                      decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                              color: Colors.black87),
+                                                          borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(20))),
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        children: [
+                                                          SizedBox(width: 6.0),
+                                                          Icon(Icons.exit_to_app,
+                                                              color: Colors.black87),
+                                                          SizedBox(width: 4.0),
+                                                          Text(
+                                                            'Logout',
+                                                            style: TextStyle(
+                                                              color: Colors.black87,
+                                                              fontWeight:
+                                                              FontWeight.bold,
+                                                              fontSize: 16.0,
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
-                                                  ],
-                                                ),
-                                              ),
-                                              onTap: () {
-                                                showDialog<dynamic>(
-                                                barrierColor: Colors.black26,
-                                                context: context,
-                                                builder: (context) {
-                                                  return CustomAlertDialog(
-                                                    title: "Delete account",
-                                                    description: "You will lose all your progress.\n"
-                                                        "Are you sure to delete your account?\n",
-                                                  );
-                                                });
-                                              })
-                                        ],
-                                      ),
-                                    )
-                                  ],)
-                                ],
+                                                    onTap: () {
+                                                      Navigator.of(context, rootNavigator: true)
+                                                          .pushAndRemoveUntil(MaterialPageRoute<void>(
+                                                          builder: (context) => LoginPage()),
+                                                            (route) => false,
+                                                      );
+                                                    })
+                                              ],
+                                            )),
+
+                                        //DELETE ACCOUNT BUTTON
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: <Widget>[
+                                              GestureDetector(
+                                                  child: Container(
+                                                    width: 120.0,
+                                                    height: 60.0,
+                                                    decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color: Colors.black87),
+                                                        borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(20))),
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      children: [
+                                                        SizedBox(width: 6.0),
+                                                        Icon(Icons.delete_outline,
+                                                            color: Colors.black87),
+                                                        SizedBox(width: 4.0),
+                                                        Text(
+                                                          'Delete\nAccount',
+                                                          style: TextStyle(
+                                                            color: Colors.black87,
+                                                            fontWeight:
+                                                            FontWeight.bold,
+                                                            fontSize: 16.0,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    showDialog<dynamic>(
+                                                        barrierColor: Colors.black26,
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return CustomAlertDialog(
+                                                            title: "Delete account",
+                                                            description: "You will lose all your progress.\n"
+                                                                "Are you sure to delete your account?\n",
+                                                          );
+                                                        });
+                                                  })
+                                            ],
+                                          ),
+                                        )
+                                      ],)
+                                  ],
+                                ),
                               ),
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
-                );
-              } else {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }));
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              }))
+    );
   }
 
   Future<void> getImage() async {
@@ -632,6 +683,19 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         print("image not selected");
       }
     });
+  }
+
+  void _showInSnackBar(String value) {
+    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
+    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
+      content: Text(value),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(14),
+          topLeft: Radius.circular(14),
+        ),
+      ),
+    ));
   }
 
   void _isEmailAuthProvider() {
@@ -696,7 +760,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               .then((_) => print('Re-authenticated'))
               .catchError((Object error) {
             if (error is FirebaseAuthException) {
-              //TODO show UI
+              _showInSnackBar('Unable to change password. Please try again later.');
               print(error.message);
             } else {
               print(error.toString());

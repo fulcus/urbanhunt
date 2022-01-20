@@ -45,12 +45,16 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   List<String>? categories;
   LocationResult? pickedLocation;
 
+  final User _myUser = FirebaseAuth.instance.currentUser!;
+  bool _isEmailAuth = true;
+
   @override
   void initState() {
     super.initState();
     _name = FocusNode();
     _lockedDescription = FocusNode();
     _unlockedDescription = FocusNode();
+    _isEmailAuthProvider();
   }
 
   @override
@@ -248,37 +252,51 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   Future<void> _handleSubmitted() async {
     final form = _formKey.currentState!;
 
-    if (form.validate() && _validateImage() && _validateLocation()) {
-      form.save();
+    if(_isEmailAuth && !_myUser.emailVerified) {
+      _showInSnackBar('Please verify your email first.');
+    }
+    else {
+      if (form.validate() && _validateImage() && _validateLocation()) {
+        form.save();
 
-      var imageURL = await ImageHelper().uploadFile(_image!);
-      var creatorId = FirebaseAuth.instance.currentUser!.uid;
-      var data = PlaceData(name!, lockedDescription!, unlockedDescription!,
-          imageURL, creatorId, categories!, pickedLocation!);
-      data.upload();
+        var imageURL = await ImageHelper().uploadFile(_image!);
+        var creatorId = FirebaseAuth.instance.currentUser!.uid;
+        var data = PlaceData(
+            name!,
+            lockedDescription!,
+            unlockedDescription!,
+            imageURL,
+            creatorId,
+            categories!,
+            pickedLocation!);
+        data.upload();
 
-      print('Added place');
-      print('$name, $lockedDescription, $unlockedDescription, $pickedLocation, '
-          '$categories');
-      //showInSnackBar('Added Place');
+        print('Added place');
+        print(
+            '$name, $lockedDescription, $unlockedDescription, $pickedLocation, '
+                '$categories');
+        //showInSnackBar('Added Place');
 
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute<void>(builder: (context) => Contribute(),
-        ),
-      );
+        Navigator.of(context)
+            .pushReplacement(
+          MaterialPageRoute<void>(builder: (context) => Contribute(),
+          ),
+        );
 
-      Navigator.of(context)
-          .push(MaterialPageRoute<void>(builder: (context) => ContributeThankYou())
-      );
-    } else {
-      // Start validating on every change.
-      _autoValidateMode = AutovalidateMode.always;
-      //_showInSnackBar('Error in form');
-      form.save(); // ?
-      // only for debugging
-      // _reset();
-      // Navigator.of(_formKey.currentState!.context)
-      //     .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+        Navigator.of(context)
+            .push(
+            MaterialPageRoute<void>(builder: (context) => ContributeThankYou())
+        );
+      } else {
+        // Start validating on every change.
+        _autoValidateMode = AutovalidateMode.always;
+        //_showInSnackBar('Error in form');
+        form.save(); // ?
+        // only for debugging
+        // _reset();
+        // Navigator.of(_formKey.currentState!.context)
+        //     .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+      }
     }
   }
 
@@ -351,6 +369,14 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         print("image not selected");
       }
     });
+  }
+
+  void _isEmailAuthProvider() {
+    var providerId = _myUser.providerData[0].providerId;
+
+    if (providerId != 'password') {
+      _isEmailAuth = false;
+    }
   }
 
 }

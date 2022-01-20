@@ -45,19 +45,24 @@ class PlaceCard extends StatefulWidget {
 
 class PlaceCardState extends State<PlaceCard> {
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  final User _myUser = FirebaseAuth.instance.currentUser!;
   String _displayDistance = '';
   bool _isGPSon = false;
+  bool _isEmailAuth = true;
 
   PlaceCardState();
 
   @override
   void initState() {
     super.initState();
+
     _checkGPS().then((isGPSon) {
       if (isGPSon) {
         _displayDist();
       }
     });
+
+    _isEmailAuthProvider();
   }
 
   @override
@@ -123,6 +128,7 @@ class PlaceCardState extends State<PlaceCard> {
                           GestureDetector(onTap: like, child: likeIcon),
                           SizedBox(width: 4.0),
                           Text(
+                            //TODO bug in display of likes and dislikes (we don't need to sum 1 when we log)
                             (widget.place.likes + (widget.isLiked ? 1 : 0)).toString(),
                             style: TextStyle(
                                 fontSize: 11.0,
@@ -255,6 +261,14 @@ class PlaceCardState extends State<PlaceCard> {
   }
 
 
+  void _isEmailAuthProvider() {
+    var providerId = _myUser.providerData[0].providerId;
+
+    if (providerId != 'password') {
+      _isEmailAuth = false;
+    }
+  }
+
   Future<bool> _checkGPS() async {
     _isGPSon = await Geolocator.isLocationServiceEnabled();
     return _isGPSon;
@@ -302,37 +316,42 @@ class PlaceCardState extends State<PlaceCard> {
 
   // Interactions
   void tryUnlock() {
-    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-        .then((pos) {
-      setState(() {
-        var posDistance = Geolocator.distanceBetween(pos.latitude,
-            pos.longitude, widget.place.latitude, widget.place.longitude);
+    if(_isEmailAuth && !_myUser.emailVerified) {
+      _showInFlushBar('Please verify your email first.');
+    }
+    else {
+      Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+          .then((pos) {
+        setState(() {
+          var posDistance = Geolocator.distanceBetween(pos.latitude,
+              pos.longitude, widget.place.latitude, widget.place.longitude);
 
-        if (widget.isLocked && posDistance < UNLOCK_RANGE_METERS) {
-          widget.isLocked = false;
-          _dbUnlockPlace();
+          if (widget.isLocked && posDistance < UNLOCK_RANGE_METERS) {
+            widget.isLocked = false;
+            _dbUnlockPlace();
 
-          // somehow trigger update for marker icon with unlocked icon => replace Explore page
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute<void>(builder: (context) => Explore(),
-          ),
-          );
+            // somehow trigger update for marker icon with unlocked icon => replace Explore page
+            Navigator.of(context)
+                .pushReplacement(
+              MaterialPageRoute<void>(builder: (context) => Explore(),
+              ),
+            );
 
-          showDialog<dynamic>(
-              barrierColor: Colors.black26,
-              context: context,
-              builder: (context) {
-                return UnlockedPopup();
-              });
-
-        } else {
-          _showInFlushBar("You are too far.");
-        }
+            showDialog<dynamic>(
+                barrierColor: Colors.black26,
+                context: context,
+                builder: (context) {
+                  return UnlockedPopup();
+                });
+          } else {
+            _showInFlushBar("You are too far.");
+          }
+        });
+      }).catchError((Object error, StackTrace stacktrace) {
+        //if location is off use don't display anything
+        print('location is off, to unlock turn it on');
       });
-    }).catchError((Object error, StackTrace stacktrace) {
-      //if location is off use don't display anything
-      print('location is off, to unlock turn it on');
-    });
+    }
   }
 
   void like() {
@@ -377,7 +396,8 @@ class PlaceCardState extends State<PlaceCard> {
     Flushbar<dynamic>(
       title: "",
       message: message,
-      duration: Duration(seconds: 5),
+      duration: Duration(seconds: 4),
+      animationDuration: Duration(milliseconds: 300),
       padding: EdgeInsets.only(bottom: 60),
       borderRadius: BorderRadius.only(
         topRight: Radius.circular(14),
@@ -663,6 +683,9 @@ class PlaceCardState extends State<PlaceCard> {
     return tags;
   }
 }
+
+
+
 
 class GmapButton extends StatelessWidget {
   const GmapButton({

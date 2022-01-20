@@ -46,6 +46,6 @@ Future<String> getCountry() async {
   var n = Network('http://ip-api.com/json');
   var locationSTR = (await n.getData());
   dynamic locationx = jsonDecode(locationSTR);
-  return locationx['country'] as String;
+  return locationx['countryCode'] as String;
 }
 
