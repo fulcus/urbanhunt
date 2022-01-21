@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -52,7 +53,7 @@ class ImageHelper {
   ImageProvider showImage(String url, String asset) {
     ImageProvider imageProvider = AssetImage(asset);
     if (url != '') {
-      imageProvider = NetworkImage(url);
+      imageProvider = CachedNetworkImageProvider(url);
     }
     return imageProvider;
   }

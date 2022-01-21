@@ -357,8 +357,10 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   Future<void> getImage() async {
-    await picker.pickImage(source: ImageSource.gallery)
-        .then((image) async {
+    await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 20
+    ).then((image) async {
       if(image!=null) {
         print("image selected");
         setState(() {

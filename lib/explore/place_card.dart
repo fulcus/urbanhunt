@@ -1,11 +1,14 @@
 import 'dart:ui';
 
 import 'package:another_flushbar/flushbar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/unlocked_popup.dart';
 import 'package:share_plus/share_plus.dart';
@@ -24,7 +27,7 @@ final FirebaseStorage storage = FirebaseStorage.instance;
 // Map category tag to its color
 final Map<String, Color> categoryColors = {};
 
-class PlaceCard extends StatefulWidget {
+class PlaceCard extends StatefulWidget with ClusterItem {
   // new card should be created for each place
   // isLocked, isLiked, isDisliked are actually part of state
 
@@ -41,6 +44,14 @@ class PlaceCard extends StatefulWidget {
 
   @override
   PlaceCardState createState() => PlaceCardState();
+
+  @override
+  LatLng get location {
+    return LatLng(
+      document['location'].latitude as double,
+      document['location'].longitude as double,
+    );
+  }
 }
 
 class PlaceCardState extends State<PlaceCard> {
@@ -471,7 +482,7 @@ class PlaceCardState extends State<PlaceCard> {
         })
         .then((value) => print('Dislikes count updated to $value'))
         .catchError(
-            (Object error,  StackTrace stacktrace) => print('Failed to update dislikes: $error'));
+            (Object error, StackTrace stacktrace) => print('Failed to update dislikes: $error'));
   }
 
   // @param fromLikeToDislike == true : add dislike and remove like and vice versa
@@ -591,13 +602,15 @@ class PlaceCardState extends State<PlaceCard> {
                         topRight: Radius.circular(14),
                         topLeft: Radius.circular(14),
                       ),
-                      child: Image.network(
-                        widget.place.imageURL,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.place.imageURL,
                         height: 180.0,
                         width: MediaQuery.of(context).size.width,
                         fit: BoxFit.cover,
-                      )),
-                    )
+                        errorWidget: (context, url, dynamic error) => Icon(Icons.error),
+                      ),
+                    ),
+                )
               ),
               ClipRRect(
                 borderRadius: BorderRadius.only(
@@ -648,11 +661,12 @@ class PlaceCardState extends State<PlaceCard> {
             colors: [Colors.black, Colors.transparent],
           ).createShader(rect),
           blendMode: BlendMode.darken,
-          child: Image.network(
-            widget.place.imageURL,
+          child: CachedNetworkImage(
+            imageUrl: widget.place.imageURL,
             height: 180.0,
             width: MediaQuery.of(context).size.width,
             fit: BoxFit.cover,
+            errorWidget: (context, url, dynamic error) => Icon(Icons.error),
           ),
         ),
       ),

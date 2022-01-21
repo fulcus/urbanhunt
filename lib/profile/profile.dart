@@ -671,8 +671,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   }
 
   Future<void> getImage() async {
-    await picker.pickImage(source: ImageSource.gallery)
-        .then((image) async {
+    await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 20
+    ).then((image) async {
       if(image!=null) {
         print("image selected");
         setState(() {
@@ -688,7 +690,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   void _showInSnackBar(String value) {
     _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
     _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-      content: Text(value),
+      content: Container(
+        child: Text(value),
+        height: 70.0,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(14),
