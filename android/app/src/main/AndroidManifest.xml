@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.INTERNET" /> <!-- Facebook Login -->
     <application
         android:icon="@mipmap/ic_launcher"
-        android:label="hunt_app"
+        android:label="UrbanHunt"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         <!-- usesCleartextTraffic for http request, requestLegacyExternalStorage for image picker-->

@@ -11,6 +11,7 @@ import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/unlocked_popup.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,10 +35,11 @@ class PlaceCard extends StatefulWidget with ClusterItem {
   DocumentSnapshot document;
   PlaceData place;
   bool fullscreen, isLocked, isLiked, isDisliked;
+  Timestamp unlockDate;
   late void Function() onCardClose;
 
   PlaceCard(this.document, this.isLocked, this.isLiked, this.isDisliked,
-      this.onCardClose,
+      this.onCardClose, this.unlockDate,
       {this.fullscreen = false, Key? key})
       : place = PlaceData.fromSnapshot(document),
         super(key: key);
@@ -201,6 +203,16 @@ class PlaceCardState extends State<PlaceCard> {
                                     color: Colors.black45,
                                   ),
                                 ),
+                              SizedBox(height: 10.0),
+                              // Unlock date
+                              if(!widget.isLocked)
+                                Text(
+                                  'Unlocked on '+ DateFormat.yMMMMd('en_US').format(widget.unlockDate.toDate()).toString(),
+                                  style: TextStyle(
+                                      fontSize: 10.0,
+                                      color: Colors.grey
+                                  ),
+                                )
                             ],
                           ),
                           Column(
@@ -531,7 +543,7 @@ class PlaceCardState extends State<PlaceCard> {
     // Only need to update UI with new info and write 'unlocking' to db.
     var unlockedPlaces =
         db.collection('users').doc(userId).collection('unlockedPlaces');
-    var data = <String, dynamic>{'liked': false, 'disliked': false};
+    var data = <String, dynamic>{'liked': false, 'disliked': false, 'unlockDate': Timestamp.now()};
 
     return await unlockedPlaces.doc(widget.place.id).set(data);
   }

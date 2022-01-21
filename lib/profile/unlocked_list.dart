@@ -115,6 +115,7 @@ class _HelperState extends State<Helper> {
                         currUlkPlace,
                         widget.unlocked[index].get('liked') as bool,
                         widget.unlocked[index].get('disliked') as bool,
+                        widget.unlocked[index].get('unlockDate') as Timestamp,
                         currUlkPlace.get('address.city').toString(),
                         currUlkPlace.get('address.country').toString(),
                         currUlkPlace.get('address.street').toString(),
@@ -139,6 +140,7 @@ class UnlockedListRow extends StatelessWidget {
   final DocumentSnapshot doc;
   final bool isLiked;
   final bool isDisliked;
+  final Timestamp unlockDate;
   final String city;
   final String country;
   final String street;
@@ -149,6 +151,7 @@ class UnlockedListRow extends StatelessWidget {
       this.doc,
       this.isLiked,
       this.isDisliked,
+      this.unlockDate,
       this.city,
       this.country,
       this.street,
@@ -232,7 +235,7 @@ class UnlockedListRow extends StatelessWidget {
           ),
         ),
         onTap: () => Navigator.push(context,
-            MaterialPageRoute<void>(builder: (context) => PlaceCard(doc, false, isLiked, isDisliked, _onCardClose, fullscreen: true))),
+            MaterialPageRoute<void>(builder: (context) => PlaceCard(doc, false, isLiked, isDisliked, _onCardClose, unlockDate, fullscreen: true))),
       ),
     );
   }
