@@ -24,6 +24,39 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.443162624639-gb2ep48pin4bgprpsa0bu38nfej5aio8</string>
+            </array>
+        </dict>
+              <dict>
+              <key>CFBundleURLSchemes</key>
+              <array>
+                <string>fb1141983086293342</string>
+              </array>
+        </dict>
+    </array>
+    <key>FacebookAppID</key>
+    <string>1141983086293342</string>
+    <key>FacebookClientToken</key>
+    <string>868a9099b8a32aa0ff7811f94cd7e9cc</string>
+    <key>FacebookDisplayName</key>
+    <string>hunt</string>
+
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -49,6 +82,14 @@
     <array>
       <string>https</string>
       <string>http</string>
+      <string>fbapi</string>
+      <string>fb-messenger-share-api</string>
+      <string>fbauth2</string>
+      <string>fbshareextension</string>
     </array>
+
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Need to access Photo Library</string>
 </dict>
 </plist>
+
