@@ -141,8 +141,7 @@ class PlaceCardState extends State<PlaceCard> {
                           GestureDetector(onTap: like, child: likeIcon),
                           SizedBox(width: 4.0),
                           Text(
-                            //TODO bug in display of likes and dislikes (we don't need to sum 1 when we log)
-                            (widget.place.likes + (widget.isLiked ? 1 : 0)).toString(),
+                            (widget.place.likes).toString(),
                             style: TextStyle(
                                 fontSize: 11.0,
                                 fontWeight: FontWeight.w600,
@@ -152,7 +151,7 @@ class PlaceCardState extends State<PlaceCard> {
                           GestureDetector(onTap: dislike, child: dislikeIcon),
                           SizedBox(width: 4.0),
                           Text(
-                            (widget.place.dislikes + (widget.isDisliked ? 1 : 0))
+                            (widget.place.dislikes)
                                 .toString(),
                             style: TextStyle(
                                 fontSize: 11.0,
@@ -170,50 +169,52 @@ class PlaceCardState extends State<PlaceCard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Name
-                              Text(
-                                widget.place.name,
-                                style: TextStyle(
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              // Sep
-                              SizedBox(height: 4.0),
-                              // Address
-                              Text(
-                                widget.place.street+'\n'+ widget.place.city+' ('+ widget.place.country+')',
-                                style: TextStyle(
-                                    fontSize: 12.0,
-                                    color: Colors.grey
-                                ),
-                              ),
-                              // Sep
-                              SizedBox(height: 10.0),
-                              // Distance
-                              if (_isGPSon)
-                                Text(
-                                  _displayDistance,
-                                  style: TextStyle(
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.black45,
+                          Expanded(
+                              child:  Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Name
+                                  Text(
+                                    widget.place.name,
+                                    style: TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
-                                ),
-                              SizedBox(height: 10.0),
-                              // Unlock date
-                              if(!widget.isLocked)
-                                Text(
-                                  'Unlocked on '+ DateFormat.yMMMMd('en_US').format(widget.unlockDate.toDate()).toString(),
-                                  style: TextStyle(
-                                      fontSize: 10.0,
-                                      color: Colors.grey
+                                  // Sep
+                                  SizedBox(height: 4.0),
+                                  // Address
+                                  Text(
+                                    widget.place.street+'\n'+ widget.place.city+' ('+ widget.place.country+')',
+                                    style: TextStyle(
+                                        fontSize: 12.0,
+                                        color: Colors.grey
+                                    ),
                                   ),
-                                )
-                            ],
+                                  // Sep
+                                  SizedBox(height: 10.0),
+                                  // Distance
+                                  if (_isGPSon)
+                                    Text(
+                                      _displayDistance,
+                                      style: TextStyle(
+                                        fontSize: 10.0,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.black45,
+                                      ),
+                                    ),
+                                  SizedBox(height: 10.0),
+                                  // Unlock date
+                                  if(!widget.isLocked)
+                                    Text(
+                                      'Unlocked on '+ DateFormat.yMMMMd('en_US').format(widget.unlockDate.toDate()).toString(),
+                                      style: TextStyle(
+                                          fontSize: 10.0,
+                                          color: Colors.grey
+                                      ),
+                                    )
+                                ],
+                              ),
                           ),
                           Column(
                             children: [
@@ -382,10 +383,14 @@ class PlaceCardState extends State<PlaceCard> {
       setState(() {
         if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateLikes(1);
+          widget.place.likes = widget.place.likes+1;
         } else if (widget.isLiked && !widget.isDisliked) {
+          widget.place.likes = widget.place.likes-1;
           _dbUpdateLikes(-1);
         } else if (!widget.isLiked && widget.isDisliked) {
           _dbSwapLikeDislike(false);
+          widget.place.likes = widget.place.likes+1;
+          widget.place.dislikes = widget.place.dislikes-1;
         }
 
         widget.isLiked = !widget.isLiked;
@@ -401,10 +406,14 @@ class PlaceCardState extends State<PlaceCard> {
       setState(() {
         if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateDislikes(1);
+          widget.place.dislikes = widget.place.dislikes+1;
         } else if (widget.isLiked && !widget.isDisliked) {
           _dbSwapLikeDislike(true);
+          widget.place.likes = widget.place.likes-1;
+          widget.place.dislikes = widget.place.dislikes+1;
         } else if (!widget.isLiked && widget.isDisliked) {
           _dbUpdateDislikes(-1);
+          widget.place.dislikes = widget.place.dislikes-1;
         }
 
         widget.isDisliked = !widget.isDisliked;

@@ -25,7 +25,6 @@ class ExploreState extends State<Explore> {
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();
   final userId = FirebaseAuth.instance.currentUser!.uid;
-
   LatLng? initPosition;
 
   @override
@@ -377,9 +376,11 @@ class _PlaceMapState extends State<PlaceMap> {
 
   void _updateMarkers(Set<Marker> markers) {
     print('Updated ${markers.length} markers');
-    setState(() {
+    if(mounted) {
+      setState(() {
       customMarkers = markers;
     });
+    }
   }
 
 

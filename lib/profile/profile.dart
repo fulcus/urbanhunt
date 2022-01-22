@@ -473,21 +473,22 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                             style: TextStyle(fontSize: 16,
                                                 fontWeight:FontWeight.bold),
                                           ),
-                                          Container(child: Center(
-                                              child: Text(
-                                                  score,
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                      fontSize: 24,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.blueAccent
-                                                  ))
-                                          ),
-                                            width: 30.0,
-                                            height: 30.0,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.amber),
-                                              borderRadius: BorderRadius.circular(8),
+                                          FittedBox(
+                                            fit: BoxFit.fitWidth,
+                                            child: Container(child: Center(
+                                                child: Text(
+                                                    score,
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                        fontSize: 24,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.blueAccent
+                                                    ))
+                                            ),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(color: Colors.amber),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
                                             ),
                                           ),
                                           Text(
