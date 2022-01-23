@@ -16,6 +16,7 @@ dependencies:
   geolocator: ^8.0.1
   google_maps_flutter: ^2.0.6
   google_maps_cluster_manager: ^3.0.0+1
+  google_maps_flutter_platform_interface: ^2.1.5
   font_awesome_flutter:
   google_fonts: ^2.1.0
   google_sign_in: ^5.0.2

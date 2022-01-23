@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
+import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 
 import '../helpers/test_helpers.dart';
@@ -83,7 +84,7 @@ Future<void> main() async {
 
   testWidgets('Like PlaceCard', (tester) async {
 
-    var placeCard = PlaceCard(snapshot.docs.first, true, false, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, false, false, onCardClose, Timestamp.now());
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
@@ -112,7 +113,7 @@ Future<void> main() async {
   });
 
   testWidgets('Close place card', (tester) async {
-    var placeCard = PlaceCard(snapshot.docs.first, true, true, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose, Timestamp.now());
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
@@ -131,7 +132,7 @@ Future<void> main() async {
   });
 
   testWidgets('Unlock place card', (tester) async {
-    var placeCard = PlaceCard(snapshot.docs.first, true, true, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose, Timestamp.now());
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),

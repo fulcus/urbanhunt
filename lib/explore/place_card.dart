@@ -32,17 +32,15 @@ class PlaceCard extends StatefulWidget with ClusterItem {
   // new card should be created for each place
   // isLocked, isLiked, isDisliked are actually part of state
 
-  DocumentSnapshot document;
   PlaceData place;
   bool fullscreen, isLocked, isLiked, isDisliked;
   Timestamp unlockDate;
   late void Function() onCardClose;
 
-  PlaceCard(this.document, this.isLocked, this.isLiked, this.isDisliked,
+  PlaceCard(this.place, this.isLocked, this.isLiked, this.isDisliked,
       this.onCardClose, this.unlockDate,
       {this.fullscreen = false, Key? key})
-      : place = PlaceData.fromSnapshot(document),
-        super(key: key);
+      : super(key: key);
 
   @override
   PlaceCardState createState() => PlaceCardState();
@@ -50,8 +48,8 @@ class PlaceCard extends StatefulWidget with ClusterItem {
   @override
   LatLng get location {
     return LatLng(
-      document['location'].latitude as double,
-      document['location'].longitude as double,
+      place.latitude,
+      place.longitude,
     );
   }
 }

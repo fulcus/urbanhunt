@@ -813,6 +813,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   void dispose() {
     // Clean up the controller when the Widget is disposed
     myFocusNode.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 

@@ -34,6 +34,9 @@ class AddPlaceForm extends StatefulWidget {
 class AddPlaceFormState extends State<AddPlaceForm> {
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final _formKey = GlobalKey<FormState>();
+  final _textFieldController1 = TextEditingController();
+  final _textFieldController2 = TextEditingController();
+  final _textFieldController3 = TextEditingController();
   AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
   late FocusNode _name, _lockedDescription, _unlockedDescription;
 
@@ -98,6 +101,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                       name = value!;
                     },
                     validator: validationHelper.validatePlaceName,
+                    controller: _textFieldController1,
                   ),
                   sizedBoxSpace,
                   TextFormField(
@@ -115,6 +119,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                       lockedDescription = value!;
                     },
                     validator: validationHelper.validateLockedDescr,
+                    controller: _textFieldController2,
                   ),
                   sizedBoxSpace,
                   TextFormField(
@@ -132,6 +137,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                       unlockedDescription = value!;
                     },
                     validator: validationHelper.validateUnlockedDescr,
+                    controller: _textFieldController3,
                   ),
                   sizedBoxSpace,
                   _multiChoice,
@@ -246,6 +252,9 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     _name.dispose();
     _lockedDescription.dispose();
     _unlockedDescription.dispose();
+    _textFieldController1.dispose();
+    _textFieldController2.dispose();
+    _textFieldController3.dispose();
     super.dispose();
   }
 

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -205,10 +206,10 @@ class _PlaceMapState extends State<PlaceMap> {
           .toList();
 
       if(unlockedIds.contains(place.id)) {
-        _placeItems.add(PlaceCard(place, false, current[0]['liked'] as bool, current[0]['disliked'] as bool, _onCardClose, current[0]['unlockDate'] as Timestamp));
+        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), false, current[0]['liked'] as bool, current[0]['disliked'] as bool, _onCardClose, current[0]['unlockDate'] as Timestamp));
       }
       else {
-        _placeItems.add(PlaceCard(place, true, false, false, _onCardClose, Timestamp.now()));
+        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), true, false, false, _onCardClose, Timestamp.now()));
       }
     }
 

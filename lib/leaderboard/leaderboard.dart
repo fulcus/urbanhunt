@@ -78,7 +78,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
       children: <Widget>[
         Scaffold(
             body: Container(
-          margin: EdgeInsets.only(top: 65.0),
+          margin: EdgeInsets.only(top: 55.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -164,7 +164,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                           );
                         }
                       })),
-              const SizedBox(height: 100),
+              const SizedBox(height: 55),
             ],
           ),
         )),
@@ -203,7 +203,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
       children: <Widget>[
         Scaffold(
             body: Container(
-          margin: EdgeInsets.only(top: 65.0),
+          margin: EdgeInsets.only(top: 55.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -255,7 +255,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                           );
                         }
                       })),
-              const SizedBox(height: 100),
+              const SizedBox(height: 55),
             ],
           ),
         )),

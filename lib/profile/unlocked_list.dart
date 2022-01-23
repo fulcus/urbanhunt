@@ -1,9 +1,13 @@
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 import 'package:hunt_app/utils/image_helper.dart';
+import 'package:rxdart/rxdart.dart';
 
 final db = FirebaseFirestore.instance;
 
@@ -34,39 +38,35 @@ class _UnlockedListState extends State<UnlockedList> {
       appBar: AppBar(title: Text('My unlocked places')),
       body: Container(
         margin: EdgeInsets.only(top: 20),
-        child: Column(
-            children: <Widget> [
-              StreamBuilder<QuerySnapshot>(
-                  stream: _unlockedPlaces,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      if(snapshot.data!.docs.isEmpty) {
-                        return Padding(
-                          padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 2.0),
-                          child: Text(
-                            'You have not unlocked any place yet.\nGet to work!',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                          ),
-                        );
-                      }
-                      else {
-                        var placeIds = <String>[];
+        child: StreamBuilder<QuerySnapshot>(
+            stream: _unlockedPlaces,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if(snapshot.data!.docs.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                        left: 25.0, right: 25.0, top: 2.0),
+                    child: Text(
+                      'You have not unlocked any place yet.\nGet to work!',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                  );
+                }
+                else {
+                  var placeIds = <String>[];
 
-                        for(var i in snapshot.data!.docs) {
-                          placeIds.add(i.id);
-                        }
-                        return Helper(placeIds, snapshot.data!.docs);
-                      }
-                    } else {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  })
-            ]
-        ),
-      )
+                  for(var i in snapshot.data!.docs) {
+                    placeIds.add(i.id);
+                  }
+                  return Helper(placeIds, snapshot.data!.docs);
+                }
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            })
+          ),
     );
   }
 }
@@ -86,58 +86,93 @@ class Helper extends StatefulWidget {
 }
 
 class _HelperState extends State<Helper> {
-  late Stream<QuerySnapshot> _myUnlockedPlaces;
+  late Stream<List<PlaceData>> _myUnlockedPlaces;
 
   @override
   void initState() {
     super.initState();
-
-    _myUnlockedPlaces = db
-        .collection('places')
-        //.orderBy('address.city')
-        .where(FieldPath.documentId, whereIn: widget.list)
-        .snapshots();
+    _myUnlockedPlaces = filteredList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _myUnlockedPlaces,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
+    return StreamBuilder<List<PlaceData>>(
+        stream: _myUnlockedPlaces,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              height: 660,
+              child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    var currUlkPlace = snapshot.data!.docs[index];
+                    var currUlkPlace = snapshot.data![index];
                     return UnlockedListRow(
                         currUlkPlace,
                         widget.unlocked[index].get('liked') as bool,
                         widget.unlocked[index].get('disliked') as bool,
                         widget.unlocked[index].get('unlockDate') as Timestamp,
-                        currUlkPlace.get('address.city').toString(),
-                        currUlkPlace.get('address.country').toString(),
-                        currUlkPlace.get('address.street').toString(),
-                        currUlkPlace.get('imgpath').toString(),
-                        currUlkPlace.get('name').toString()
+                        currUlkPlace.city,
+                        currUlkPlace.country,
+                        currUlkPlace.street,
+                        currUlkPlace.imageURL,
+                        currUlkPlace.name,
                     );
                   }
-              );
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
-        )
+              ),
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
     );
   }
+
+  List<List<String>> _getChunks() {
+    var len = widget.list.length;
+    var size = 10;
+    var chunks = <List<String>>[];
+
+    for(var i = 0; i< len; i+= size)
+    {
+      var end = (i+size<len)?i+size:len;
+      chunks.add(widget.list.sublist(i, end));
+    }
+    return chunks;
+  }
+
+  Stream<List<PlaceData>> filteredList() {
+    var chunks = _getChunks();
+
+    List<Stream<QuerySnapshot>> combineList = [];
+    for (var i = 0; i < chunks.length; i++) {
+      combineList.add(db.collection('places').where(FieldPath.documentId, whereIn: chunks[i]).snapshots());
+    } //get a list of the streams, which will have 10 each.
+
+    CombineLatestStream<QuerySnapshot, List<QuerySnapshot>> mergedQuerySnapshot = CombineLatestStream.list(combineList);
+    //now we combine all the streams....but it'll be a list of QuerySnapshots.
+
+    //and you'll want to look closely at the map, as it iterates, consolidates and returns as a single stream of List<AttendeeData>
+    return mergedQuerySnapshot.map(listFromDocumentSnapshot);
+  }
+
+  List<PlaceData> listFromDocumentSnapshot(List<QuerySnapshot> snapshot) {
+    List<PlaceData> listToReturn = [];
+    for (var element in snapshot) {
+      listToReturn.addAll(element.docs.map((doc) {
+        return PlaceData.fromSnapshot(doc);
+      }));
+    }
+    return listToReturn;
+  }
+
 }
 
 
 class UnlockedListRow extends StatelessWidget {
-  final DocumentSnapshot doc;
+  final PlaceData place;
   final bool isLiked;
   final bool isDisliked;
   final Timestamp unlockDate;
@@ -148,7 +183,7 @@ class UnlockedListRow extends StatelessWidget {
   final String name;
 
   UnlockedListRow (
-      this.doc,
+      this.place,
       this.isLiked,
       this.isDisliked,
       this.unlockDate,
@@ -235,7 +270,7 @@ class UnlockedListRow extends StatelessWidget {
           ),
         ),
         onTap: () => Navigator.push(context,
-            MaterialPageRoute<void>(builder: (context) => PlaceCard(doc, false, isLiked, isDisliked, _onCardClose, unlockDate, fullscreen: true))),
+            MaterialPageRoute<void>(builder: (context) => PlaceCard(place, false, isLiked, isDisliked, _onCardClose, unlockDate, fullscreen: true))),
       ),
     );
   }
