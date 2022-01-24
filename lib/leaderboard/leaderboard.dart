@@ -78,12 +78,12 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
       children: <Widget>[
         Scaffold(
             body: Container(
-          margin: EdgeInsets.only(top: 55.0),
+          margin: EdgeInsets.only(top: 40.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(left: 15.0),
+                padding: EdgeInsets.only(left: 15.0, bottom: 4),
                 child: Row(
                   children: [
                     Padding(
@@ -101,7 +101,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                     ),
                     Text(
                       ' $myCountry Rank Board: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     )
                   ],
                 )
@@ -119,7 +119,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                                 QueryDocumentSnapshot prevListUser;
                                 // highlight my user
                                 if (currListUser.id == myUser.uid) {
-                                  _rowColor = Colors.orangeAccent;
+                                  _rowColor = Colors.indigo[50]!;
                                   _myUserInTop = true;
                                 } else {
                                   _rowColor = Colors.transparent;
@@ -203,60 +203,60 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
       children: <Widget>[
         Scaffold(
             body: Container(
-          margin: EdgeInsets.only(top: 55.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: 15.0),
-                child: Text(
-                  'Global Rank Board: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              Flexible(
-                  child: StreamBuilder<QuerySnapshot>(
-                      stream: _bestUsers,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          _position = 0;
-                          return ListView.builder(
-                              itemCount: snapshot.data!.docs.length,
-                              itemBuilder: (context, index) {
-                                var currListUser = snapshot.data!.docs[index];
-                                QueryDocumentSnapshot prevListUser;
-                                // highlight my user
-                                if (currListUser.id == myUser.uid) {
-                                  _rowColor = Colors.orangeAccent;
-                                  _myUserInTop = true;
-                                } else {
-                                  _rowColor = Colors.transparent;
-                                }
-                                if (index >= 1) {
-                                  prevListUser = snapshot.data!.docs[index - 1];
-                                  if (currListUser.get('score') ==
-                                      prevListUser.get('score')) {
-                                  } else {
-                                    _position++;
-                                  }
-                                }
-                                return LeaderBoardRow(
-                                    currListUser.get('username').toString(),
-                                    currListUser.get('imageURL').toString(),
-                                    currListUser.get('score').toString(),
-                                    currListUser.get('country').toString(),
-                                    _position,
-                                    _rowColor,
-                                    true);
-                              });
-                        } else {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                      })),
-              const SizedBox(height: 55),
-            ],
+              margin: EdgeInsets.only(top: 40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(left: 15.0, bottom: 4.0),
+                    child: Text(
+                      'Global Rank Board: ',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ),
+                  Flexible(
+                      child: StreamBuilder<QuerySnapshot>(
+                          stream: _bestUsers,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              _position = 0;
+                              return ListView.builder(
+                                  itemCount: snapshot.data!.docs.length,
+                                  itemBuilder: (context, index) {
+                                    var currListUser = snapshot.data!.docs[index];
+                                    QueryDocumentSnapshot prevListUser;
+                                    // highlight my user
+                                    if (currListUser.id == myUser.uid) {
+                                      _rowColor = Colors.indigo[50]!;
+                                      _myUserInTop = true;
+                                    } else {
+                                      _rowColor = Colors.transparent;
+                                    }
+                                    if (index >= 1) {
+                                      prevListUser = snapshot.data!.docs[index - 1];
+                                      if (currListUser.get('score') ==
+                                          prevListUser.get('score')) {
+                                      } else {
+                                        _position++;
+                                      }
+                                    }
+                                    return LeaderBoardRow(
+                                        currListUser.get('username').toString(),
+                                        currListUser.get('imageURL').toString(),
+                                        currListUser.get('score').toString(),
+                                        currListUser.get('country').toString(),
+                                        _position,
+                                        _rowColor,
+                                        true);
+                                  });
+                            } else {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                          })),
+                  const SizedBox(height: 55),
+                ],
           ),
         )),
       ],
@@ -288,13 +288,13 @@ class LeaderBoardRow extends StatelessWidget {
                   color: position == 0
                       ? Colors.amber
                       : position == 1
-                          ? Colors.grey
+                          ? Color.fromARGB(255,192,192,192)
                           : position == 2
-                              ? Colors.brown
+                              ? Color.fromARGB(255,176,141,87)
                               : Colors.white,
-                  width: 3.0,
+                  width: 2.0,
                   style: BorderStyle.solid),
-              borderRadius: BorderRadius.circular(50.0)),
+              borderRadius: BorderRadius.circular(16.0)),
           width: MediaQuery.of(context).size.width,
           child: Column(
             children: <Widget>[
@@ -328,7 +328,7 @@ class LeaderBoardRow extends StatelessWidget {
                                         foreground: Paint()
                                           ..style = PaintingStyle.stroke
                                           ..strokeWidth = 1
-                                          ..color = Colors.blue[700]!,
+                                          ..color = Colors.indigo[700]!,
                                       ))),
                   Padding(
                     padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -369,8 +369,8 @@ class LeaderBoardRow extends StatelessWidget {
                             child: Text(
                               username,
                               style: TextStyle(
-                                  color: Colors.deepPurple,
-                                  fontWeight: FontWeight.w500),
+                                  color: Colors.indigo,
+                                  fontWeight: FontWeight.w600),
                               maxLines: 2,
                             ))
                       ],
@@ -379,23 +379,34 @@ class LeaderBoardRow extends StatelessWidget {
                   Flexible(child: Container()),
                   Padding(
                     padding: const EdgeInsets.all(15),
-                    child: Row(children: [
-                      Padding(
+                    child: Padding(
                         padding: const EdgeInsets.only(right: 6),
-                        child: Text(
-                          score,
-                          style: TextStyle(fontSize: 21),
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.amber, width: 2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  score,
+                                  style: TextStyle(fontSize: 21),
+                                ),
+                                Icon(Icons.vpn_key, color: Colors.amber)
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      Icon(Icons.vpn_key, color: Colors.amber)
-                    ]),
-                  )
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+                    ),
+                  ),
+            ],),
+          ],),
+       ),
+      )
     );
   }
 

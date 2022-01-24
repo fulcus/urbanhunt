@@ -57,7 +57,7 @@ class ContributeThankYou extends StatelessWidget {
                       },
                     ),
                     foregroundColor:
-                    MaterialStateProperty.all<Color>(Colors.blue),
+                    MaterialStateProperty.all<Color>(Colors.indigo),
                     backgroundColor:
                     MaterialStateProperty.all<Color>(Colors.white),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(

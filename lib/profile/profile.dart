@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hunt_app/login_page.dart';
 import 'package:hunt_app/profile/custom_alert_dialog.dart';
 import 'package:hunt_app/utils/image_helper.dart';
@@ -78,14 +79,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
 
                   return Container(
-                    color: Colors.white,
                     child: ListView(
                       children: <Widget>[
                         Column(
                           children: <Widget>[
                             Container(
                               height: 230.0,
-                              color: Colors.white,
                               child: Column(
                                 children: <Widget>[
                                   Padding(
@@ -122,11 +121,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   FloatingActionButton(
                                                     child: CircleAvatar(
                                                       backgroundColor:
-                                                      Colors.blueAccent,
+                                                      Colors.white,
                                                       radius: 25.0,
                                                       child: Icon(
                                                         Icons.camera_alt,
-                                                        color: Colors.white,
+                                                        color: Colors.indigo,
+                                                        size: 26,
                                                       ),
                                                     ),
                                                     onPressed: () async => {
@@ -147,7 +147,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                             Divider(height: 1),
 
                             Container(
-                              color: Colors.white,
                               child: Padding(
                                 padding: EdgeInsets.only(bottom: 25.0),
                                 child: Column(
@@ -170,6 +169,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 Text(
                                                   'Personal Information',
                                                   style: TextStyle(
+                                                      color: Colors.indigo,
                                                       fontSize: 18.0,
                                                       fontWeight:
                                                       FontWeight.bold),
@@ -201,16 +201,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                               ],
                                             ),
-                                            Column(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                _status
-                                                    ? _getEditIcon()
-                                                    : Container(),
-                                              ],
-                                            )
                                           ],
                                         )),
                                     Padding(
@@ -225,8 +215,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   controller: _nameController
                                                     ..text = username,
                                                   decoration: const InputDecoration(
+                                                    filled: true,
                                                     hintText: 'Enter Your Name',
                                                   ),
+                                                  style: TextStyle(color: Colors.black54),
                                                   enabled: !_status,
                                                   autofocus: !_status,
                                                   autovalidateMode: AutovalidateMode
@@ -243,7 +235,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       }
                                                   },
                                                   validator: _validateName,
-                                                )),
+                                                ),
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                _status
+                                                    ? _getEditIcon()
+                                                    : Container(),
+                                              ],
+                                            )
                                           ],
                                         )),
                                     !_status ? _getActionButtons() : Container(),
@@ -285,6 +288,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   TextEditingController()
                                                     ..text = _myUser.email
                                                         .toString(),
+                                                  decoration: const InputDecoration(
+                                                    filled: true,
+                                                  ),
+                                                  style: TextStyle(color: Colors.black54),
                                                   //email cannot be changed
                                                   enabled: false,
                                                 ),
@@ -320,6 +327,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   TextEditingController()
                                                     ..text = _myUser.email
                                                         .toString(),
+                                                  decoration: const InputDecoration(
+                                                    filled: true,
+                                                  ),
+                                                  style: TextStyle(color: Colors.black54),
                                                   //email cannot be changed
                                                   enabled: false,
                                                 ),
@@ -329,7 +340,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   radius: 14.0,
                                                   child: Icon(
                                                     Icons.verified,
-                                                    color: Color.fromARGB(255,103,196,211),
+                                                    color: Colors.green[300],
                                                     size: 20.0,
                                                   ),
                                                 ),
@@ -360,16 +371,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   ),
                                                 ],
                                               ),
-                                              Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: <Widget>[
-                                                  _enabled
-                                                      ? _getEditIcon2()
-                                                      : Container(),
-                                                ],
-                                              )
                                             ],
                                           )),
                                     if (_isEmailAuth)
@@ -385,6 +386,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   controller:
                                                   TextEditingController()
                                                     ..text = '**********',
+                                                  decoration: const InputDecoration(
+                                                    filled: true,
+                                                  ),
+                                                  style: TextStyle(color: Colors.black54),
                                                   obscureText: true,
                                                   enabled: !_enabled,
                                                   autofocus: !_enabled,
@@ -397,6 +402,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       .validatePassword,
                                                 ),
                                               ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  _enabled
+                                                      ? _getEditIcon2()
+                                                      : Container(),
+                                                ],
+                                              )
                                             ],
                                           )),
                                     !_enabled ? _getActionButtons() : Container(),
@@ -435,8 +450,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 TextEditingController()
                                                   ..text = countryName,
                                                 decoration: const InputDecoration(
-                                                    hintText:
-                                                    'Enter your Country'),
+                                                  filled: true,
+                                                  hintText: 'Enter your Country'),
+                                                style: TextStyle(color: Colors.black54),
                                                 enabled: false,
                                                 autofocus: !_status,
                                               ),
@@ -475,27 +491,24 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           ),
                                           FittedBox(
                                             fit: BoxFit.fitWidth,
-                                            child: Container(child: Center(
-                                                child: Text(
-                                                    score,
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(
-                                                        fontSize: 24,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Colors.blueAccent
-                                                    ))
-                                            ),
+                                            child: Container(
+                                              padding: EdgeInsets.all(2),
                                               decoration: BoxDecoration(
-                                                border: Border.all(color: Colors.amber),
+                                                color: Colors.white,
+                                                border: Border.all(color: Colors.amber, width: 2),
                                                 borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    score,
+                                                    style: TextStyle(fontSize: 21),
+                                                  ),
+                                                  Icon(Icons.vpn_key, color: Colors.amber)
+                                                ],
                                               ),
                                             ),
                                           ),
-                                          Text(
-                                            ' ',
-                                            style: TextStyle(fontSize: 16),
-                                          ),
-                                          Icon(Icons.vpn_key, color: Colors.amber)
                                         ]),
                                       ),
                                     ),
@@ -518,6 +531,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 Text(
                                                   'My Unlocked Places',
                                                   style: TextStyle(
+                                                      color: Colors.indigo,
                                                       fontSize: 16.0,
                                                       fontWeight:
                                                       FontWeight.bold),
@@ -530,19 +544,21 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
                                                 GestureDetector(
-                                                  onTap: () => Navigator.push(context,
-                                                      MaterialPageRoute<void>(builder: (context) => UnlockedList())),
+                                                  onTap: () => Navigator.push(context, MaterialPageRoute<void>(builder: (context) => UnlockedList())),
                                                   child: CircleAvatar(
-                                                    backgroundColor:
-                                                    Colors.blueAccent,
-                                                    radius: 14.0,
-                                                    child: Icon(
-                                                      Icons.lock_open,
-                                                      color: Colors.white,
-                                                      size: 16.0,
+                                                    backgroundColor: Colors.indigo,
+                                                    radius: 16.0,
+                                                    child: CircleAvatar(
+                                                      backgroundColor: Colors.white,
+                                                      radius: 15.0,
+                                                      child: FaIcon(
+                                                        FontAwesomeIcons.unlockAlt,
+                                                        color: Colors.indigo,
+                                                        size: 20.0,
+                                                      ),
                                                     ),
                                                   ),
-                                                )
+                                                ),
                                               ],
                                             )
                                           ],
@@ -565,8 +581,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       width: 120.0,
                                                       height: 60.0,
                                                       decoration: BoxDecoration(
+                                                          color: Colors.white,
                                                           border: Border.all(
-                                                              color: Colors.black87),
+                                                              color: Colors.indigo),
                                                           borderRadius:
                                                           BorderRadius.all(
                                                               Radius.circular(20))),
@@ -576,12 +593,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                         children: [
                                                           SizedBox(width: 6.0),
                                                           Icon(Icons.exit_to_app,
-                                                              color: Colors.black87),
+                                                              color: Colors.indigo),
                                                           SizedBox(width: 4.0),
                                                           Text(
                                                             'Logout',
                                                             style: TextStyle(
-                                                              color: Colors.black87,
+                                                              color: Colors.indigo,
                                                               fontWeight:
                                                               FontWeight.bold,
                                                               fontSize: 16.0,
@@ -611,8 +628,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                     width: 120.0,
                                                     height: 60.0,
                                                     decoration: BoxDecoration(
+                                                        color: Colors.white,
                                                         border: Border.all(
-                                                            color: Colors.black87),
+                                                            color: Colors.indigo),
                                                         borderRadius:
                                                         BorderRadius.all(
                                                             Radius.circular(20))),
@@ -622,12 +640,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       children: [
                                                         SizedBox(width: 6.0),
                                                         Icon(Icons.delete_outline,
-                                                            color: Colors.black87),
+                                                            color: Colors.indigo),
                                                         SizedBox(width: 4.0),
                                                         Text(
                                                           'Delete\nAccount',
                                                           style: TextStyle(
-                                                            color: Colors.black87,
+                                                            color: Colors.indigo,
                                                             fontWeight:
                                                             FontWeight.bold,
                                                             fontSize: 16.0,
@@ -797,7 +815,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           ElevatedButton(
             child: Text('Submit'),
             style: ElevatedButton.styleFrom(
-              primary: Colors.green,
+              primary: Colors.green[300],
               textStyle: TextStyle(color: Colors.white),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0)),
@@ -831,7 +849,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                   child: ElevatedButton(
                 child: Text('Save'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.green,
+                  primary: Colors.green[300],
                   textStyle: TextStyle(color: Colors.white),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -874,7 +892,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                   child: ElevatedButton(
                 child: Text('Cancel'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.red,
+                  primary: Color.fromARGB(255,235,82,105),
                   textStyle: TextStyle(color: Colors.white),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
@@ -896,15 +914,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   Widget _getEditIcon() {
     return GestureDetector(
-      child: CircleAvatar(
-        backgroundColor: Colors.blueAccent,
-        radius: 14.0,
-        child: Icon(
-          Icons.edit,
-          color: Colors.white,
-          size: 16.0,
-        ),
-      ),
       onTap: () {
         setState(() {
           _isNameButton = true;
@@ -912,20 +921,20 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           _enabled = true;
         });
       },
+    child: CircleAvatar(
+      backgroundColor: Colors.transparent,
+      radius: 14.0,
+      child: Icon(
+          Icons.edit,
+          color: Colors.black87,
+        size: 20.0,
+        ),
+      ),
     );
   }
 
   Widget _getEditIcon2() {
     return GestureDetector(
-      child: CircleAvatar(
-        backgroundColor: Colors.blueAccent,
-        radius: 14.0,
-        child: Icon(
-          Icons.edit,
-          color: Colors.white,
-          size: 16.0,
-        ),
-      ),
       onTap: () {
         setState(() {
           _isNameButton = false;
@@ -933,6 +942,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           _enabled = false;
         });
       },
+      child: CircleAvatar(
+        backgroundColor: Colors.transparent,
+        radius: 14.0,
+        child: Icon(
+          Icons.edit,
+          color: Colors.black87,
+          size: 20.0,
+        ),
+      ),
     );
   }
 }

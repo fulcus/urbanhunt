@@ -208,10 +208,10 @@ class UnlockedListRow extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
               border: Border.all(
-                  color: Colors.blue,
-                  width: 3.0,
+                  color: Colors.indigo[200]!,
+                  width: 2.0,
                   style: BorderStyle.solid),
-              borderRadius: BorderRadius.circular(50.0)),
+              borderRadius: BorderRadius.circular(16.0)),
           width: MediaQuery.of(context).size.width,
           child: Column(
             children: <Widget>[
@@ -242,7 +242,6 @@ class UnlockedListRow extends StatelessWidget {
                             child: Text(
                               name,
                               style: TextStyle(
-                                  color: Colors.deepPurple,
                                   fontWeight: FontWeight.w500),
                               maxLines: 2,
                             )
@@ -258,7 +257,7 @@ class UnlockedListRow extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 6),
                         child: Text(
                           city+' ('+country+')',
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ),
                       Icon(Icons.vpn_key, color: Colors.amber)

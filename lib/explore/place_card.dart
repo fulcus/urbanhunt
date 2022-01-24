@@ -26,7 +26,12 @@ final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 
 // Map category tag to its color
-final Map<String, Color> categoryColors = {};
+final Map<String, Color> categoryColors = {
+  'Art': Colors.blue[300]!,
+  'Nature': Colors.green[300]!,
+  'Culture': Colors.orangeAccent,
+  'Food': Color.fromARGB(255,235,82,105),
+};
 
 class PlaceCard extends StatefulWidget with ClusterItem {
   // new card should be created for each place
@@ -114,6 +119,7 @@ class PlaceCardState extends State<PlaceCard> {
               // Image
               imageBanner,
               // scroll hint and close button
+              if(!widget.fullscreen)
               Positioned(child: topBar(), right: 0, left: 0, top: 1),
               // Below Image: Place info
               Positioned(
@@ -175,6 +181,7 @@ class PlaceCardState extends State<PlaceCard> {
                                   Text(
                                     widget.place.name,
                                     style: TextStyle(
+                                      color: Colors.indigo,
                                       fontSize: 22.0,
                                       fontWeight: FontWeight.w900,
                                     ),
@@ -198,7 +205,7 @@ class PlaceCardState extends State<PlaceCard> {
                                       style: TextStyle(
                                         fontSize: 10.0,
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.black45,
+                                        color: Colors.black54,
                                       ),
                                     ),
                                   SizedBox(height: 10.0),
@@ -253,13 +260,13 @@ class PlaceCardState extends State<PlaceCard> {
     if (widget.fullscreen) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Unlocked Place'),
+          title: Text(widget.place.name),
           elevation: 0.0,
           bottomOpacity: 0.0,
         ),
         body: Material(
           elevation: 10,
-          color: Colors.blue,
+          color: Colors.indigo,
           child: content,
         ),
       );
@@ -707,7 +714,7 @@ class PlaceCardState extends State<PlaceCard> {
         padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
         child: Text(widget.place.categories[i], style: textStyle),
         decoration: BoxDecoration(
-          color: categoryColors[widget.place.categories[i]] ?? Colors.blue[300],
+          color: categoryColors[widget.place.categories[i]],
           borderRadius: BorderRadius.circular(12.0),
         ),
       ));
@@ -732,12 +739,13 @@ class GmapButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var color = Colors.blue[600] ?? Colors.blue;
+    var color = Colors.indigo;
 
     return GestureDetector(
       child: Container(
         width: 72.0,
         decoration: BoxDecoration(
+            color: Colors.white,
             border: Border.all(color: color),
             borderRadius: BorderRadius.all(Radius.circular(20))),
         //child: Flexible(
@@ -788,12 +796,13 @@ class ShareButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var color = Colors.blue[600] ?? Colors.blue;
+    var color = Colors.indigo;
 
     return GestureDetector(
       child: Container(
       width: 72.0,
       decoration: BoxDecoration(
+          color: Colors.white,
           border: Border.all(color: color),
           borderRadius: BorderRadius.all(Radius.circular(20))),
       //child: Flexible(

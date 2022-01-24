@@ -289,25 +289,22 @@ Color mainColor = Colors.greenAccent[400]!;
 Color mainColorContrast = Colors.green[400]!;
 
 TextStyle styleHeading1 = TextStyle(
-    fontFamily: 'Truneo', fontSize: 92.0, fontWeight: FontWeight.bold);
+    fontSize: 92.0, fontWeight: FontWeight.bold);
 TextStyle styleHeading2 = TextStyle(
-    fontFamily: 'Truneo', fontSize: 72.0, fontWeight: FontWeight.bold);
+    fontSize: 72.0, fontWeight: FontWeight.bold);
 TextStyle styleNormal =
-    TextStyle(fontFamily: 'Truneo', fontSize: 18.0, color: Colors.black87);
+    TextStyle(fontSize: 18.0, color: Colors.black87);
 TextStyle styleBold = TextStyle(
-    fontFamily: 'Trueno',
     fontSize: 18.0,
     fontWeight: FontWeight.bold,
     color: Colors.black);
 TextStyle styleHint = TextStyle(
-    fontFamily: 'Truneo', fontSize: 14.0, color: Colors.grey.withOpacity(0.75));
+    fontSize: 14.0, color: Colors.grey.withOpacity(0.75));
 TextStyle styleLink = TextStyle(
-    fontFamily: 'Trueno',
     fontSize: 18.0,
     color: mainColor,
     decoration: TextDecoration.underline);
 TextStyle styleButtonified = TextStyle(
-    fontFamily: 'Trueno',
     fontSize: 18.0,
     fontWeight: FontWeight.w600,
     color: Colors.white);
@@ -508,7 +505,6 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                 child: const Text('Login with facebook',
                     style: TextStyle(
-                        fontFamily: 'Trueno',
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
                         color: fbBlue)),
@@ -706,7 +702,7 @@ class _SignupPageState extends State<SignupPage> {
             child: Stack(
               children: [
                 heading1('Sign up', 0.0, 0.0),
-                iconLock(186.0, 65.0),
+                iconLock(180.0, 65.0),
               ],
             ),
           ),

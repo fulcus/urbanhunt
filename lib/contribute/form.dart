@@ -185,18 +185,18 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                         overlayColor: MaterialStateProperty.resolveWith(
                               (states) {
                             return states.contains(MaterialState.pressed)
-                                ? Colors.blue[50]
+                                ? Colors.indigo[50]
                                 : null;
                           },
                         ),
                         foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                        MaterialStateProperty.all<Color>(Colors.indigo),
                         backgroundColor:
                         MaterialStateProperty.all<Color>(Colors.white),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
-                                side: BorderSide(color: Colors.blue)))),
+                                side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,
                   // todo make address prettier
@@ -215,18 +215,18 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                         overlayColor: MaterialStateProperty.resolveWith(
                               (states) {
                             return states.contains(MaterialState.pressed)
-                                ? Colors.blue[50]
+                                ? Colors.indigo[50]
                                 : null;
                           },
                         ),
                         foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue[800]!),
+                        MaterialStateProperty.all<Color>(Colors.indigo),
                         backgroundColor:
                         MaterialStateProperty.all<Color>(Colors.white),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
-                                side: BorderSide(color: Colors.blue)))),
+                                side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,
                   Center(

@@ -249,27 +249,43 @@ class _PlaceMapState extends State<PlaceMap> {
     );
 
     Widget locate = Padding(
-      padding: EdgeInsets.only(top: 680.0, left: 330.0),
-      child: CircleAvatar(
-        backgroundColor: Colors.lightBlueAccent,
-        child: IconButton(
-          icon: Icon(Icons.my_location),
-          color: Colors.black,
-          onPressed: _setCurrentLocation,
+      padding: EdgeInsets.only(top: 690.0, left: 330.0),
+      child:  GestureDetector(
+        onTap: _setCurrentLocation,
+        child: CircleAvatar(
+          backgroundColor: Colors.indigo,
+          radius: 18.0,
+          child: CircleAvatar(
+            backgroundColor: Colors.white,
+            radius: 17.0,
+            child: Icon(
+              Icons.my_location,
+              color: Colors.indigo,
+              size: 25.0,
+            ),
+          ),
         ),
-      ),
+      )
     );
 
     Widget rotate = Padding(
-      padding: EdgeInsets.only(top: 630.0, left: 330.0),
-      child: CircleAvatar(
-        backgroundColor: Colors.lightBlueAccent,
-        child: IconButton(
-          icon: Icon(Icons.explore),
-          color: Colors.black,
-          onPressed: _rotateNorth,
+      padding: EdgeInsets.only(top: 640.0, left: 330.0),
+      child: GestureDetector(
+        onTap: _rotateNorth,
+        child: CircleAvatar(
+          backgroundColor: Colors.indigo,
+          radius: 18.0,
+          child: CircleAvatar(
+            backgroundColor: Colors.white,
+            radius: 17.0,
+            child: Icon(
+              Icons.explore,
+              color: Colors.indigo,
+              size: 25.0,
+            ),
+          ),
         ),
-      ),
+      )
     );
 
     var children = <Widget>[gmap, locate];
@@ -346,7 +362,7 @@ class _PlaceMapState extends State<PlaceMap> {
 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Paint paint1 = Paint()..color = Colors.blue;
+    final Paint paint1 = Paint()..color = Colors.indigo;
     final Paint paint2 = Paint()..color = Colors.white;
 
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);

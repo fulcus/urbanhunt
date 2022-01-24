@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:one_context/one_context.dart';
 
 import 'login_page.dart';
@@ -20,7 +21,8 @@ class App extends StatelessWidget {
       builder: OneContext().builder, // needed?
       title: 'UrbanHunt',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        textTheme: GoogleFonts.robotoTextTheme(),
+        primarySwatch: Colors.indigo,
       ),
       home: redirectHomeOrLogin(),
       // initialRoute: '/',
