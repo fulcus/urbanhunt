@@ -1,16 +1,15 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:hunt_app/utils/validation_helper.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-
 import 'package:hunt_app/explore/explore.dart';
 import 'package:hunt_app/navbar.dart';
+import 'package:hunt_app/utils/form_factor.dart';
 import 'package:hunt_app/utils/network.dart';
+import 'package:hunt_app/utils/validation_helper.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);
@@ -28,6 +27,13 @@ StreamBuilder redirectHomeOrLogin() {
   return StreamBuilder<User?>(
     stream: FirebaseAuth.instance.authStateChanges(),
     builder: (context, snapshot) {
+      ScreenType screenType = getFormFactor(context);
+      if(screenType == ScreenType.Handset) {
+        portraitModeOnly();
+      }
+      else if(screenType == ScreenType.Tablet) {
+        landscapeModeOnly();
+      }
       if (snapshot.connectionState != ConnectionState.active) {
         return Center(child: CircularProgressIndicator());
       }
@@ -285,8 +291,8 @@ void _showInSnackBar(
 
 // Frontend utils
 ValidationHelper validationHelper = ValidationHelper();
-Color mainColor = Colors.greenAccent[400]!;
-Color mainColorContrast = Colors.green[400]!;
+Color mainColor = Colors.indigoAccent[400]!;
+Color mainColorContrast = Colors.indigo[400]!;
 
 TextStyle styleHeading1 = TextStyle(
     fontSize: 92.0, fontWeight: FontWeight.bold);
@@ -619,7 +625,7 @@ class _LoginPageState extends State<LoginPage> {
           _buildLoginGoogleButton(context),
           SizedBox(height: 38.0),
           lineLink(
-            'Dont have an account?',
+            "Don't have an account?",
             'Sign up now',
             () {
               pushNewScreen<void>(context, screen: SignupPage());

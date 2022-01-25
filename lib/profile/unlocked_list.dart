@@ -203,7 +203,7 @@ class UnlockedListRow extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
       child: InkWell(
         child: Container(
           decoration: BoxDecoration(

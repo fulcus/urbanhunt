@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hunt_app/login_page.dart';
 import 'package:hunt_app/profile/custom_alert_dialog.dart';
 import 'package:hunt_app/utils/image_helper.dart';
@@ -302,13 +303,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   _showInSnackBar('A verification email has been sent to your email box.')
                                                 },
                                                 child: CircleAvatar(
-                                                  backgroundColor:
-                                                  Color.fromARGB(255,235,82,105),
+                                                  backgroundColor: Colors.transparent,
                                                   radius: 14.0,
-                                                  child: Icon(
-                                                    Icons.close_rounded,
-                                                    color: Colors.white,
-                                                    size: 16.0,
+                                                  child: FaIcon(
+                                                    FontAwesomeIcons.exclamationCircle,
+                                                    color: Color.fromARGB(255,235,82,105),
+                                                    size: 20.0,
                                                   ),
                                                 ),
                                               )
@@ -492,7 +492,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           FittedBox(
                                             fit: BoxFit.fitWidth,
                                             child: Container(
-                                              padding: EdgeInsets.all(2),
+                                              padding: EdgeInsets.only(right: 3.5, left: 3.5, top: 2, bottom: 2),
                                               decoration: BoxDecoration(
                                                 color: Colors.white,
                                                 border: Border.all(color: Colors.amber, width: 2),
@@ -501,8 +501,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                               child: Row(
                                                 children: [
                                                   Text(
-                                                    score,
-                                                    style: TextStyle(fontSize: 21),
+                                                    score+' ',
+                                                    style: GoogleFonts.patrickHand(
+                                                      fontSize: 21,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.orange
+                                                    ),
                                                   ),
                                                   Icon(Icons.vpn_key, color: Colors.amber)
                                                 ],
@@ -547,10 +551,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   onTap: () => Navigator.push(context, MaterialPageRoute<void>(builder: (context) => UnlockedList())),
                                                   child: CircleAvatar(
                                                     backgroundColor: Colors.indigo,
-                                                    radius: 16.0,
+                                                    radius: 18.0,
                                                     child: CircleAvatar(
                                                       backgroundColor: Colors.white,
-                                                      radius: 15.0,
+                                                      radius: 17.0,
                                                       child: FaIcon(
                                                         FontAwesomeIcons.unlockAlt,
                                                         color: Colors.indigo,
@@ -586,7 +590,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                               color: Colors.indigo),
                                                           borderRadius:
                                                           BorderRadius.all(
-                                                              Radius.circular(20))),
+                                                              Radius.circular(16))),
                                                       child: Row(
                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -633,7 +637,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                             color: Colors.indigo),
                                                         borderRadius:
                                                         BorderRadius.all(
-                                                            Radius.circular(20))),
+                                                            Radius.circular(16))),
                                                     child: Row(
                                                       mainAxisAlignment: MainAxisAlignment.center,
                                                       crossAxisAlignment: CrossAxisAlignment.center,

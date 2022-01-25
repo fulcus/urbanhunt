@@ -329,6 +329,7 @@ class _PlaceMapState extends State<PlaceMap> {
           onTap: () {
             if(cluster.isMultiple) {
               _placeCard = null;
+              _zoomIn();
               print(cluster);
             } else {
               _placeCard = cluster.items.first;
@@ -398,6 +399,15 @@ class _PlaceMapState extends State<PlaceMap> {
       customMarkers = markers;
     });
     }
+  }
+
+  Future<void> _zoomIn() async {
+    final controller = await widget.mapController.future;
+    await controller
+        .animateCamera(CameraUpdate.zoomIn())
+        .then((value) {
+      setState(() {});
+    });
   }
 
 

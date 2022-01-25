@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 
 final db = FirebaseFirestore.instance;
@@ -83,11 +84,11 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(left: 15.0, bottom: 4),
+                padding: EdgeInsets.only(left: 25.0, bottom: 4),
                 child: Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
+                      padding: const EdgeInsets.only(left: 0.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,9 +209,9 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(left: 15.0, bottom: 4.0),
+                    padding: EdgeInsets.only(left: 25.0, bottom: 4.0),
                     child: Text(
-                      'Global Rank Board: ',
+                      '🌍 Global Rank Board: ',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                   ),
@@ -279,7 +280,7 @@ class LeaderBoardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
       child: InkWell(
         child: Container(
           decoration: BoxDecoration(
@@ -384,7 +385,7 @@ class LeaderBoardRow extends StatelessWidget {
                         child: FittedBox(
                           fit: BoxFit.fitWidth,
                           child: Container(
-                            padding: EdgeInsets.all(2),
+                            padding: EdgeInsets.only(right: 3.5, left: 3.5, top: 2, bottom: 2),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               border: Border.all(color: Colors.amber, width: 2),
@@ -393,8 +394,12 @@ class LeaderBoardRow extends StatelessWidget {
                             child: Row(
                               children: [
                                 Text(
-                                  score,
-                                  style: TextStyle(fontSize: 21),
+                                  score+' ',
+                                  style: GoogleFonts.patrickHand(
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.orange
+                                  ),
                                 ),
                                 Icon(Icons.vpn_key, color: Colors.amber)
                               ],

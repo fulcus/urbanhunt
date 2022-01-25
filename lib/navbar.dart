@@ -42,14 +42,13 @@ class _NavbarState extends State<Navbar> {
       PersistentBottomNavBarItem(
         icon: Icon(Icons.explore),
         title: 'Explore',
-        activeColorPrimary: Colors.blue,
+        activeColorPrimary: Colors.indigo,
         inactiveColorPrimary: Colors.grey,
-        inactiveColorSecondary: Colors.purple,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.add_circle),
         title: ('Contribute'),
-        activeColorPrimary: Colors.teal,
+        activeColorPrimary: Colors.indigo,
         inactiveColorPrimary: Colors.grey,
         // routeAndNavigatorSettings: RouteAndNavigatorSettings(
         //   initialRoute: '/',
@@ -62,9 +61,8 @@ class _NavbarState extends State<Navbar> {
       PersistentBottomNavBarItem(
         icon: Icon(Icons.leaderboard),
         title: ('Leaderboard'),
-        activeColorPrimary: Colors.blueAccent,
 
-        activeColorSecondary: Colors.deepOrange,
+        activeColorPrimary: Colors.indigo,
         inactiveColorPrimary: Colors.grey,
         // routeAndNavigatorSettings: RouteAndNavigatorSettings(
         //   initialRoute: '/',

@@ -83,7 +83,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             autovalidateMode: _autoValidateMode,
             child: Scrollbar(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 children: [
                   SizedBox(height: 35),
                   TextFormField(
@@ -195,7 +195,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                         MaterialStateProperty.all<Color>(Colors.white),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                                borderRadius: BorderRadius.circular(16.0),
                                 side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,
@@ -225,7 +225,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                         MaterialStateProperty.all<Color>(Colors.white),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                                borderRadius: BorderRadius.circular(16.0),
                                 side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,

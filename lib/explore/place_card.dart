@@ -100,8 +100,8 @@ class PlaceCardState extends State<PlaceCard> {
       imageBanner = imageBannerUnlocked();
     }
 
-    var likeOn = widget.isLiked ? Colors.green[600] : Colors.grey[400];
-    var dislikeOn = widget.isDisliked ? Colors.red[600] : Colors.grey[400];
+    var likeOn = widget.isLiked ? Colors.green[300] : Colors.grey[400];
+    var dislikeOn = widget.isDisliked ? Color.fromARGB(255,235,82,105) : Colors.grey[400];
 
     var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
     var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);
@@ -149,7 +149,7 @@ class PlaceCardState extends State<PlaceCard> {
                             style: TextStyle(
                                 fontSize: 11.0,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.green[600]),
+                                color: Colors.green[300]),
                           ),
                           SizedBox(width: 16.0),
                           GestureDetector(onTap: dislike, child: dislikeIcon),
@@ -160,7 +160,7 @@ class PlaceCardState extends State<PlaceCard> {
                             style: TextStyle(
                                 fontSize: 11.0,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.red[600]),
+                                color: Color.fromARGB(255,235,82,105)),
                           ),
                           // Sep
                           Spacer(),
@@ -747,7 +747,7 @@ class GmapButton extends StatelessWidget {
         decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: color),
-            borderRadius: BorderRadius.all(Radius.circular(20))),
+            borderRadius: BorderRadius.all(Radius.circular(16))),
         //child: Flexible(
           child: Column(
             children: [
@@ -804,7 +804,7 @@ class ShareButton extends StatelessWidget {
       decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: color),
-          borderRadius: BorderRadius.all(Radius.circular(20))),
+          borderRadius: BorderRadius.all(Radius.circular(16))),
       //child: Flexible(
       child: Column(
         children: [
