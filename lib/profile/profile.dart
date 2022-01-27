@@ -502,7 +502,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 children: [
                                                   Text(
                                                     score+' ',
-                                                    style: GoogleFonts.patrickHand(
+                                                    style: GoogleFonts.supermercadoOne(
                                                       fontSize: 21,
                                                       fontWeight: FontWeight.w600,
                                                       color: Colors.orange

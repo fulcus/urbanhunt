@@ -4,6 +4,7 @@ import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hunt_app/utils/image_helper.dart';
+import 'package:hunt_app/utils/keep_alive_builder.dart';
 
 final db = FirebaseFirestore.instance;
 
@@ -79,7 +80,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
       children: <Widget>[
         Scaffold(
             body: Container(
-          margin: EdgeInsets.only(top: 40.0),
+          margin: EdgeInsets.only(top: 40.0, bottom: 55.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -150,14 +151,16 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                                   _myUserInTop = true;
                                 }*/
 
-                                return LeaderBoardRow(
-                                    currListUser.get('username').toString(),
-                                    currListUser.get('imageURL').toString(),
-                                    currListUser.get('score').toString(),
-                                    currListUser.get('country').toString(),
-                                    _position,
-                                    _rowColor,
-                                    false);
+                                return KeepAliveBuilder(
+                                    child: LeaderBoardRow(
+                                        currListUser.get('username').toString(),
+                                        currListUser.get('imageURL').toString(),
+                                        currListUser.get('score').toString(),
+                                        currListUser.get('country').toString(),
+                                        _position,
+                                        _rowColor,
+                                        false)
+                                );
                               });
                         } else {
                           return Center(
@@ -165,7 +168,6 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                           );
                         }
                       })),
-              const SizedBox(height: 55),
             ],
           ),
         )),
@@ -204,7 +206,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
       children: <Widget>[
         Scaffold(
             body: Container(
-              margin: EdgeInsets.only(top: 40.0),
+              margin: EdgeInsets.only(top: 40.0, bottom: 55.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -241,14 +243,16 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                                         _position++;
                                       }
                                     }
-                                    return LeaderBoardRow(
-                                        currListUser.get('username').toString(),
-                                        currListUser.get('imageURL').toString(),
-                                        currListUser.get('score').toString(),
-                                        currListUser.get('country').toString(),
-                                        _position,
-                                        _rowColor,
-                                        true);
+                                    return KeepAliveBuilder(
+                                        child: LeaderBoardRow(
+                                            currListUser.get('username').toString(),
+                                            currListUser.get('imageURL').toString(),
+                                            currListUser.get('score').toString(),
+                                            currListUser.get('country').toString(),
+                                            _position,
+                                            _rowColor,
+                                            true)
+                                    );
                                   });
                             } else {
                               return Center(
@@ -256,7 +260,6 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                               );
                             }
                           })),
-                  const SizedBox(height: 55),
                 ],
           ),
         )),
@@ -395,7 +398,7 @@ class LeaderBoardRow extends StatelessWidget {
                               children: [
                                 Text(
                                   score+' ',
-                                  style: GoogleFonts.patrickHand(
+                                  style: GoogleFonts.supermercadoOne(
                                     fontSize: 21,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.orange

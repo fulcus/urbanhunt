@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hunt_app/explore/explore.dart';
-import 'package:hunt_app/navbar.dart';
+import 'package:hunt_app/navigation_bar/navbar.dart';
+import 'package:hunt_app/navigation_bar/sidebar.dart';
 import 'package:hunt_app/utils/form_factor.dart';
 import 'package:hunt_app/utils/network.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);
+bool isTablet = false;
+bool isMobile = false;
 //TODO global keys here gives exception when logging out: Duplicate GlobalKey detected in widget tree. (but without consequences)
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey1 =
     GlobalKey<ScaffoldMessengerState>();
@@ -30,9 +34,11 @@ StreamBuilder redirectHomeOrLogin() {
       ScreenType screenType = getFormFactor(context);
       if(screenType == ScreenType.Handset) {
         portraitModeOnly();
+        isMobile = true;
       }
       else if(screenType == ScreenType.Tablet) {
-        landscapeModeOnly();
+        //landscapeModeOnly();
+        isTablet = true;
       }
       if (snapshot.connectionState != ConnectionState.active) {
         return Center(child: CircularProgressIndicator());
@@ -40,8 +46,12 @@ StreamBuilder redirectHomeOrLogin() {
 
       final hasUser = snapshot.hasData;
       if (hasUser && FirebaseAuth.instance.currentUser!.emailVerified) {
-        // return BottomNavContainer();
-        return Navbar(menuScreenContext: context);
+        if(isMobile) {
+          return Navbar(menuScreenContext: context);
+        }
+        else {
+          return SideNavBar();
+        }
       } else {
         return LoginPage();
       }
@@ -428,14 +438,17 @@ class _LoginPageState extends State<LoginPage> {
     return ScaffoldMessenger(
         key: _scaffoldMessengerKey1,
         child: Scaffold(
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Form(
-              key: _formKey,
-              child: _buildLoginForm(context),
+          body: Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: isMobile ? MediaQuery.of(context).size.width : 600,
+              height: isMobile ? MediaQuery.of(context).size.height : 1000,
+              child: Form(
+                key: _formKey,
+                child: _buildLoginForm(context),
+              ),
             ),
-          ),
+          )
         ));
   }
 
@@ -447,9 +460,9 @@ class _LoginPageState extends State<LoginPage> {
             if (ok) {
               pushNewScreen<void>(
                 context,
-                screen: Navbar(
+                screen: isMobile ? Navbar(
                   menuScreenContext: context,
-                ),
+                ) : SideNavBar(),
               );
               //   Navigator.of(context, rootNavigator: true).pushReplacement(
               //       MaterialPageRoute<void>(
@@ -584,12 +597,24 @@ class _LoginPageState extends State<LoginPage> {
           Container(
             height: 175.0,
             width: 200.0,
-            child: Stack(
-              children: [
-                heading1('Urban', 0.0, 0.0),
-                heading1('Hunt', 25.0, 75.0),
-                iconLock(246.0, 65.0),
-              ],
+            child: ScreenTypeLayout(
+              mobile: Stack(
+                children: [
+                  heading1('Urban', 0.0, 0.0),
+                  heading1('Hunt', 25.0, 75.0),
+                  iconLock(246.0, 65.0),
+                ],
+              ),
+              tablet:  Stack(
+                children: [
+                    Positioned(
+                      left: 15,
+                      bottom: 10,
+                      child: Text('Urban Hunt', style: TextStyle(fontSize: 100, fontWeight: FontWeight.w900)),
+                    ),
+                  iconLock(276.0, 120.0),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 25.0),
@@ -658,14 +683,17 @@ class _SignupPageState extends State<SignupPage> {
     return ScaffoldMessenger(
         key: _scaffoldMessengerKey2,
         child: Scaffold(
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Form(
-              key: _formKey,
-              child: _buildSignupForm(context),
+          body: Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: isMobile ? MediaQuery.of(context).size.width : 600,
+              height: isMobile ? MediaQuery.of(context).size.height : 600,
+              child: Form(
+                key: _formKey,
+                child: _buildSignupForm(context),
+              ),
             ),
-          ),
+          )
         ));
   }
 
@@ -677,9 +705,9 @@ class _SignupPageState extends State<SignupPage> {
             if (ok) {
               pushNewScreen<void>(
                 context,
-                screen: Navbar(
+                screen: isMobile ? Navbar(
                   menuScreenContext: context,
-                ),
+                ) : SideNavBar(),
               );
 
               // Navigator.of(context, rootNavigator: true).pushReplacement(
@@ -751,14 +779,17 @@ class _ResetPasswordState extends State<ResetPasswordPage> {
     return ScaffoldMessenger(
         key: _scaffoldMessengerKey3,
         child: Scaffold(
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Form(
-              key: _formKey,
-              child: _buildResetPasswordForm(context),
+          body: Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: isMobile ? MediaQuery.of(context).size.width : 600,
+              height: isMobile ? MediaQuery.of(context).size.height : 600,
+              child: Form(
+                key: _formKey,
+                child: _buildResetPasswordForm(context),
+              ),
             ),
-          ),
+          )
         ));
   }
 
