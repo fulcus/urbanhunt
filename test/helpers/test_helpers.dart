@@ -1,17 +1,13 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 
-
 @GenerateMocks([Firebase])
-void main () {
+void main() {
   //var firebase = MockFirebase();
-
 }
-
 
 typedef Callback = void Function(MethodCall call);
 
@@ -29,17 +25,17 @@ void setupFirebaseAuthMocks([Callback? customHandlers]) {
             'messagingSenderId': '123',
             'projectId': '123',
           },
-          'pluginConstants': <String, dynamic> {},
+          'pluginConstants': <String, dynamic>{},
         }
       ];
     }
 
     if (call.method == 'Firebase#initializeApp') {
       return [
-        <String, dynamic> {
+        <String, dynamic>{
           'name': call.arguments['appName'],
           'options': call.arguments['options'],
-          'pluginConstants': <String, dynamic> {},
+          'pluginConstants': <String, dynamic>{},
         }
       ];
     }
@@ -57,6 +53,4 @@ Future<T> neverEndingFuture<T>() async {
   while (true) {
     await Future<T>.delayed(const Duration(minutes: 5));
   }
-
 }
-

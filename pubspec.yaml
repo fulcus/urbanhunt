@@ -20,13 +20,11 @@ dependencies:
   font_awesome_flutter:
   google_fonts: ^2.1.0
   google_sign_in: ^5.0.2
-  page_transition:
   image_picker: ^0.8.2
   place_picker: ^0.9.20-nullsafety
   country_picker: ^2.0.7
   url_launcher: ^6.0.3
   cached_network_image: ^3.1.0
-  one_context: ^1.1.1
   persistent_bottom_nav_bar: ^4.0.2
   share_plus: ^3.0.1
   shared_preferences: ^2.0.7
@@ -41,7 +39,6 @@ dependencies:
 
 dev_dependencies:
   mockito:
-  build_runner:
   flutter_test:
     sdk: flutter
   lints: ^1.0.1

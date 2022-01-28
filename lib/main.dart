@@ -1,9 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:one_context/one_context.dart';
 
-import 'login_page.dart';
+import 'auth/login_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +16,6 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     //_portraitModeOnly();
     return MaterialApp(
-      builder: OneContext().builder, // needed?
       title: 'UrbanHunt',
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(),

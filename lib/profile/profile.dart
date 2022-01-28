@@ -1,17 +1,16 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hunt_app/login_page.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/profile/custom_alert_dialog.dart';
+import 'package:hunt_app/profile/unlocked_list.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
-import 'package:one_context/one_context.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:hunt_app/profile/unlocked_list.dart';
 import 'package:image_picker/image_picker.dart';
 
 final db = FirebaseFirestore.instance;
@@ -773,13 +772,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     username.docs.isEmpty ? _isUnique = true : _isUnique = false;
   }
 
-  Future<void> _changePassword(String password) async {
+  Future<void> _changePassword(String password, BuildContext context) async {
     await _myUser.updatePassword(password).then((_) {
       print('Successfully changed password');
     }).catchError((Object error) {
       if (error is FirebaseAuthException) {
         if (error.code == 'requires-recent-login') {
-          _retrieveOldPassword();
+          _retrieveOldPassword(context);
           var credential = EmailAuthProvider.credential(
               email: _myUser.email!, password: _oldPassword);
 
@@ -803,10 +802,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     });
   }
 
-  void _retrieveOldPassword() {
+  void _retrieveOldPassword(BuildContext context) {
     var controller = TextEditingController();
 
-    OneContext().showDialog<void>(
+    showDialog<void>(
+      context: context,
       builder: (_) => AlertDialog(
         title: Text('You have to re-authenticate to change the password'),
         content: TextFormField(
@@ -876,7 +876,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
                     if (form.validate()) {
                       if (_newPassword.isNotEmpty) {
-                        _changePassword(_newPassword);
+                        _changePassword(_newPassword, context);
                       }
                       setState(() {
                         _enabled = true;
