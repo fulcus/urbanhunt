@@ -206,10 +206,10 @@ class _PlaceMapState extends State<PlaceMap> {
           .toList();
 
       if(unlockedIds.contains(place.id)) {
-        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), false, current[0]['liked'] as bool, current[0]['disliked'] as bool, _onCardClose, current[0]['unlockDate'] as Timestamp));
+        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), false, current[0]['liked'] as bool, current[0]['disliked'] as bool, _onCardClose, unlockDate: current[0]['unlockDate'] as Timestamp));
       }
       else {
-        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), true, false, false, _onCardClose, Timestamp.now()));
+        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), true, false, false, _onCardClose));
       }
     }
 

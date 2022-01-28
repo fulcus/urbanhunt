@@ -39,12 +39,12 @@ class PlaceCard extends StatefulWidget with ClusterItem {
 
   PlaceData place;
   bool fullscreen, isLocked, isLiked, isDisliked;
-  Timestamp unlockDate;
+  Timestamp? unlockDate;
   late void Function() onCardClose;
 
   PlaceCard(this.place, this.isLocked, this.isLiked, this.isDisliked,
-      this.onCardClose, this.unlockDate,
-      {this.fullscreen = false, Key? key})
+      this.onCardClose,
+      {this.fullscreen = false, this.unlockDate, Key? key})
       : super(key: key);
 
   @override
@@ -215,7 +215,7 @@ class PlaceCardState extends State<PlaceCard> {
                                   Text(
                                     'Unlocked on ' +
                                         DateFormat.yMMMMd('en_US')
-                                            .format(widget.unlockDate.toDate())
+                                            .format(widget.unlockDate!.toDate())
                                             .toString(),
                                     style: TextStyle(
                                         fontSize: 10.0, color: Colors.grey),

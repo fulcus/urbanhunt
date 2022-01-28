@@ -84,7 +84,7 @@ Future<void> main() async {
 
   testWidgets('Like PlaceCard', (tester) async {
 
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, false, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, false, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
@@ -113,7 +113,7 @@ Future<void> main() async {
   });
 
   testWidgets('Close place card', (tester) async {
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
@@ -132,7 +132,7 @@ Future<void> main() async {
   });
 
   testWidgets('Unlock place card', (tester) async {
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
