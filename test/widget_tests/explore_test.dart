@@ -70,6 +70,9 @@ Future<void> main() async {
       'score': 0,
       'username': 'MockedUser'
     });*/
+    // final explore = Explore();
+    // final ExploreState exploreState = tester.state(find.byType(Explore));
+    // exploreState.userId = 'abc';
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),

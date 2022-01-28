@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/utils/misc.dart';
 
 import '../auth/login_page.dart';
 
@@ -56,13 +57,37 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
             child: InkWell(
               highlightColor: Colors.grey[200],
               onTap: () {
-                _myUser.delete();
-                Navigator.of(context, rootNavigator: true)
-                    .pushAndRemoveUntil(MaterialPageRoute<void>(
-                    builder: (context) => LoginPage()),
-                      (route) => false,
-                );
+                _myUser.delete().catchError((Object error) {
+                  if (error is FirebaseAuthException) {
+                    if (error.code == 'requires-recent-login') {
+                      var oldPassword = retrieveOldPassword(context);
+                      var credential = EmailAuthProvider.credential(
+                          email: _myUser.email!, password: oldPassword);
 
+                      _myUser
+                          .reauthenticateWithCredential(credential)
+                          .then((_) => print('Re-authenticated'))
+                          .catchError((Object error) {
+                        if (error is FirebaseAuthException) {
+                          // showInSnackBar(
+                          //     'Unable to change password. Please try again later.', _scaffoldMessengerKey, height: 70.0);
+                          print(error.message);
+                        } else {
+                          print(error.toString());
+                        }
+                      });
+                    } else {
+                      print(error.message);
+                    }
+                  } else {
+                    print("Password can't be changed" + error.toString());
+                  }
+                });
+
+                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                  MaterialPageRoute<void>(builder: (context) => LoginPage()),
+                  (route) => false,
+                );
               },
               child: Center(
                 child: Text(
