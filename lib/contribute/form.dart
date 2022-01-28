@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/api_key.dart';
 import 'package:hunt_app/contribute/place_data.dart';
+import 'package:hunt_app/login_page.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -83,7 +84,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             autovalidateMode: _autoValidateMode,
             child: Scrollbar(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
+                padding: isMobile ? const EdgeInsets.symmetric(horizontal: 15) : const EdgeInsets.symmetric(horizontal: 70),
                 children: [
                   SizedBox(height: 35),
                   TextFormField(

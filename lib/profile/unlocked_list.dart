@@ -9,6 +9,8 @@ import 'package:hunt_app/explore/place_card.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../login_page.dart';
+
 final db = FirebaseFirestore.instance;
 
 
@@ -101,7 +103,7 @@ class _HelperState extends State<Helper> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Container(
-              height: 660,
+              padding: isMobile ? EdgeInsets.only(bottom: 55) : EdgeInsets.only(left: 70, right: 70, bottom: 35, top: 10),
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: snapshot.data!.length,

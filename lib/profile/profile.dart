@@ -80,6 +80,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
 
                   return Container(
+                    padding: isMobile ? EdgeInsets.only(top: 0) : EdgeInsets.only(left: 70, right: 70),
                     child: ListView(
                       children: <Widget>[
                         Column(
@@ -644,7 +645,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                       children: [
                                                         SizedBox(width: 6.0),
                                                         Icon(Icons.delete_outline,
-                                                            color: Colors.indigo),
+                                                            color: Colors.indigo,
+                                                            size: 25,
+                                                        ),
                                                         SizedBox(width: 4.0),
                                                         Text(
                                                           'Delete\nAccount',

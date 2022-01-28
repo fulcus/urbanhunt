@@ -13,6 +13,8 @@ import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../login_page.dart';
+
 final db = FirebaseFirestore.instance;
 
 class Explore extends StatefulWidget {
@@ -111,7 +113,16 @@ class ExploreState extends State<Explore> {
   /// When the location services are not enabled or permissions
   /// are denied the `Future` will return an error.
   Future<Position> determinePosition() async {
+    bool serviceEnabled;
     LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      permission = await Geolocator.checkPermission();
+    }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -249,7 +260,7 @@ class _PlaceMapState extends State<PlaceMap> {
     );
 
     Widget locate = Padding(
-      padding: EdgeInsets.only(top: 690.0, left: 330.0),
+      padding: isMobile ? EdgeInsets.only(top: 690.0, left: 330.0) : EdgeInsets.only(top: 690.0, left: 1000.0),
       child:  GestureDetector(
         onTap: _setCurrentLocation,
         child: CircleAvatar(
@@ -269,7 +280,7 @@ class _PlaceMapState extends State<PlaceMap> {
     );
 
     Widget rotate = Padding(
-      padding: EdgeInsets.only(top: 640.0, left: 330.0),
+      padding: isMobile ? EdgeInsets.only(top: 640.0, left: 330.0) : EdgeInsets.only(top: 640.0, left: 1000.0),
       child: GestureDetector(
         onTap: _rotateNorth,
         child: CircleAvatar(

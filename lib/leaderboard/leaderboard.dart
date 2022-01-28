@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hunt_app/login_page.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/keep_alive_builder.dart';
 
@@ -85,7 +86,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(left: 25.0, bottom: 4),
+                padding: isMobile ? const EdgeInsets.symmetric(horizontal: 25) : const EdgeInsets.symmetric(horizontal: 75),
                 child: Row(
                   children: [
                     Padding(
@@ -211,7 +212,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(left: 25.0, bottom: 4.0),
+                    padding: isMobile ? EdgeInsets.only(left: 25.0, bottom: 4.0) : EdgeInsets.only(left: 75.0, bottom: 4.0),
                     child: Text(
                       '🌍 Global Rank Board: ',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -283,7 +284,7 @@ class LeaderBoardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
+      padding: isMobile ? const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0) : const EdgeInsets.symmetric(horizontal: 70.0, vertical: 3.0),
       child: InkWell(
         child: Container(
           decoration: BoxDecoration(

@@ -11,6 +11,7 @@ import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/unlocked_popup.dart';
+import 'package:hunt_app/login_page.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -125,7 +126,7 @@ class PlaceCardState extends State<PlaceCard> {
               Positioned(
                 right: 0,
                 left: 0,
-                top: 162,
+                top: isMobile ? 162 : 348,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).scaffoldBackgroundColor,
@@ -134,7 +135,8 @@ class PlaceCardState extends State<PlaceCard> {
                       topLeft: Radius.circular(8),
                     ),
                   ),
-                  padding: EdgeInsets.only(top: 10.0, left: 32.0, right: 32.0),
+                  padding: isMobile ? EdgeInsets.only(top: 10.0, left: 32.0, right: 32.0)
+                  : EdgeInsets.only(top: 10.0, left: 70.0, right: 70.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -246,7 +248,7 @@ class PlaceCardState extends State<PlaceCard> {
                       SizedBox(height: 4.0),
                       Text(description, style: TextStyle(fontSize: 12.0)),
                       // Sep
-                      SizedBox(height: 370.0),
+                      SizedBox(height: 900.0),
                     ],
                   ),
                 ),
@@ -271,7 +273,8 @@ class PlaceCardState extends State<PlaceCard> {
         ),
       );
     } else {
-      return DraggableScrollableSheet(
+      if(isMobile) {
+        return DraggableScrollableSheet(
         minChildSize: 0.44,
         initialChildSize: 0.44,
         builder: (context, scrollController) {
@@ -286,6 +289,26 @@ class PlaceCardState extends State<PlaceCard> {
           );
         },
       );
+      }
+      else {
+        return Align(
+          alignment: Alignment.bottomRight,
+          child: SingleChildScrollView(
+            child: SizedBox(
+                width: MediaQuery.of(context).size.width*0.4,
+                height: MediaQuery.of(context).size.height,
+                child: Material(
+                  elevation: 10,
+                  shadowColor: Colors.black,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16.0),
+                      bottomLeft: Radius.circular(16.0)),
+                  child: content,
+                )
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -611,7 +634,7 @@ class PlaceCardState extends State<PlaceCard> {
       children: <Widget>[
         Container(
           width: double.infinity,
-          height: 180.0,
+          height: isMobile? 180.0 : 350.0,
           alignment: Alignment.center,
           child: Stack(
             children: <Widget>[
@@ -625,12 +648,12 @@ class PlaceCardState extends State<PlaceCard> {
                 child: Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(14),
+                        topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
                         topLeft: Radius.circular(14),
                       ),
                       child: CachedNetworkImage(
                         imageUrl: widget.place.imageURL,
-                        height: 180.0,
+                        height: isMobile? 180.0 : 350.0,
                         width: MediaQuery.of(context).size.width,
                         fit: BoxFit.cover,
                         errorWidget: (context, url, dynamic error) => Icon(Icons.error),
@@ -640,7 +663,7 @@ class PlaceCardState extends State<PlaceCard> {
               ),
               ClipRRect(
                 borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(14),
+                  topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
                   topLeft: Radius.circular(14),
                 ),
                 child: BackdropFilter(
@@ -673,11 +696,11 @@ class PlaceCardState extends State<PlaceCard> {
   Widget imageBannerUnlocked() {
     return Container(
       width: double.infinity,
-      height: 180.0,
+      height: isMobile? 180.0 : 350.0,
       alignment: Alignment.center,
       child: ClipRRect(
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(14),
+          topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
           topLeft: Radius.circular(14),
         ),
         child:  ShaderMask(
@@ -689,7 +712,7 @@ class PlaceCardState extends State<PlaceCard> {
           blendMode: BlendMode.darken,
           child: CachedNetworkImage(
             imageUrl: widget.place.imageURL,
-            height: 180.0,
+            height: isMobile? 180.0 : 350.0,
             width: MediaQuery.of(context).size.width,
             fit: BoxFit.cover,
             errorWidget: (context, url, dynamic error) => Icon(Icons.error),
