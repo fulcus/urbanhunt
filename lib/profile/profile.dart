@@ -102,7 +102,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                         image: DecorationImage(
                                                           image: imageHelper
                                                               .showImage(url,
-                                                                  'assets/images/as.png'),
+                                                                  'assets/images/default_profile.png'),
                                                           fit: BoxFit.cover,
                                                         )))
                                               ],

@@ -47,7 +47,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
   Color _rowColor = Colors.transparent;
   int _position = 0;
   String? myCountry;
-  bool _myUserInTop = false; //todo if false add me as last
+  // bool _myUserInTop = false; //todo if false add me as last
 
   Future<String> getCountry() async {
     var doc = await db.collection('users').doc(myUser.uid).get();
@@ -121,7 +121,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                                 // highlight my user
                                 if (currListUser.id == myUser.uid) {
                                   _rowColor = Colors.indigo[50]!;
-                                  _myUserInTop = true;
+                                  // _myUserInTop = true;
                                 } else {
                                   _rowColor = Colors.transparent;
                                 }
@@ -184,7 +184,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
   late Stream<QuerySnapshot> _bestUsers;
   Color _rowColor = Colors.transparent;
   int _position = 0;
-  bool _myUserInTop = false; //todo if false add me as last
+  // bool _myUserInTop = false; //todo if false add me as last
 
   @override
   void initState() {
@@ -229,7 +229,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                                     // highlight my user
                                     if (currListUser.id == myUser.uid) {
                                       _rowColor = Colors.indigo[50]!;
-                                      _myUserInTop = true;
+                                      // _myUserInTop = true;
                                     } else {
                                       _rowColor = Colors.transparent;
                                     }
@@ -340,7 +340,7 @@ class LeaderBoardRow extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
-                                        image: ImageHelper().showImage(imageURL, 'assets/images/as.png'),
+                                        image: ImageHelper().showImage(imageURL, 'assets/images/default_profile.png'),
                                         fit: BoxFit.cover)))),
                       ],
                     ),

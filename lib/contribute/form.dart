@@ -275,7 +275,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         print(
             '$name, $lockedDescription, $unlockedDescription, $pickedLocation, '
             '$categories');
-        //showInSnackBar('Added Place');
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(
@@ -289,11 +288,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         // Start validating on every change.
         _autoValidateMode = AutovalidateMode.always;
         //_showInSnackBar('Error in form');
-        form.save(); // ?
-        // only for debugging
-        // _reset();
-        // Navigator.of(_formKey.currentState!.context)
-        //     .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+        form.save();
       }
     }
   }

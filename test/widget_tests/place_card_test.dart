@@ -41,8 +41,8 @@ Future<void> main() async {
   await auth.signInWithCredential(credential);
 
   final storage = MockFirebaseStorage();
-  final storageRef = storage.ref().child('assets/images/as.png');
-  final image = File('assets/images/as.png');
+  final storageRef = storage.ref().child('assets/images/default_profile.png');
+  final image = File('assets/images/default_profile.png');
   await storageRef.putFile(image);
 
   final firestore = FakeFirebaseFirestore();
