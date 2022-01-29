@@ -182,7 +182,7 @@ class _SideNavMenuState extends State<SideNavMenu>
       color: widget.backgroundColor,
       width: isCollapsed ? widget.sideBarCollapsedWidth : widget.sideBarWidth,
       child: Container(
-        margin: const EdgeInsets.only(top: 24),
+        margin: EdgeInsets.only(top: 120),
         height: MediaQuery.of(context).size.height,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -296,7 +296,7 @@ class NavItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 58,
+      height: 100,
       child: TextButton(
         style: TextButton.styleFrom(
           padding: EdgeInsets.all(0),

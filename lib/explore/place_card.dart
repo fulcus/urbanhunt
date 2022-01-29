@@ -295,23 +295,23 @@ class PlaceCardState extends State<PlaceCard> {
       );
       }
       else {
+        //TODO not scrolling
         return Align(
           alignment: Alignment.bottomRight,
-          child: SingleChildScrollView(
-            child: SizedBox(
-                width: MediaQuery.of(context).size.width*0.4,
-                height: MediaQuery.of(context).size.height,
-                child: Material(
-                  elevation: 10,
-                  shadowColor: Colors.black,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.0),
-                      bottomLeft: Radius.circular(16.0)),
-                  child: content,
-                )
+          child: SizedBox(
+              width: MediaQuery.of(context).size.width*0.4,
+              height: MediaQuery.of(context).size.height,
+              child: Material(
+                elevation: 10,
+                shadowColor: Colors.black,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    bottomLeft: Radius.circular(16.0)),
+                child: SingleChildScrollView(
+                    child: content),
+              )
             ),
-          ),
-        );
+          );
       }
     }
   }

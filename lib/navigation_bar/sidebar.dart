@@ -51,8 +51,7 @@ class _SideNavBarState extends State<SideNavBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SideBar(
-        alwaysOpened: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.indigo[50]!,
         items: _navBarsItems(),
         selectedColor: Colors.indigo,
         pageController: _pageController,

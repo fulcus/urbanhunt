@@ -262,8 +262,9 @@ class _PlaceMapState extends State<PlaceMap> {
       //indoorViewEnabled: true,  // we might need it
     );
 
-    Widget locate = Padding(
-      padding: isMobile ? EdgeInsets.only(top: 690.0, left: 330.0) : EdgeInsets.only(top: 690.0, left: 1000.0),
+    Widget locate = Container(
+      alignment: Alignment.bottomRight,
+      padding: isMobile ? EdgeInsets.only(bottom: 130, right: 25) : EdgeInsets.only(bottom: 100, right: 100),
       child:  GestureDetector(
         onTap: _setCurrentLocation,
         child: CircleAvatar(
@@ -282,8 +283,9 @@ class _PlaceMapState extends State<PlaceMap> {
       )
     );
 
-    Widget rotate = Padding(
-      padding: isMobile ? EdgeInsets.only(top: 640.0, left: 330.0) : EdgeInsets.only(top: 640.0, left: 1000.0),
+    Widget rotate = Container(
+      alignment: Alignment.bottomRight,
+      padding: isMobile ? EdgeInsets.only(bottom: 180, right: 25) : EdgeInsets.only(bottom: 150, right: 100),
       child: GestureDetector(
         onTap: _rotateNorth,
         child: CircleAvatar(
