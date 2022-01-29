@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hunt_app/login_page.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/keep_alive_builder.dart';
 

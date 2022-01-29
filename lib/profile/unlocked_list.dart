@@ -4,12 +4,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../login_page.dart';
 
 final db = FirebaseFirestore.instance;
 

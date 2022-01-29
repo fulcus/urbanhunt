@@ -74,107 +74,111 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                     var score = snapshot.data!.docs[0].get('score').toString();
                     var isEmailAuth = isEmailAuthProvider(_myUser);
 
-                  return Container(
-                    padding: isMobile ? EdgeInsets.only(top: 0) : EdgeInsets.only(left: 70, right: 70),
-                    child: ListView(
-                      children: <Widget>[
-                        Column(
-                          children: <Widget>[
-                            Container(
-                              height: 230.0,
-                              child: Column(
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 30.0),
-                                    child: Stack(
-                                        fit: StackFit.loose,
-                                        children: <Widget>[
-                                          Row(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                            children: <Widget>[
-                                              Container(
-                                                  width: 140.0,
-                                                  height: 140.0,
-                                                  decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                        image: imageHelper.showImage(
-                                                            url,
-                                                            'assets/images/as.png'),
-                                                        fit: BoxFit.cover,
-                                                      )))
-                                            ],
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 90.0, right: 100.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  FloatingActionButton(
-                                                    child: CircleAvatar(
-                                                      backgroundColor:
-                                                      Colors.white,
-                                                      radius: 25.0,
-                                                      child: Icon(
-                                                        Icons.camera_alt,
-                                                        color: Colors.indigo,
-                                                        size: 26,
-                                                      ),
-                                                    ),
-                                                    onPressed: () async => {
-                                                      await getImage(),
-                                                      await imageHelper
-                                                          .uploadImage(
-                                                          _image!, _myUser)
-                                                    },
-                                                  )
-                                                ],
-                                              )),
-                                        ]),
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            Divider(height: 1),
-
-                            Container(
-                              child: Padding(
-                                padding: EdgeInsets.only(bottom: 25.0),
+                    return Container(
+                      padding: isMobile
+                          ? EdgeInsets.only(top: 0)
+                          : EdgeInsets.only(left: 70, right: 70),
+                      child: ListView(
+                        children: <Widget>[
+                          Column(
+                            children: <Widget>[
+                              Container(
+                                height: 230.0,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
                                     Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 25.0, right: 25.0, top: 10.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                          mainAxisSize: MainAxisSize.max,
+                                      padding: EdgeInsets.only(top: 30.0),
+                                      child: Stack(
+                                          fit: StackFit.loose,
                                           children: <Widget>[
-                                            Column(
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
                                               mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
+                                                  MainAxisAlignment.center,
                                               children: <Widget>[
-                                                Text(
-                                                  'Personal Information',
-                                                  style: TextStyle(
-                                                      color: Colors.indigo,
-                                                      fontSize: 18.0,
-                                                      fontWeight:
-                                                      FontWeight.bold),
-                                                ),
+                                                Container(
+                                                    width: 140.0,
+                                                    height: 140.0,
+                                                    decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        image: DecorationImage(
+                                                          image: imageHelper
+                                                              .showImage(url,
+                                                                  'assets/images/as.png'),
+                                                          fit: BoxFit.cover,
+                                                        )))
                                               ],
                                             ),
-                                          ],
-                                        )),
+                                            Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 90.0, right: 100.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    FloatingActionButton(
+                                                      child: CircleAvatar(
+                                                        backgroundColor:
+                                                            Colors.white,
+                                                        radius: 25.0,
+                                                        child: Icon(
+                                                          Icons.camera_alt,
+                                                          color: Colors.indigo,
+                                                          size: 26,
+                                                        ),
+                                                      ),
+                                                      onPressed: () async => {
+                                                        await getImage(),
+                                                        await imageHelper
+                                                            .uploadImage(
+                                                                _image!,
+                                                                _myUser)
+                                                      },
+                                                    )
+                                                  ],
+                                                )),
+                                          ]),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Divider(height: 1),
+                              Container(
+                                child: Padding(
+                                  padding: EdgeInsets.only(bottom: 25.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 25.0,
+                                              right: 25.0,
+                                              top: 10.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: <Widget>[
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  Text(
+                                                    'Personal Information',
+                                                    style: TextStyle(
+                                                        color: Colors.indigo,
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          )),
 
                                       Padding(
                                           padding: EdgeInsets.only(
@@ -528,33 +532,45 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                             ],
                                           )),
 
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 25.0, right: 25.0, top: 25.0),
-                                      child: Container(
-                                        child: Row(children: [
-                                          Text(
-                                            'Total Score: ',
-                                            style: TextStyle(fontSize: 16,
-                                                fontWeight:FontWeight.bold),
-                                          ),
-                                          FittedBox(
-                                            fit: BoxFit.fitWidth,
-                                            child: Container(
-                                              padding: EdgeInsets.only(right: 3.5, left: 3.5, top: 2, bottom: 2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(color: Colors.amber, width: 2),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    score+' ',
-                                                    style: GoogleFonts.supermercadoOne(
-                                                      fontSize: 21,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.orange
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 25.0, right: 25.0, top: 25.0),
+                                        child: Container(
+                                          child: Row(children: [
+                                            Text(
+                                              'Total Score: ',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            FittedBox(
+                                              fit: BoxFit.fitWidth,
+                                              child: Container(
+                                                padding: EdgeInsets.only(
+                                                    right: 3.5,
+                                                    left: 3.5,
+                                                    top: 2,
+                                                    bottom: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                      color: Colors.amber,
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      score + ' ',
+                                                      style: GoogleFonts
+                                                          .supermercadoOne(
+                                                              fontSize: 21,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color: Colors
+                                                                  .orange),
                                                     ),
                                                     Icon(Icons.vpn_key,
                                                         color: Colors.amber)
@@ -702,78 +718,96 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ],
                                               )),
 
-                                        //DELETE ACCOUNT BUTTON
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: <Widget>[
-                                              GestureDetector(
-                                                  child: Container(
-                                                    width: 120.0,
-                                                    height: 60.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                            color: Colors.indigo),
-                                                        borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(16))),
-                                                    child: Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      children: [
-                                                        SizedBox(width: 6.0),
-                                                        Icon(Icons.delete_outline,
-                                                            color: Colors.indigo,
+                                          //DELETE ACCOUNT BUTTON
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 25.0,
+                                                right: 25.0,
+                                                top: 25.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: <Widget>[
+                                                GestureDetector(
+                                                    child: Container(
+                                                      width: 120.0,
+                                                      height: 60.0,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          border: Border.all(
+                                                              color: Colors
+                                                                  .indigo),
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          16))),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          SizedBox(width: 6.0),
+                                                          Icon(
+                                                            Icons
+                                                                .delete_outline,
+                                                            color:
+                                                                Colors.indigo,
                                                             size: 25,
-                                                        ),
-                                                        SizedBox(width: 4.0),
-                                                        Text(
-                                                          'Delete\nAccount',
-                                                          style: TextStyle(
-                                                            color: Colors.indigo,
-                                                            fontWeight:
-                                                            FontWeight.bold,
-                                                            fontSize: 16.0,
                                                           ),
-                                                        ),
-                                                      ],
+                                                          SizedBox(width: 4.0),
+                                                          Text(
+                                                            'Delete\nAccount',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.indigo,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 16.0,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                  onTap: () {
-                                                    showDialog<dynamic>(
-                                                        barrierColor: Colors.black26,
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return CustomAlertDialog(
-                                                            title: "Delete account",
-                                                            description: "You will lose all your progress.\n"
-                                                                "Are you sure to delete your account?\n",
-                                                          );
-                                                        });
-                                                  })
-                                            ],
-                                          ),
-                                        )
-                                      ],)
-                                  ],
+                                                    onTap: () {
+                                                      showDialog<dynamic>(
+                                                          barrierColor:
+                                                              Colors.black26,
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return CustomAlertDialog(
+                                                              title:
+                                                                  "Delete account",
+                                                              description:
+                                                                  "You will lose all your progress.\n"
+                                                                  "Are you sure to delete your account?\n",
+                                                            );
+                                                          });
+                                                    })
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              }))
-    );
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                })));
   }
 
   Future<void> getImage() async {
@@ -862,7 +896,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       }
     });
   }
-
 
   @override
   void dispose() {

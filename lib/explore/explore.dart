@@ -10,12 +10,12 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../login_page.dart';
 
 final db = FirebaseFirestore.instance;
 

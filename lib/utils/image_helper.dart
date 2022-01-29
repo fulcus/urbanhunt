@@ -62,7 +62,6 @@ class ImageHelper {
     }
     return imageProvider;
   }
-}
 
   Future<ui.Image> loadUiImage(String assetPath) async {
     final data = await rootBundle.load(assetPath);
@@ -71,5 +70,4 @@ class ImageHelper {
     ui.decodeImageFromList(list, completer.complete);
     return completer.future;
   }
-
 }
