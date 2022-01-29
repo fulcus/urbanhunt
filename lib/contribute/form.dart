@@ -200,10 +200,44 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                                 side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,
-                  // todo make address prettier
-                  pickedLocation == null
-                      ? Container()
-                      : Text(pickedLocation!.formattedAddress ?? 'No location'),
+                  Center(
+                      child: pickedLocation == null
+                          ? const Text('No place location selected.')
+                          : Stack(
+                        children: <Widget>[
+                            Container(
+                              child: FittedBox(
+                                child: Text(pickedLocation!.formattedAddress ?? 'No location'),
+                              ),
+                              padding: EdgeInsets.all(30),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                border: Border(
+                                  bottom: BorderSide (
+                                    color: Colors.grey[600]!,
+                                    width: 1,
+                                  ),
+                                )
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    pickedLocation = null;
+                                  });
+                                },
+                                child: const Icon(
+                                  Icons.close,
+                                // color: Colors.white,
+                                ),
+                              ),
+                           ),
+                          ],
+                        ),
+                  ),
                   sizedBoxSpace,
                   TextButton.icon(
                     label: const Text('Select place location'),

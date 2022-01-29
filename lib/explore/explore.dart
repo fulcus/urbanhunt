@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
+import 'package:hunt_app/utils/image_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../login_page.dart';
@@ -187,6 +189,7 @@ class PlaceMap extends StatefulWidget {
 class _PlaceMapState extends State<PlaceMap> {
   late BitmapDescriptor _markerIconUnlocked;
   late BitmapDescriptor _markerIconLocked;
+  late ui.Image _clusterIcon;
   late ClusterManager _clusterManager;
   double _currentCameraBearing = 0.0;
   double _currentCameraTilt = 0.0;
@@ -230,7 +233,7 @@ class _PlaceMapState extends State<PlaceMap> {
         markerBuilder: _markerBuilder, // Optional : Method to implement if you want to customize markers
         levels: [1, 4.25, 6.75, 8.25, 11.5, 14.5, 16.0, 16.5, 20.0], // Optional : Configure this if you want to change zoom levels at which the clustering precision change
         extraPercent: 0.2, // Optional : This number represents the percentage (0.2 for 20%) of latitude and longitude (in each direction) to be considered on top of the visible map bounds to render clusters. This way, clusters don't "pop out" when you cross the map.
-        stopClusteringZoom: 17.0 // Optional : The zoom level to stop clustering, so it's only rendering single item "clusters"
+        stopClusteringZoom: 16.0 // Optional : The zoom level to stop clustering, so it's only rendering single item "clusters"
     );
   }
 
@@ -352,15 +355,17 @@ class _PlaceMapState extends State<PlaceMap> {
 
   Future<void> _loadCustomIcon() async {
     _markerIconUnlocked =
-    await _createMarkerImageFromAsset('assets/images/manette-blue.png');
+    await _createMarkerImageFromAsset('assets/images/unlocked-green.png');
     _markerIconLocked =
-    await _createMarkerImageFromAsset('assets/images/manette-red.png');
+    await _createMarkerImageFromAsset('assets/images/locked-red.png');
+
+    _clusterIcon = await ImageHelper().loadUiImage('assets/images/cluster-blue-v5.png');
+
   }
 
   Future<BitmapDescriptor> _setCustomIcon(Cluster<PlaceCard> cluster) async {
     if(cluster.isMultiple) {
-      return await _getMarkerBitmap(cluster.isMultiple ? 125 : 75,
-          text: cluster.isMultiple ? cluster.count.toString() : null);
+      return await _getMarkerBitmap(125, text: cluster.count.toString());
     }
     else {
       bool isLocked = cluster.items.first.isLocked;
@@ -372,14 +377,11 @@ class _PlaceMapState extends State<PlaceMap> {
   Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? text}) async {
     if (kIsWeb) size = (size / 2).floor();
 
-    final PictureRecorder pictureRecorder = PictureRecorder();
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Paint paint1 = Paint()..color = Colors.indigo;
-    final Paint paint2 = Paint()..color = Colors.white;
 
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
+    canvas.drawImage(_clusterIcon, Offset.zero, paint1);
 
     if (text != null) {
       TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -387,18 +389,18 @@ class _PlaceMapState extends State<PlaceMap> {
         text: text,
         style: TextStyle(
             fontSize: size / 3,
-            color: Colors.white,
-            fontWeight: FontWeight.normal),
+            color: Colors.indigo,
+            fontWeight: FontWeight.bold),
       );
       painter.layout();
       painter.paint(
         canvas,
-        Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
+        Offset(size / 2.7 - painter.width / 2, size / 2.5 - painter.height / 2),
       );
     }
 
     final img = await pictureRecorder.endRecording().toImage(size, size);
-    final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
+    final data = await img.toByteData(format: ui.ImageByteFormat.png) as ByteData;
 
     return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
   }

@@ -56,7 +56,17 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
             child: InkWell(
               highlightColor: Colors.grey[200],
               onTap: () {
-                _myUser.delete();
+                _myUser.delete().catchError((Object error) {
+                  if(error is FirebaseAuthException && error.code == 'requires-recent-login') {
+                    //TODO handle exception
+                    _myUser.reauthenticateWithCredential(
+                        AuthCredential(
+                            providerId: _myUser.providerData[0].providerId,
+                            signInMethod: _myUser.email!
+                        )
+                    );
+                  }
+                });
                 Navigator.of(context, rootNavigator: true)
                     .pushAndRemoveUntil(MaterialPageRoute<void>(
                     builder: (context) => LoginPage()),
