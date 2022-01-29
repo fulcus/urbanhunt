@@ -58,7 +58,7 @@ Future<void> _addUserToDB(String uid, String? imageURL) async {
       'imageURL': imageURL ?? '',
       'score': 0,
       'username': randomUsername,
-      'country': myCountry
+      'country': myCountry ?? ''
     });
   } on Exception catch (e) {
     print(e);
