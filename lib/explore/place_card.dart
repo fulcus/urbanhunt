@@ -575,10 +575,11 @@ class PlaceCardState extends State<PlaceCard> {
     // Only need to update UI with new info and write 'unlocking' to db.
     var unlockedPlaces =
         db.collection('users').doc(userId).collection('unlockedPlaces');
+    widget.unlockDate = Timestamp.now();
     var data = <String, dynamic>{
       'liked': false,
       'disliked': false,
-      'unlockDate': Timestamp.now()
+      'unlockDate': widget.unlockDate
     };
 
     return await unlockedPlaces.doc(widget.place.id).set(data);

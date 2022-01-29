@@ -45,7 +45,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
   File? _image;
   String? name, lockedDescription, unlockedDescription;
-  List<String>? categories;
+  List<String> categories = [];
   LocationResult? pickedLocation;
 
   final User _myUser = FirebaseAuth.instance.currentUser!;
@@ -303,7 +303,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
         var imageURL = await ImageHelper().uploadFile(_image!);
         var creatorId = FirebaseAuth.instance.currentUser!.uid;
         var data = PlaceData(name!, lockedDescription!, unlockedDescription!,
-            imageURL, creatorId, categories!, pickedLocation!);
+            imageURL, creatorId, categories, pickedLocation!);
         data.upload();
 
         print('Added place');
