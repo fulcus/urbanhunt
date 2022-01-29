@@ -8,10 +8,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
-import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/unlocked_popup.dart';
-import 'package:hunt_app/login_page.dart';
+import 'package:hunt_app/auth/login_page.dart';
+import 'package:hunt_app/utils/misc.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,7 +23,6 @@ import 'explore.dart';
 const double UNLOCK_RANGE_METERS = 15.0;
 
 //TODO probably they need to be local variable for testing purposes
-// Firebase db instance
 final db = FirebaseFirestore.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 
@@ -31,7 +31,7 @@ final Map<String, Color> categoryColors = {
   'Art': Colors.blue[300]!,
   'Nature': Colors.green[300]!,
   'Culture': Colors.orangeAccent,
-  'Food': Color.fromARGB(255,235,82,105),
+  'Food': Color.fromARGB(255, 235, 82, 105),
 };
 
 class PlaceCard extends StatefulWidget with ClusterItem {
@@ -40,12 +40,12 @@ class PlaceCard extends StatefulWidget with ClusterItem {
 
   PlaceData place;
   bool fullscreen, isLocked, isLiked, isDisliked;
-  Timestamp unlockDate;
+  Timestamp? unlockDate;
   late void Function() onCardClose;
 
   PlaceCard(this.place, this.isLocked, this.isLiked, this.isDisliked,
-      this.onCardClose, this.unlockDate,
-      {this.fullscreen = false, Key? key})
+      this.onCardClose,
+      {this.fullscreen = false, this.unlockDate, Key? key})
       : super(key: key);
 
   @override
@@ -65,7 +65,6 @@ class PlaceCardState extends State<PlaceCard> {
   final User _myUser = FirebaseAuth.instance.currentUser!;
   String _displayDistance = '';
   bool _isGPSon = false;
-  bool _isEmailAuth = true;
 
   PlaceCardState();
 
@@ -78,8 +77,6 @@ class PlaceCardState extends State<PlaceCard> {
         _displayDist();
       }
     });
-
-    _isEmailAuthProvider();
   }
 
   @override
@@ -102,7 +99,9 @@ class PlaceCardState extends State<PlaceCard> {
     }
 
     var likeOn = widget.isLiked ? Colors.green[300] : Colors.grey[400];
-    var dislikeOn = widget.isDisliked ? Color.fromARGB(255,235,82,105) : Colors.grey[400];
+    var dislikeOn = widget.isDisliked
+        ? Color.fromARGB(255, 235, 82, 105)
+        : Colors.grey[400];
 
     var likeIcon = Icon(Icons.thumb_up_alt, size: 20.0, color: likeOn);
     var dislikeIcon = Icon(Icons.thumb_down_alt, size: 20.0, color: dislikeOn);
@@ -113,15 +112,15 @@ class PlaceCardState extends State<PlaceCard> {
       children: <Widget>[
         Container(
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height*0.8,
+          height: MediaQuery.of(context).size.height * 0.8,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               // Image
               imageBanner,
               // scroll hint and close button
-              if(!widget.fullscreen)
-              Positioned(child: topBar(), right: 0, left: 0, top: 1),
+              if (!widget.fullscreen)
+                Positioned(child: topBar(), right: 0, left: 0, top: 1),
               // Below Image: Place info
               Positioned(
                 right: 0,
@@ -157,12 +156,11 @@ class PlaceCardState extends State<PlaceCard> {
                           GestureDetector(onTap: dislike, child: dislikeIcon),
                           SizedBox(width: 4.0),
                           Text(
-                            (widget.place.dislikes)
-                                .toString(),
+                            (widget.place.dislikes).toString(),
                             style: TextStyle(
                                 fontSize: 11.0,
                                 fontWeight: FontWeight.w600,
-                                color: Color.fromARGB(255,235,82,105)),
+                                color: Color.fromARGB(255, 235, 82, 105)),
                           ),
                           // Sep
                           Spacer(),
@@ -176,52 +174,56 @@ class PlaceCardState extends State<PlaceCard> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                              child:  Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Name
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Name
+                                Text(
+                                  widget.place.name,
+                                  style: TextStyle(
+                                    color: Colors.indigo,
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                // Sep
+                                SizedBox(height: 4.0),
+                                // Address
+                                Text(
+                                  widget.place.street +
+                                      '\n' +
+                                      widget.place.city +
+                                      ' (' +
+                                      widget.place.country +
+                                      ')',
+                                  style: TextStyle(
+                                      fontSize: 12.0, color: Colors.grey),
+                                ),
+                                // Sep
+                                SizedBox(height: 10.0),
+                                // Distance
+                                if (_isGPSon)
                                   Text(
-                                    widget.place.name,
+                                    _displayDistance,
                                     style: TextStyle(
-                                      color: Colors.indigo,
-                                      fontSize: 22.0,
+                                      fontSize: 10.0,
                                       fontWeight: FontWeight.w900,
+                                      color: Colors.black54,
                                     ),
                                   ),
-                                  // Sep
-                                  SizedBox(height: 4.0),
-                                  // Address
+                                SizedBox(height: 10.0),
+                                // Unlock date
+                                if (!widget.isLocked)
                                   Text(
-                                    widget.place.street+'\n'+ widget.place.city+' ('+ widget.place.country+')',
+                                    'Unlocked on ' +
+                                        DateFormat.yMMMMd('en_US')
+                                            .format(widget.unlockDate!.toDate())
+                                            .toString(),
                                     style: TextStyle(
-                                        fontSize: 12.0,
-                                        color: Colors.grey
-                                    ),
-                                  ),
-                                  // Sep
-                                  SizedBox(height: 10.0),
-                                  // Distance
-                                  if (_isGPSon)
-                                    Text(
-                                      _displayDistance,
-                                      style: TextStyle(
-                                        fontSize: 10.0,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  SizedBox(height: 10.0),
-                                  // Unlock date
-                                  if(!widget.isLocked)
-                                    Text(
-                                      'Unlocked on '+ DateFormat.yMMMMd('en_US').format(widget.unlockDate.toDate()).toString(),
-                                      style: TextStyle(
-                                          fontSize: 10.0,
-                                          color: Colors.grey
-                                      ),
-                                    )
-                                ],
-                              ),
+                                        fontSize: 10.0, color: Colors.grey),
+                                  )
+                              ],
+                            ),
                           ),
                           Column(
                             children: [
@@ -244,7 +246,9 @@ class PlaceCardState extends State<PlaceCard> {
                       SizedBox(height: 10.0),
                       Divider(height: 8),
                       // Description
-                      Text('Description:', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w600)),
+                      Text('Description:',
+                          style: TextStyle(
+                              fontSize: 14.0, fontWeight: FontWeight.w600)),
                       SizedBox(height: 4.0),
                       Text(description, style: TextStyle(fontSize: 12.0)),
                       // Sep
@@ -312,15 +316,6 @@ class PlaceCardState extends State<PlaceCard> {
     }
   }
 
-
-  void _isEmailAuthProvider() {
-    var providerId = _myUser.providerData[0].providerId;
-
-    if (providerId != 'password') {
-      _isEmailAuth = false;
-    }
-  }
-
   Future<bool> _checkGPS() async {
     _isGPSon = await Geolocator.isLocationServiceEnabled();
     return _isGPSon;
@@ -328,7 +323,7 @@ class PlaceCardState extends State<PlaceCard> {
 
   Future<void> _displayDist() async {
     _displayDistance = await _updateDistance();
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -368,10 +363,9 @@ class PlaceCardState extends State<PlaceCard> {
 
   // Interactions
   void tryUnlock() {
-    if(_isEmailAuth && !_myUser.emailVerified) {
+    if (isEmailAuthProvider(_myUser) && !_myUser.emailVerified) {
       _showInFlushBar('Please verify your email first.');
-    }
-    else {
+    } else {
       Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
           .then((pos) {
         setState(() {
@@ -383,9 +377,9 @@ class PlaceCardState extends State<PlaceCard> {
             _dbUnlockPlace();
 
             // somehow trigger update for marker icon with unlocked icon => replace Explore page
-            Navigator.of(context)
-                .pushReplacement(
-              MaterialPageRoute<void>(builder: (context) => Explore(),
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(
+                builder: (context) => Explore(),
               ),
             );
 
@@ -411,14 +405,14 @@ class PlaceCardState extends State<PlaceCard> {
       setState(() {
         if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateLikes(1);
-          widget.place.likes = widget.place.likes+1;
+          widget.place.likes = widget.place.likes + 1;
         } else if (widget.isLiked && !widget.isDisliked) {
-          widget.place.likes = widget.place.likes-1;
+          widget.place.likes = widget.place.likes - 1;
           _dbUpdateLikes(-1);
         } else if (!widget.isLiked && widget.isDisliked) {
           _dbSwapLikeDislike(false);
-          widget.place.likes = widget.place.likes+1;
-          widget.place.dislikes = widget.place.dislikes-1;
+          widget.place.likes = widget.place.likes + 1;
+          widget.place.dislikes = widget.place.dislikes - 1;
         }
 
         widget.isLiked = !widget.isLiked;
@@ -434,14 +428,14 @@ class PlaceCardState extends State<PlaceCard> {
       setState(() {
         if (!widget.isLiked && !widget.isDisliked) {
           _dbUpdateDislikes(1);
-          widget.place.dislikes = widget.place.dislikes+1;
+          widget.place.dislikes = widget.place.dislikes + 1;
         } else if (widget.isLiked && !widget.isDisliked) {
           _dbSwapLikeDislike(true);
-          widget.place.likes = widget.place.likes-1;
-          widget.place.dislikes = widget.place.dislikes+1;
+          widget.place.likes = widget.place.likes - 1;
+          widget.place.dislikes = widget.place.dislikes + 1;
         } else if (!widget.isLiked && widget.isDisliked) {
           _dbUpdateDislikes(-1);
-          widget.place.dislikes = widget.place.dislikes-1;
+          widget.place.dislikes = widget.place.dislikes - 1;
         }
 
         widget.isDisliked = !widget.isDisliked;
@@ -498,7 +492,8 @@ class PlaceCardState extends State<PlaceCard> {
           return newLikesCount;
         })
         .then((value) => print('Likes count updated to $value'))
-        .catchError((Object error, StackTrace stacktrace) => print('Failed to update likes: $error'));
+        .catchError((Object error, StackTrace stacktrace) =>
+            print('Failed to update likes: $error'));
   }
 
   Future<void> _dbUpdateDislikes(int dislikesIncrement) async {
@@ -530,8 +525,8 @@ class PlaceCardState extends State<PlaceCard> {
           return newDislikesCount;
         })
         .then((value) => print('Dislikes count updated to $value'))
-        .catchError(
-            (Object error, StackTrace stacktrace) => print('Failed to update dislikes: $error'));
+        .catchError((Object error, StackTrace stacktrace) =>
+            print('Failed to update dislikes: $error'));
   }
 
   // @param fromLikeToDislike == true : add dislike and remove like and vice versa
@@ -571,8 +566,8 @@ class PlaceCardState extends State<PlaceCard> {
           return newLikesCount;
         })
         .then((value) => print('Dislikes count updated to $value'))
-        .catchError(
-            (Object error, StackTrace stacktrace) => print('Failed to update dislikes: $error'));
+        .catchError((Object error, StackTrace stacktrace) =>
+            print('Failed to update dislikes: $error'));
   }
 
   Future<void> _dbUnlockPlace() async {
@@ -580,7 +575,11 @@ class PlaceCardState extends State<PlaceCard> {
     // Only need to update UI with new info and write 'unlocking' to db.
     var unlockedPlaces =
         db.collection('users').doc(userId).collection('unlockedPlaces');
-    var data = <String, dynamic>{'liked': false, 'disliked': false, 'unlockDate': Timestamp.now()};
+    var data = <String, dynamic>{
+      'liked': false,
+      'disliked': false,
+      'unlockDate': Timestamp.now()
+    };
 
     return await unlockedPlaces.doc(widget.place.id).set(data);
   }
@@ -613,15 +612,15 @@ class PlaceCardState extends State<PlaceCard> {
           Expanded(child: Container(color: Colors.transparent)),
           Expanded(
               child: Container(
-                color: Colors.transparent,
-                alignment: Alignment.center,
-                child: scrollHint,
+            color: Colors.transparent,
+            alignment: Alignment.center,
+            child: scrollHint,
           )),
           Expanded(
               child: Container(
-                color: Colors.transparent,
-                alignment: Alignment.centerRight,
-                child: closeIcon,
+            color: Colors.transparent,
+            alignment: Alignment.centerRight,
+            child: closeIcon,
           )),
         ],
       ),
@@ -639,13 +638,13 @@ class PlaceCardState extends State<PlaceCard> {
           child: Stack(
             children: <Widget>[
               ShaderMask(
-                shaderCallback: (rect) => LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.center,
-                  colors: [Colors.black, Colors.transparent],
-                ).createShader(rect),
-                blendMode: BlendMode.darken,
-                child: Center(
+                  shaderCallback: (rect) => LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.center,
+                        colors: [Colors.black, Colors.transparent],
+                      ).createShader(rect),
+                  blendMode: BlendMode.darken,
+                  child: Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.only(
                         topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
@@ -656,11 +655,11 @@ class PlaceCardState extends State<PlaceCard> {
                         height: isMobile? 180.0 : 350.0,
                         width: MediaQuery.of(context).size.width,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, dynamic error) => Icon(Icons.error),
+                        errorWidget: (context, url, dynamic error) =>
+                            Icon(Icons.error),
                       ),
                     ),
-                )
-              ),
+                  )),
               ClipRRect(
                 borderRadius: BorderRadius.only(
                   topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
@@ -703,7 +702,7 @@ class PlaceCardState extends State<PlaceCard> {
           topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
           topLeft: Radius.circular(14),
         ),
-        child:  ShaderMask(
+        child: ShaderMask(
           shaderCallback: (rect) => LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.center,
@@ -747,9 +746,6 @@ class PlaceCardState extends State<PlaceCard> {
   }
 }
 
-
-
-
 class GmapButton extends StatelessWidget {
   const GmapButton({
     Key? key,
@@ -772,21 +768,21 @@ class GmapButton extends StatelessWidget {
             border: Border.all(color: color),
             borderRadius: BorderRadius.all(Radius.circular(16))),
         //child: Flexible(
-          child: Column(
-            children: [
-              SizedBox(width: 3.0),
-              Icon(Icons.navigation, color: color),
-              SizedBox(width: 2.0),
-              Text(
-                'Start',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 15.0,
-                ),
+        child: Column(
+          children: [
+            SizedBox(width: 3.0),
+            Icon(Icons.navigation, color: color),
+            SizedBox(width: 2.0),
+            Text(
+              'Start',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w400,
+                fontSize: 15.0,
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
         //)
       ),
       onTap: () {
@@ -823,29 +819,29 @@ class ShareButton extends StatelessWidget {
 
     return GestureDetector(
       child: Container(
-      width: 72.0,
-      decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: color),
-          borderRadius: BorderRadius.all(Radius.circular(16))),
-      //child: Flexible(
-      child: Column(
-        children: [
-          SizedBox(width: 3.0),
-          Icon(Icons.share, color: color),
-          SizedBox(width: 2.0),
-          Text(
-            'Share',
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w400,
-              fontSize: 15.0,
+        width: 72.0,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: color),
+            borderRadius: BorderRadius.all(Radius.circular(16))),
+        //child: Flexible(
+        child: Column(
+          children: [
+            SizedBox(width: 3.0),
+            Icon(Icons.share, color: color),
+            SizedBox(width: 2.0),
+            Text(
+              'Share',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w400,
+                fontSize: 15.0,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        //)
       ),
-      //)
-    ),
       onTap: () {
         Share.share(
             'Join me here! https://maps.google.com/?q=$latitude,$longitude');

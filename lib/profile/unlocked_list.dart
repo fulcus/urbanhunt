@@ -271,7 +271,7 @@ class UnlockedListRow extends StatelessWidget {
           ),
         ),
         onTap: () => Navigator.push(context,
-            MaterialPageRoute<void>(builder: (context) => PlaceCard(place, false, isLiked, isDisliked, _onCardClose, unlockDate, fullscreen: true))),
+            MaterialPageRoute<void>(builder: (context) => PlaceCard(place, false, isLiked, isDisliked, _onCardClose, unlockDate: unlockDate, fullscreen: true))),
       ),
     );
   }

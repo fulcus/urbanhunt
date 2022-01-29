@@ -31,21 +31,21 @@ class Network {
     }
   }
 
-  Future<String> getData() async {
+  Future<String?> getData() async {
     var response = await http.post(Uri.parse(url),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'});
     if (response.statusCode == 200) {
       return (response.body);
     } else {
-      return 'No Data';
+      return null;
     }
   }
 }
 
-Future<String> getCountry() async {
+Future<String?> getCountry() async {
   var n = Network('http://ip-api.com/json');
   var locationSTR = (await n.getData());
+  if (locationSTR == null) return null;
   dynamic locationx = jsonDecode(locationSTR);
   return locationx['countryCode'] as String;
 }
-

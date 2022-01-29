@@ -1,6 +1,6 @@
+import 'dart:io';
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -13,17 +13,17 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 
+final db = FirebaseFirestore.instance;
+
 class ImageHelper {
-
   final ImagePicker picker = ImagePicker();
-  final db = FirebaseFirestore.instance;
-
 
   Future<void> uploadImage(File image, User user) async {
     try {
       var path = '${user.uid}${extension(image.path)}';
       print('path ' + path);
-      var storageRef = FirebaseStorage.instance.ref().child('images/profile/$path');
+      var storageRef =
+          FirebaseStorage.instance.ref().child('images/profile/$path');
       await storageRef.putFile(image);
       print('File Uploaded');
 
@@ -44,7 +44,8 @@ class ImageHelper {
   }
 
   Future<String> uploadFile(File _image) async {
-    var storageReference = FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
+    var storageReference =
+        FirebaseStorage.instance.ref().child('images/${basename(_image.path)}');
     await storageReference.putFile(_image);
     print('File Uploaded');
     var returnURL = '';
@@ -61,7 +62,7 @@ class ImageHelper {
     }
     return imageProvider;
   }
-
+}
 
   Future<ui.Image> loadUiImage(String assetPath) async {
     final data = await rootBundle.load(assetPath);

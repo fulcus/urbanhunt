@@ -41,8 +41,8 @@ Future<void> main() async {
   await auth.signInWithCredential(credential);
 
   final storage = MockFirebaseStorage();
-  final storageRef = storage.ref().child('assets/images/as.png');
-  final image = File('assets/images/as.png');
+  final storageRef = storage.ref().child('assets/images/default_profile.png');
+  final image = File('assets/images/default_profile.png');
   await storageRef.putFile(image);
 
   final firestore = FakeFirebaseFirestore();
@@ -84,7 +84,7 @@ Future<void> main() async {
 
   testWidgets('Like PlaceCard', (tester) async {
 
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, false, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, false, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
@@ -113,7 +113,7 @@ Future<void> main() async {
   });
 
   testWidgets('Close place card', (tester) async {
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
@@ -132,7 +132,7 @@ Future<void> main() async {
   });
 
   testWidgets('Unlock place card', (tester) async {
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose, Timestamp.now());
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),

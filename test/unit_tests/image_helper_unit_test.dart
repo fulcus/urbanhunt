@@ -1,28 +1,30 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 
-ImageHelper imageHelper = ImageHelper();
 
 void main() {
 
-  final asset = 'assets/images/as.png';
-  final url = 'https://camo.githubusercontent.com/b4c566de1ceca472d9c01c7558999fa947a045164019cd180d7713f17fafa9c2/68747470733a2f2f692e6962622e636f2f516d567a4a77562f557365722d486f6d65706167652e706e67';;
+  final asset = 'assets/images/default_profile.png';
+  final url = 'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png';
+  final ImageHelper imageHelper = ImageHelper();
+
   ImageProvider result;
-  var networkImage = NetworkImage(url);
+  var networkImage = CachedNetworkImageProvider(url);
   var assetImage = AssetImage(asset);
 
-  /*group('Show Image', () {
+  group('Given image URL, Show image', () {
     test('Provided URL', () {
       result = imageHelper.showImage(url, asset);
       expect(result, networkImage);
     });
 
-    test('Not provided URL', () {
+    test('Not provided URL, Load asset', () {
       result = imageHelper.showImage('', asset);
       expect(result, assetImage);
     });
-  });*/
+  });
 
 }

@@ -4,8 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/api_key.dart';
 import 'package:hunt_app/contribute/place_data.dart';
-import 'package:hunt_app/login_page.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/utils/image_helper.dart';
+import 'package:hunt_app/utils/misc.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:place_picker/place_picker.dart';
@@ -13,15 +14,13 @@ import 'package:place_picker/place_picker.dart';
 import 'multiselect.dart';
 import 'thankyou.dart';
 
-
 class Contribute extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Add new place')),
-        body: const AddPlaceForm(),
-      );
+    return Scaffold(
+      appBar: AppBar(title: Text('Add new place')),
+      body: const AddPlaceForm(),
+    );
   }
 }
 
@@ -50,7 +49,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   LocationResult? pickedLocation;
 
   final User _myUser = FirebaseAuth.instance.currentUser!;
-  bool _isEmailAuth = true;
 
   @override
   void initState() {
@@ -58,7 +56,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     _name = FocusNode();
     _lockedDescription = FocusNode();
     _unlockedDescription = FocusNode();
-    _isEmailAuthProvider();
   }
 
   @override
@@ -147,32 +144,32 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                     child: _image == null
                         ? const Text('No image selected.')
                         : Stack(
-                      children: <Widget>[
-                        Container(
-                          height: 200,
-                          width: 200,
-                          child: Image.file(
-                            _image!,
-                            fit: BoxFit.cover,
+                            children: <Widget>[
+                              Container(
+                                height: 200,
+                                width: 200,
+                                child: Image.file(
+                                  _image!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _image = null;
+                                    });
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    // color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _image = null;
-                              });
-                            },
-                            child: const Icon(
-                              Icons.close,
-                              // color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                   sizedBoxSpace,
                   TextButton.icon(
@@ -180,24 +177,25 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                     label: const Text('Choose a picture'),
                     icon: const Icon(Icons.add_a_photo),
                     style: ButtonStyle(
-                      //elevation: MaterialStateProperty.all<double>(10),
+                        //elevation: MaterialStateProperty.all<double>(10),
                         padding: MaterialStateProperty.all<EdgeInsets>(
                             EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
                         overlayColor: MaterialStateProperty.resolveWith(
-                              (states) {
+                          (states) {
                             return states.contains(MaterialState.pressed)
                                 ? Colors.indigo[50]
                                 : null;
                           },
                         ),
                         foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.indigo),
+                            MaterialStateProperty.all<Color>(Colors.indigo),
                         backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16.0),
-                                side: BorderSide(color: Colors.indigo)))),
+                            MaterialStateProperty.all<Color>(Colors.white),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,
                   Center(
@@ -244,24 +242,25 @@ class AddPlaceFormState extends State<AddPlaceForm> {
                     icon: const Icon(Icons.pin_drop),
                     onPressed: () => openLocationPicker(context),
                     style: ButtonStyle(
-                      //elevation: MaterialStateProperty.all<double>(10),
+                        //elevation: MaterialStateProperty.all<double>(10),
                         padding: MaterialStateProperty.all<EdgeInsets>(
                             EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
                         overlayColor: MaterialStateProperty.resolveWith(
-                              (states) {
+                          (states) {
                             return states.contains(MaterialState.pressed)
                                 ? Colors.indigo[50]
                                 : null;
                           },
                         ),
                         foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.indigo),
+                            MaterialStateProperty.all<Color>(Colors.indigo),
                         backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16.0),
-                                side: BorderSide(color: Colors.indigo)))),
+                            MaterialStateProperty.all<Color>(Colors.white),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    side: BorderSide(color: Colors.indigo)))),
                   ),
                   sizedBoxSpace,
                   Center(
@@ -276,10 +275,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
             ),
           ),
         ),
-
       ),
     );
-
   }
 
   @override
@@ -296,50 +293,37 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   Future<void> _handleSubmitted() async {
     final form = _formKey.currentState!;
 
-    if(_isEmailAuth && !_myUser.emailVerified) {
-      _showInSnackBar('Please verify your email first.');
-    }
-    else {
+    if (isEmailAuthProvider(_myUser) && !_myUser.emailVerified) {
+      showInSnackBar('Please verify your email first.', _scaffoldMessengerKey,
+          height: 70.0);
+    } else {
       if (form.validate() && _validateImage() && _validateLocation()) {
         form.save();
 
         var imageURL = await ImageHelper().uploadFile(_image!);
         var creatorId = FirebaseAuth.instance.currentUser!.uid;
-        var data = PlaceData(
-            name!,
-            lockedDescription!,
-            unlockedDescription!,
-            imageURL,
-            creatorId,
-            categories!,
-            pickedLocation!);
+        var data = PlaceData(name!, lockedDescription!, unlockedDescription!,
+            imageURL, creatorId, categories!, pickedLocation!);
         data.upload();
 
         print('Added place');
         print(
             '$name, $lockedDescription, $unlockedDescription, $pickedLocation, '
-                '$categories');
-        //showInSnackBar('Added Place');
+            '$categories');
 
-        Navigator.of(context)
-            .pushReplacement(
-          MaterialPageRoute<void>(builder: (context) => Contribute(),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (context) => Contribute(),
           ),
         );
 
-        Navigator.of(context)
-            .push(
-            MaterialPageRoute<void>(builder: (context) => ContributeThankYou())
-        );
+        Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (context) => ContributeThankYou()));
       } else {
         // Start validating on every change.
         _autoValidateMode = AutovalidateMode.always;
         //_showInSnackBar('Error in form');
-        form.save(); // ?
-        // only for debugging
-        // _reset();
-        // Navigator.of(_formKey.currentState!.context)
-        //     .push(MaterialPageRoute<void>(builder: (_) => ContributeThankYou()));
+        form.save();
       }
     }
   }
@@ -352,37 +336,20 @@ class AddPlaceFormState extends State<AddPlaceForm> {
     }
   }
 
-  void _showInSnackBar(String value) {
-    _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
-    //TODO if keyboard is not visible change SnackBar elevation
-    _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-      content: Container(
-        child: Text(value),
-        height: 70.0,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(14),
-          topLeft: Radius.circular(14),
-        ),
-      ),
-    ));
-  }
-
   bool _validateImage() {
     if (_image == null) {
-      _showInSnackBar('Please select an image');
+      showInSnackBar('Please select an image', _scaffoldMessengerKey,
+          height: 70.0);
       return false;
-    }
-    else {
+    } else {
       return true;
     }
-
   }
 
   bool _validateLocation() {
     if (pickedLocation == null) {
-      _showInSnackBar('Please select the location');
+      showInSnackBar('Please select the location', _scaffoldMessengerKey,
+          height: 70.0);
     }
     return pickedLocation != null;
   }
@@ -401,28 +368,17 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   }
 
   Future<void> getImage() async {
-    await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 20
-    ).then((image) async {
-      if(image!=null) {
+    await picker
+        .pickImage(source: ImageSource.gallery, imageQuality: 20)
+        .then((image) async {
+      if (image != null) {
         print("image selected");
         setState(() {
           _image = File(image.path);
         });
-      }
-      else {
+      } else {
         print("image not selected");
       }
     });
   }
-
-  void _isEmailAuthProvider() {
-    var providerId = _myUser.providerData[0].providerId;
-
-    if (providerId != 'password') {
-      _isEmailAuth = false;
-    }
-  }
-
 }

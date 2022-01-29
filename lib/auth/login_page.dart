@@ -9,6 +9,7 @@ import 'package:hunt_app/navigation_bar/navbar.dart';
 import 'package:hunt_app/navigation_bar/sidebar.dart';
 import 'package:hunt_app/utils/form_factor.dart';
 import 'package:hunt_app/utils/network.dart';
+import 'package:hunt_app/utils/misc.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -67,7 +68,7 @@ Future<void> _addUserToDB(String uid, String? imageURL) async {
       'imageURL': imageURL ?? '',
       'score': 0,
       'username': randomUsername,
-      'country': myCountry
+      'country': myCountry ?? ''
     });
   } on Exception catch (e) {
     print(e);
@@ -115,11 +116,11 @@ Future<bool> loginFacebook() async {
               logged = true;
               break;
             case 'invalid-credential':
-              _showInSnackBar('Invalid credential', _scaffoldMessengerKey1);
+              showInSnackBar('Invalid credential', _scaffoldMessengerKey1);
               logged = false;
               break;
             case 'user-not-found':
-              _showInSnackBar('User not found', _scaffoldMessengerKey1);
+              showInSnackBar('User not found', _scaffoldMessengerKey1);
               logged = false;
               break;
           }
@@ -136,7 +137,7 @@ Future<bool> loginFacebook() async {
     } else if (loginResult.status == LoginStatus.cancelled) {
       logged = false;
     } else if (loginResult.status == LoginStatus.failed) {
-      _showInSnackBar(
+      showInSnackBar(
           'Login has failed. Try again later', _scaffoldMessengerKey1);
       logged = false;
     }
@@ -190,11 +191,11 @@ Future<bool> loginGoogle() async {
             logged = true;
             break;
           case 'invalid-credential':
-            _showInSnackBar('Invalid credential', _scaffoldMessengerKey1);
+            showInSnackBar('Invalid credential', _scaffoldMessengerKey1);
             logged = false;
             break;
           case 'user-not-found':
-            _showInSnackBar('User not found', _scaffoldMessengerKey1);
+            showInSnackBar('User not found', _scaffoldMessengerKey1);
             logged = false;
             break;
         }
@@ -224,18 +225,18 @@ Future<bool> loginEmailPassword(String email, String password) async {
     if (error is FirebaseAuthException) {
       switch (error.code) {
         case 'invalid-email':
-          _showInSnackBar('Invalid email', _scaffoldMessengerKey1);
+          showInSnackBar('Invalid email', _scaffoldMessengerKey1);
           break;
         case 'user-disabled':
-          _showInSnackBar('The user associated to this email is disabled',
+          showInSnackBar('The user associated to this email is disabled',
               _scaffoldMessengerKey1);
           break;
         case 'user-not-found':
-          _showInSnackBar('This email is not associated to any user',
+          showInSnackBar('This email is not associated to any user',
               _scaffoldMessengerKey1);
           break;
         case 'wrong-password':
-          _showInSnackBar('The password is wrong', _scaffoldMessengerKey1);
+          showInSnackBar('The password is wrong', _scaffoldMessengerKey1);
           break;
       }
     }
@@ -260,14 +261,14 @@ Future<bool> signupAndLoginEmailPassword(String email, String password) async {
     if (error is FirebaseAuthException) {
       switch (error.code) {
         case 'invalid-email':
-          _showInSnackBar('Invalid email', _scaffoldMessengerKey2);
+          showInSnackBar('Invalid email', _scaffoldMessengerKey2);
           break;
         case 'email-already-in-use':
-          _showInSnackBar('This email is already associated to another account',
+          showInSnackBar('This email is already associated to another account',
               _scaffoldMessengerKey2);
           break;
         case 'weak-password':
-          _showInSnackBar('The password is too weak', _scaffoldMessengerKey2);
+          showInSnackBar('The password is too weak', _scaffoldMessengerKey2);
           break;
       }
     }
@@ -285,19 +286,6 @@ bool validateForm(GlobalKey<FormState> formKey) {
   return false;
 }
 
-void _showInSnackBar(
-    String value, GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey) {
-  _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
-  _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-    content: Text(value),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topRight: Radius.circular(14),
-        topLeft: Radius.circular(14),
-      ),
-    ),
-  ));
-}
 
 // Frontend utils
 ValidationHelper validationHelper = ValidationHelper();
@@ -803,17 +791,17 @@ class _ResetPasswordState extends State<ResetPasswordPage> {
             FirebaseAuth.instance
                 .sendPasswordResetEmail(email: _email)
                 .then((_) {
-              _showInSnackBar(
+              showInSnackBar(
                   'An email to reset your password has been sent to you. Check your email box.',
                   _scaffoldMessengerKey3);
             }).catchError((Object error) {
               if (error is FirebaseAuthException) {
                 switch (error.code) {
                   case 'invalid-email':
-                    _showInSnackBar('Invalid email', _scaffoldMessengerKey3);
+                    showInSnackBar('Invalid email', _scaffoldMessengerKey3);
                     break;
                   case 'user-not-found':
-                    _showInSnackBar('This email is not associated to any user',
+                    showInSnackBar('This email is not associated to any user',
                         _scaffoldMessengerKey3);
                     break;
                 }

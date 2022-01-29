@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/utils/misc.dart';
 
-import '../login_page.dart';
+import '../auth/login_page.dart';
 
 class CustomAlertDialog extends StatefulWidget {
   const CustomAlertDialog({
@@ -72,7 +73,6 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
                     builder: (context) => LoginPage()),
                       (route) => false,
                 );
-
               },
               child: Center(
                 child: Text(
