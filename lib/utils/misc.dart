@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 //TODO if keyboard is not visible change SnackBar elevation
-void showInSnackBar(
-    String value, GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey,
+void showInSnackBar(String value,
+    GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey,
     {double height = 0.0}) {
   _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
   _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
@@ -28,28 +28,47 @@ String retrieveOldPassword(BuildContext context) {
   // TODO dialog over dialog does not work, throws exception
   showDialog<void>(
     context: context,
-    builder: (_) => AlertDialog(
-      title: Text('You have to re-authenticate to change the password'),
-      content: TextFormField(
-        decoration: const InputDecoration(hintText: 'Enter your password'),
-        controller: controller,
-        obscureText: true,
-        enabled: true,
-      ),
-      actions: [
-        ElevatedButton(
-          child: Text('Submit'),
-          style: ElevatedButton.styleFrom(
-            primary: Colors.green[300],
-            textStyle: TextStyle(color: Colors.white),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)),
+    builder: (_) =>
+        AlertDialog(
+          title: Text('You have to re-authenticate to change the password'),
+          content: TextFormField(
+            decoration: const InputDecoration(hintText: 'Enter your password'),
+            controller: controller,
+            obscureText: true,
+            enabled: true,
           ),
-          onPressed: () => oldPassword = controller.value.text,
-        )
-      ],
-    ),
+          actions: [
+            ElevatedButton(
+              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.green[300],
+                textStyle: TextStyle(color: Colors.white),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+              ),
+              onPressed: () => oldPassword = controller.value.text,
+            )
+          ],
+        ),
   );
 
   return oldPassword;
+}
+
+Route createRoute(Widget page) {
+  return PageRouteBuilder<Route>(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }

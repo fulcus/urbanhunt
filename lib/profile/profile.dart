@@ -616,11 +616,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: <Widget>[
                                                   GestureDetector(
-                                                    onTap: () => Navigator.push(
+                                                    onTap: () => Navigator.push<
+                                                            dynamic>(
                                                         context,
-                                                        MaterialPageRoute<void>(
-                                                            builder: (context) =>
-                                                                UnlockedList())),
+                                                        createRoute(
+                                                            UnlockedList())),
                                                     child: CircleAvatar(
                                                       backgroundColor:
                                                           Colors.indigo,
