@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:lottie/lottie.dart';
 
 class UnlockedPopup extends StatefulWidget {
@@ -14,6 +15,9 @@ class _UnlockedPopupState extends State<UnlockedPopup> {
     return Dialog(
       elevation: 0,
       backgroundColor: Color(0xffffffff),
+      insetPadding: (isMobile || MediaQuery.of(context).orientation == Orientation.portrait) ?
+          EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0) :
+          EdgeInsets.symmetric(horizontal: 400),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),

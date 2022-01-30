@@ -19,7 +19,7 @@ class ContributeThankYou extends StatelessWidget {
                   SizedBox(height: 12),
                   ListTile(
                     //leading: Icon(Icons.arrow_drop_down_circle),
-                    title: const Text('Thank you for contributing to Hunt!',
+                    title: const Text('Thank you for contributing to UrbanHunt!',
                         style: TextStyle(fontSize: 26),
                         textAlign: TextAlign.center),
                   ),

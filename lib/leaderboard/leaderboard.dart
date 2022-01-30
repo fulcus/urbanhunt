@@ -344,7 +344,7 @@ class LeaderBoardRow extends StatelessWidget {
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
-                                        image: ImageHelper().showImage(imageURL, 'assets/images/default_profile.png'),
+                                        image: ImageHelper().showImage(imageURL, 'assets/images/default-profile.png'),
                                         fit: BoxFit.cover)))),
                       ],
                     ),

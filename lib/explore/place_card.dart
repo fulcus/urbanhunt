@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:another_flushbar/flushbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/unlocked_popup.dart';
-import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/utils/misc.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -364,7 +363,7 @@ class PlaceCardState extends State<PlaceCard> {
   // Interactions
   void tryUnlock() {
     if (isEmailAuthProvider(_myUser) && !_myUser.emailVerified) {
-      _showInFlushBar('Please verify your email first.');
+      showInFlushBar('Please verify your email first.', context);
     } else {
       Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
           .then((pos) {
@@ -390,7 +389,7 @@ class PlaceCardState extends State<PlaceCard> {
                   return UnlockedPopup();
                 });
           } else {
-            _showInFlushBar("You are too far.");
+            showInFlushBar("You are too far.", context);
           }
         });
       }).catchError((Object error, StackTrace stacktrace) {
@@ -419,7 +418,7 @@ class PlaceCardState extends State<PlaceCard> {
         widget.isDisliked = false;
       });
     } else {
-      _showInFlushBar("You first need to unlock this place.");
+      showInFlushBar("You first need to unlock this place.", context);
     }
   }
 
@@ -442,23 +441,8 @@ class PlaceCardState extends State<PlaceCard> {
         widget.isLiked = false;
       });
     } else {
-      _showInFlushBar("You first need to unlock this place.");
+      showInFlushBar("You first need to unlock this place.", context);
     }
-  }
-
-  void _showInFlushBar(String message) {
-    Flushbar<dynamic>(
-      title: "",
-      message: message,
-      duration: Duration(seconds: 4),
-      animationDuration: Duration(milliseconds: 300),
-      padding: EdgeInsets.only(bottom: 60),
-      borderRadius: BorderRadius.only(
-        topRight: Radius.circular(14),
-        topLeft: Radius.circular(14),
-      ),
-      icon: Icon(Icons.error_outline, color: Colors.transparent),
-    ).show(context);
   }
 
   // see https://firebase.flutter.dev/docs/firestore/usage/#transactions

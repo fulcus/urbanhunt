@@ -10,8 +10,8 @@ import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/profile/custom_alert_dialog.dart';
 import 'package:hunt_app/profile/unlocked_list.dart';
 import 'package:hunt_app/utils/image_helper.dart';
-import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:hunt_app/utils/misc.dart';
+import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
 final db = FirebaseFirestore.instance;
@@ -105,7 +105,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                         image: DecorationImage(
                                                           image: imageHelper
                                                               .showImage(url,
-                                                                  'assets/images/as.png'),
+                                                                  'assets/images/default-profile.png'),
                                                           fit: BoxFit.cover,
                                                         )))
                                               ],
@@ -325,7 +325,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                     showInSnackBar(
                                                         'A verification email has been sent to your email box.',
                                                         _scaffoldMessengerKey,
-                                                        height: 70.0)
+                                                        height: isMobile ? 70.0 : 0.0)
                                                   },
                                                   child: CircleAvatar(
                                                     backgroundColor:
@@ -882,7 +882,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               showInSnackBar(
                   'Unable to change password. Please try again later.',
                   _scaffoldMessengerKey,
-                  height: 70.0);
+                  height: isMobile ? 70.0 : 0.0);
               print(error.message);
             } else {
               print(error.toString());

@@ -22,6 +22,7 @@ class App extends StatelessWidget {
         primarySwatch: Colors.indigo,
       ),
       home: redirectHomeOrLogin(),
+      //debugShowCheckedModeBanner: false,
       // initialRoute: '/',
       // routes: {
       //   // When navigating to the "/" route, build the FirstScreen widget.
