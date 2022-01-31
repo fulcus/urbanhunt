@@ -46,17 +46,17 @@ Future<void> main() async {
   await storageRef.putFile(image);
 
   final firestore = FakeFirebaseFirestore();
-  await firestore.collection('places').add(<String, dynamic> {
-    'address': <String, dynamic> {
+  await firestore.collection('places').add(<String, dynamic>{
+    'address': <String, dynamic>{
       'city': 'Milan',
       'country': 'Italy',
       'street': '6, Viale Brianza'
     },
-    'categories': <dynamic>[
-      'food'
-    ],
+    'categories': <String>['food'],
+    'creatorId' : '076R1REcV2cFma2h2gFcrPU8kT92',
     'dislikes': 0,
-    'imgpath': 'https://camo.githubusercontent.com/b4c566de1ceca472d9c01c7558999fa947a045164019cd180d7713f17fafa9c2/68747470733a2f2f692e6962622e636f2f516d567a4a77562f557365722d486f6d65706167652e706e67',
+    'imgpath':
+        'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png',
     'likes': 0,
     'location': GeoPoint(45.464664, 9.188540),
     'lockedDescr': 'none',
@@ -64,8 +64,8 @@ Future<void> main() async {
     'unlockedDescr': 'none',
   });
 
-  await firestore.collection('users').add(<String, dynamic> {
-    'country': 'Italy',
+  await firestore.collection('users').add(<String, dynamic>{
+    'country': 'IT',
     'imageURL': '',
     'score': 0,
     'username': 'MockedUser'
@@ -80,25 +80,23 @@ Future<void> main() async {
     HttpOverrides.global = null;
   });
 
-
-
   testWidgets('Like PlaceCard', (tester) async {
-
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, false, false, onCardClose);
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true,
+        false, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
-        child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: placeCard
-        )
-    );
+        child:
+            Directionality(textDirection: TextDirection.ltr, child: placeCard));
 
     await tester.pumpWidget(testWidget);
 
     final columnFinder = find.byType(Column);
     expect(columnFinder, findsWidgets);
-    expect(find.descendant(of: columnFinder, matching: find.byType(GestureDetector)), findsNWidgets(5));
+    expect(
+        find.descendant(
+            of: columnFinder, matching: find.byType(GestureDetector)),
+        findsNWidgets(5));
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
     expect(find.widgetWithIcon(IconButton, Icons.lock), findsNothing);
@@ -109,19 +107,16 @@ Future<void> main() async {
     await tester.tap(finder);
     await tester.pump();
     expect(placeCard.isLiked, true); //TODO not working (because of db call)
-
   });
 
   testWidgets('Close place card', (tester) async {
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose);
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true,
+        true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
-        child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: placeCard
-        )
-    );
+        child:
+            Directionality(textDirection: TextDirection.ltr, child: placeCard));
 
     await tester.pumpWidget(testWidget);
 
@@ -132,15 +127,13 @@ Future<void> main() async {
   });
 
   testWidgets('Unlock place card', (tester) async {
-    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true, true, false, onCardClose);
+    var placeCard = PlaceCard(PlaceData.fromSnapshot(snapshot.docs.first), true,
+        true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
-        child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: placeCard
-        )
-    );
+        child:
+            Directionality(textDirection: TextDirection.ltr, child: placeCard));
 
     await tester.pumpWidget(testWidget);
 
@@ -151,8 +144,5 @@ Future<void> main() async {
     await tester.pump();
 
     expect(finder, findsWidgets);
-
-
   });
-
 }
