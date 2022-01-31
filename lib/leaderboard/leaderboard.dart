@@ -7,11 +7,12 @@ import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/keep_alive_builder.dart';
 
-final db = FirebaseFirestore.instance;
-
 
 class LeaderBoard extends StatelessWidget {
-  const LeaderBoard({Key? key}) : super(key: key);
+  final User loggedUser;
+  final FirebaseFirestore db;
+
+  LeaderBoard(this.loggedUser, this.db, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +30,8 @@ class LeaderBoard extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            GlobalLeaderBoard(),
-            CountryLeaderBoard(),
+            GlobalLeaderBoard(loggedUser, db),
+            CountryLeaderBoard(loggedUser, db),
           ],
         ),
       ),
@@ -39,12 +40,16 @@ class LeaderBoard extends StatelessWidget {
 }
 
 class CountryLeaderBoard extends StatefulWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
+
+  CountryLeaderBoard(this.loggedUser, this.db);
+
   @override
   _CountryLeaderBoardState createState() => _CountryLeaderBoardState();
 }
 
 class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
-  final User myUser = FirebaseAuth.instance.currentUser!;
   Stream<QuerySnapshot>? _bestUsers;
   Color _rowColor = Colors.transparent;
   int _position = 0;
@@ -52,13 +57,13 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
   // bool _myUserInTop = false; //todo if false add me as last
 
   Future<String> getCountry() async {
-    var doc = await db.collection('users').doc(myUser.uid).get();
+    var doc = await widget.db.collection('users').doc(widget.loggedUser.uid).get();
     return doc['country'].toString();
   }
 
   Future<Stream<QuerySnapshot<Object?>>> getBestUsers() async {
     myCountry = await getCountry();
-    var users = db
+    var users = widget.db
         .collection('users')
         .where('country', isEqualTo: myCountry)
         .orderBy('score', descending: true)
@@ -121,7 +126,7 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
                                 var currListUser = snapshot.data!.docs[index];
                                 QueryDocumentSnapshot prevListUser;
                                 // highlight my user
-                                if (currListUser.id == myUser.uid) {
+                                if (currListUser.id == widget.loggedUser.uid) {
                                   _rowColor = Colors.indigo[50]!;
                                   // _myUserInTop = true;
                                 } else {
@@ -178,12 +183,16 @@ class _CountryLeaderBoardState extends State<CountryLeaderBoard> {
 }
 
 class GlobalLeaderBoard extends StatefulWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
+
+  GlobalLeaderBoard(this.loggedUser, this.db);
+
   @override
   _GlobalLeaderBoardState createState() => _GlobalLeaderBoardState();
 }
 
 class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
-  final User myUser = FirebaseAuth.instance.currentUser!;
   late Stream<QuerySnapshot> _bestUsers;
   Color _rowColor = Colors.transparent;
   int _position = 0;
@@ -194,7 +203,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
     super.initState();
 
     // get 10 best players
-    _bestUsers = db
+    _bestUsers = widget.db
         .collection('users')
         .orderBy('score', descending: true)
         .limit(50)
@@ -230,7 +239,7 @@ class _GlobalLeaderBoardState extends State<GlobalLeaderBoard> {
                                     var currListUser = snapshot.data!.docs[index];
                                     QueryDocumentSnapshot prevListUser;
                                     // highlight my user
-                                    if (currListUser.id == myUser.uid) {
+                                    if (currListUser.id == widget.loggedUser.uid) {
                                       _rowColor = Colors.indigo[50]!;
                                       // _myUserInTop = true;
                                     } else {

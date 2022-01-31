@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hunt_app/contribute/form.dart';
 import 'package:hunt_app/explore/explore.dart';
 import 'package:hunt_app/leaderboard/leaderboard.dart';
 import 'package:hunt_app/profile/profile.dart';
+import 'package:hunt_app/utils/misc.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 
@@ -20,6 +22,7 @@ class Navbar extends StatefulWidget {
 class _NavbarState extends State<Navbar> {
   late PersistentTabController _controller;
   late bool _hideNavBar;
+  final User loggedUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -30,10 +33,10 @@ class _NavbarState extends State<Navbar> {
 
   List<Widget> _buildScreens() {
     return [
-      Explore(),
+      Explore(loggedUser, db),
       Contribute(),
-      LeaderBoard(),
-      Profile(),
+      LeaderBoard(loggedUser, db),
+      Profile(loggedUser, db),
     ];
   }
 

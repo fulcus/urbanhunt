@@ -11,23 +11,27 @@ import 'package:hunt_app/utils/image_helper.dart';
 import 'package:rxdart/rxdart.dart';
 
 
-final db = FirebaseFirestore.instance;
-
-
 class UnlockedList extends StatefulWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
+
+  UnlockedList(this.loggedUser, this.db);
+
   @override
   _UnlockedListState createState() => _UnlockedListState();
 }
 
 class _UnlockedListState extends State<UnlockedList> {
   late Stream<QuerySnapshot> _unlockedPlaces;
-  final userId = FirebaseAuth.instance.currentUser!.uid;
+  late String userId;
 
   @override
   void initState() {
     super.initState();
 
-    _unlockedPlaces = db
+    userId = widget.loggedUser.uid;
+
+    _unlockedPlaces = widget.db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
@@ -60,7 +64,7 @@ class _UnlockedListState extends State<UnlockedList> {
                   for(var i in snapshot.data!.docs) {
                     placeIds.add(i.id);
                   }
-                  return Helper(placeIds, snapshot.data!.docs);
+                  return Helper(widget.loggedUser, widget.db, placeIds, snapshot.data!.docs);
                 }
               } else {
                 return Center(
@@ -75,10 +79,14 @@ class _UnlockedListState extends State<UnlockedList> {
 
 
 class Helper extends StatefulWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
   final List<String> list;
   final List<DocumentSnapshot> unlocked;
 
   Helper(
+      this.loggedUser,
+      this.db,
       this.list,
       this.unlocked,
       {Key? key}) : super(key: key);
@@ -110,6 +118,8 @@ class _HelperState extends State<Helper> {
                   itemBuilder: (context, index) {
                     var currUlkPlace = snapshot.data![index];
                     return UnlockedListRow(
+                        widget.loggedUser,
+                        widget.db,
                         currUlkPlace,
                         widget.unlocked[index].get('liked') as bool,
                         widget.unlocked[index].get('disliked') as bool,
@@ -150,7 +160,7 @@ class _HelperState extends State<Helper> {
 
     List<Stream<QuerySnapshot>> combineList = [];
     for (var i = 0; i < chunks.length; i++) {
-      combineList.add(db.collection('places').where(FieldPath.documentId, whereIn: chunks[i]).snapshots());
+      combineList.add(widget.db.collection('places').where(FieldPath.documentId, whereIn: chunks[i]).snapshots());
     } //get a list of the streams, which will have 10 each.
 
     CombineLatestStream<QuerySnapshot, List<QuerySnapshot>> mergedQuerySnapshot = CombineLatestStream.list(combineList);
@@ -174,6 +184,8 @@ class _HelperState extends State<Helper> {
 
 
 class UnlockedListRow extends StatelessWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
   final PlaceData place;
   final bool isLiked;
   final bool isDisliked;
@@ -185,6 +197,8 @@ class UnlockedListRow extends StatelessWidget {
   final String name;
 
   UnlockedListRow (
+      this.loggedUser,
+      this.db,
       this.place,
       this.isLiked,
       this.isDisliked,
@@ -201,7 +215,7 @@ class UnlockedListRow extends StatelessWidget {
 
     void _onCardClose() {
       Navigator.pop(context,
-          MaterialPageRoute<void>(builder: (context) => UnlockedList()));
+          MaterialPageRoute<void>(builder: (context) => UnlockedList(loggedUser, db)));
     }
 
     return Padding(
@@ -271,7 +285,7 @@ class UnlockedListRow extends StatelessWidget {
           ),
         ),
         onTap: () => Navigator.push(context,
-            MaterialPageRoute<void>(builder: (context) => PlaceCard(place, false, isLiked, isDisliked, _onCardClose, unlockDate: unlockDate, fullscreen: true))),
+            MaterialPageRoute<void>(builder: (context) => PlaceCard(loggedUser, db, place, false, isLiked, isDisliked, _onCardClose, unlockDate: unlockDate, fullscreen: true))),
       ),
     );
   }

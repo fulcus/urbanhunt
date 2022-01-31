@@ -17,24 +17,27 @@ import 'package:hunt_app/utils/image_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-final db = FirebaseFirestore.instance;
-
 class Explore extends StatefulWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
+
+  Explore(this.loggedUser, this.db);
+
   @override
-  ExploreState createState() => ExploreState();
+  _ExploreState createState() => _ExploreState();
 }
 
-@visibleForTesting
-class ExploreState extends State<Explore> {
+class _ExploreState extends State<Explore> {
   late Stream<QuerySnapshot> _places;
   late Stream<QuerySnapshot> _unlockedPlaces;
   final Completer<GoogleMapController> _mapController = Completer();
-  final userId = FirebaseAuth.instance.currentUser!.uid;
+  late String userId;
   LatLng? initPosition;
 
   @override
   void initState() {
     super.initState();
+    userId = widget.loggedUser.uid;
 
     // first initialize initPosition using last known because it's faster
     getLastKnown().then((pos) async {
@@ -68,10 +71,10 @@ class ExploreState extends State<Explore> {
     });
 
     //retrieve all the places
-    _places = db.collection('places').orderBy('name').snapshots();
+    _places = widget.db.collection('places').orderBy('name').snapshots();
 
     //retrieve the user's unlocked places
-    _unlockedPlaces = db
+    _unlockedPlaces = widget.db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
@@ -99,6 +102,8 @@ class ExploreState extends State<Explore> {
                   return Center(child: CircularProgressIndicator());
                 }
                 return PlaceMap(
+                  loggedUser: widget.loggedUser,
+                  db: widget.db,
                   places: snapshot.data!.docs,
                   unlockedPlaces: snapshot2.data!.docs,
                   initialPosition: initPosition!,
@@ -171,12 +176,16 @@ class ExploreState extends State<Explore> {
 class PlaceMap extends StatefulWidget {
   PlaceMap({
     Key? key,
+    required this.loggedUser,
+    required this.db,
     required this.places,
     required this.unlockedPlaces,
     required this.initialPosition,
     required this.mapController,
   }) : super(key: key);
 
+  final User loggedUser;
+  final FirebaseFirestore db;
   final List<DocumentSnapshot> places;
   final List<DocumentSnapshot> unlockedPlaces;
   final LatLng initialPosition;
@@ -220,10 +229,10 @@ class _PlaceMapState extends State<PlaceMap> {
           .toList();
 
       if(unlockedIds.contains(place.id)) {
-        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), false, current[0]['liked'] as bool, current[0]['disliked'] as bool, _onCardClose, unlockDate: current[0]['unlockDate'] as Timestamp));
+        _placeItems.add(PlaceCard(widget.loggedUser, widget.db, PlaceData.fromSnapshot(place), false, current[0]['liked'] as bool, current[0]['disliked'] as bool, _onCardClose, unlockDate: current[0]['unlockDate'] as Timestamp));
       }
       else {
-        _placeItems.add(PlaceCard(PlaceData.fromSnapshot(place), true, false, false, _onCardClose));
+        _placeItems.add(PlaceCard(widget.loggedUser, widget.db, PlaceData.fromSnapshot(place), true, false, false, _onCardClose));
       }
     }
 

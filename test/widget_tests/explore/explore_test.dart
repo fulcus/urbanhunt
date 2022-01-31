@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/explore/explore.dart';
 
-import '../helpers/test_helpers.dart';
-
-//TODO it doesn't work
+import '../../helpers/test_helpers.dart';
 
 Future<void> main() async {
   // Mock sign in with Google.
@@ -64,23 +62,22 @@ Future<void> main() async {
       'unlockedDescr': 'none',
     });
 
-    /*await firestore.collection('users').add(<String, dynamic> {
+    await firestore.collection('users').add(<String, dynamic> {
       'country': 'Italy',
       'imageURL': '',
       'score': 0,
-      'username': 'MockedUser'
-    });*/
+      'username': 'Bob'
+    });
     // final explore = Explore();
     // final ExploreState exploreState = tester.state(find.byType(Explore));
     // exploreState.userId = 'abc';
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
-        child: MaterialApp(home: Explore())
+        child: MaterialApp(home: Explore(user1, firestore))
     );
 
     await tester.pumpWidget(testWidget);
-    await tester.pumpAndSettle();
 
     //final exploreState = tester.state(find.byType(ExploreState));
 
@@ -89,6 +86,6 @@ Future<void> main() async {
     final finder = find.byType(Scaffold);
 
     expect(finder, findsOneWidget);
-    //expect(find.descendant(of: scaffoldFinder, matching: find.byType(StreamBuilder)), findsNWidgets(2));
+    expect(find.descendant(of: finder, matching: find.byType(StreamBuilder<QuerySnapshot>)), findsNWidgets(2));
   });
 }

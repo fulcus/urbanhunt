@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
@@ -21,10 +20,6 @@ import 'explore.dart';
 // Unlock distance threshold
 const double UNLOCK_RANGE_METERS = 15.0;
 
-//TODO probably they need to be local variable for testing purposes
-final db = FirebaseFirestore.instance;
-final FirebaseStorage storage = FirebaseStorage.instance;
-
 // Map category tag to its color
 final Map<String, Color> categoryColors = {
   'Art': Colors.blue[300]!,
@@ -37,12 +32,15 @@ class PlaceCard extends StatefulWidget with ClusterItem {
   // new card should be created for each place
   // isLocked, isLiked, isDisliked are actually part of state
 
+  final User loggedUser;
+  final FirebaseFirestore db;
+
   PlaceData place;
   bool fullscreen, isLocked, isLiked, isDisliked;
   Timestamp? unlockDate;
   late void Function() onCardClose;
 
-  PlaceCard(this.place, this.isLocked, this.isLiked, this.isDisliked,
+  PlaceCard(this.loggedUser, this.db, this.place, this.isLocked, this.isLiked, this.isDisliked,
       this.onCardClose,
       {this.fullscreen = false, this.unlockDate, Key? key})
       : super(key: key);
@@ -60,8 +58,7 @@ class PlaceCard extends StatefulWidget with ClusterItem {
 }
 
 class PlaceCardState extends State<PlaceCard> {
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-  final User _myUser = FirebaseAuth.instance.currentUser!;
+  late String userId;
   String _displayDistance = '';
   bool _isGPSon = false;
 
@@ -70,6 +67,7 @@ class PlaceCardState extends State<PlaceCard> {
   @override
   void initState() {
     super.initState();
+    userId = widget.loggedUser.uid;
 
     _checkGPS().then((isGPSon) {
       if (isGPSon) {
@@ -362,7 +360,7 @@ class PlaceCardState extends State<PlaceCard> {
 
   // Interactions
   void tryUnlock() {
-    if (isEmailAuthProvider(_myUser) && !_myUser.emailVerified) {
+    if (isEmailAuthProvider(widget.loggedUser) && !widget.loggedUser.emailVerified) {
       showInFlushBar('Please verify your email first.', context);
     } else {
       Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
@@ -378,7 +376,7 @@ class PlaceCardState extends State<PlaceCard> {
             // somehow trigger update for marker icon with unlocked icon => replace Explore page
             Navigator.of(context).pushReplacement(
               MaterialPageRoute<void>(
-                builder: (context) => Explore(),
+                builder: (context) => Explore(widget.loggedUser, widget.db),
               ),
             );
 
@@ -450,14 +448,14 @@ class PlaceCardState extends State<PlaceCard> {
   Future<void> _dbUpdateLikes(int likesIncrement) async {
     var liked = likesIncrement > 0 ? true : false;
 
-    var placeRef = db.collection('places').doc(widget.place.id);
-    var unlockedPlaceRef = db
+    var placeRef = widget.db.collection('places').doc(widget.place.id);
+    var unlockedPlaceRef = widget.db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
         .doc(widget.place.id);
 
-    return db
+    return widget.db
         .runTransaction((transaction) async {
           var placeSnapshot = await transaction.get(placeRef);
           var unlockedPlaceSnapshot = await transaction.get(unlockedPlaceRef);
@@ -483,14 +481,14 @@ class PlaceCardState extends State<PlaceCard> {
   Future<void> _dbUpdateDislikes(int dislikesIncrement) async {
     var disliked = dislikesIncrement > 0 ? true : false;
 
-    var placeRef = db.collection('places').doc(widget.place.id);
-    var unlockedPlaceRef = db
+    var placeRef = widget.db.collection('places').doc(widget.place.id);
+    var unlockedPlaceRef = widget.db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
         .doc(widget.place.id);
 
-    return db
+    return widget.db
         .runTransaction((transaction) async {
           var placeSnapshot = await transaction.get(placeRef);
           var unlockedPlaceSnapshot = await transaction.get(unlockedPlaceRef);
@@ -518,14 +516,14 @@ class PlaceCardState extends State<PlaceCard> {
     var likesUpdate = fromLikeToDislike ? -1 : 1;
     var dislikesUpdate = fromLikeToDislike ? 1 : -1;
 
-    var placeRef = db.collection('places').doc(widget.place.id);
-    var unlockedPlaceRef = db
+    var placeRef = widget.db.collection('places').doc(widget.place.id);
+    var unlockedPlaceRef = widget.db
         .collection('users')
         .doc(userId)
         .collection('unlockedPlaces')
         .doc(widget.place.id);
 
-    return db
+    return widget.db
         .runTransaction((transaction) async {
           var placeSnapshot = await transaction.get(placeRef);
           var unlockedPlaceSnapshot = await transaction.get(unlockedPlaceRef);
@@ -558,7 +556,7 @@ class PlaceCardState extends State<PlaceCard> {
     // All places have actually been already downloaded, so not need to get it again.
     // Only need to update UI with new info and write 'unlocking' to db.
     var unlockedPlaces =
-        db.collection('users').doc(userId).collection('unlockedPlaces');
+      widget.db.collection('users').doc(userId).collection('unlockedPlaces');
     widget.unlockDate = Timestamp.now();
     var data = <String, dynamic>{
       'liked': false,

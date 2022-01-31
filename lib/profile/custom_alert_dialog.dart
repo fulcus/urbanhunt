@@ -6,10 +6,12 @@ import '../auth/login_page.dart';
 class CustomAlertDialog extends StatefulWidget {
   const CustomAlertDialog({
     Key? key,
+    required this.loggedUser,
     required this.title,
     required this.description,
   }) : super(key: key);
 
+  final User loggedUser;
   final String title, description;
 
   @override
@@ -17,12 +19,10 @@ class CustomAlertDialog extends StatefulWidget {
 }
 
 class _CustomAlertDialogState extends State<CustomAlertDialog> {
-  late User _myUser;
 
   @override
   void initState() {
     super.initState();
-    _myUser = FirebaseAuth.instance.currentUser!;
   }
 
   @override
@@ -59,12 +59,12 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
             child: InkWell(
               highlightColor: Colors.grey[200],
               onTap: () {
-                _myUser.delete().catchError((Object error) async {
+                widget.loggedUser.delete().catchError((Object error) async {
                   if(error is FirebaseAuthException && error.code == 'requires-recent-login') {
-                    List<String> signInMethods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(_myUser.email!);
-                    _myUser.reauthenticateWithCredential(
+                    List<String> signInMethods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(widget.loggedUser.email!);
+                    widget.loggedUser.reauthenticateWithCredential(
                         AuthCredential(
-                            providerId: _myUser.providerData[0].providerId,
+                            providerId: widget.loggedUser.providerData[0].providerId,
                             signInMethod: signInMethods[0]
                         )
                     );

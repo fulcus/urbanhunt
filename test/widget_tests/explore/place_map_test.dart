@@ -11,7 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/explore/explore.dart';
 
-import '../helpers/test_helpers.dart';
+import '../../helpers/test_helpers.dart';
 
 
 Future<void> main() async {
@@ -31,14 +31,16 @@ Future<void> main() async {
     displayName: 'Bob',
   );
   final auth = MockFirebaseAuth(signedIn: true, mockUser: user);
-  final result = await auth.signInWithCredential(credential);
+  await auth.signInWithCredential(credential);
 
   setupFirebaseAuthMocks();
+  TestWidgetsFlutterBinding.ensureInitialized();
 
 
   setUpAll(() async {
     await Firebase.initializeApp();
   });
+
 
   testWidgets('PlaceMap Widget', (tester) async {
 
@@ -68,8 +70,8 @@ Future<void> main() async {
       'username': 'MockedUser'
     });
 
-    final List<DocumentSnapshot> places;
-    final List<DocumentSnapshot> unlockedPlaces;
+    //final List<DocumentSnapshot> places;
+    //final List<DocumentSnapshot> unlockedPlaces;
     final initialPosition = LatLng(0.0, 0.0);
     final mapController = Completer<GoogleMapController>();
 
@@ -80,6 +82,8 @@ Future<void> main() async {
               textDirection: TextDirection.ltr,
               child:
                 PlaceMap(
+                  loggedUser: user,
+                  db: firestore,
                   places: [],
                   unlockedPlaces: [],
                   initialPosition: initialPosition,
@@ -92,27 +96,26 @@ Future<void> main() async {
 
     //create the finders
     final gmapFinder = find.byType(GoogleMap);
-    final paddingFinder = find.byType(Padding);
+    final finder = find.byType(CircleAvatar);
 
     expect(gmapFinder, findsOneWidget);
-    expect(paddingFinder, findsNWidgets(2));
-    expect(find.descendant(of: paddingFinder, matching: find.byType(CircleAvatar)), findsOneWidget);
-    expect(find.descendant(of: paddingFinder, matching: find.byType(IconButton)), findsOneWidget);
-    expect(find.descendant(of: paddingFinder, matching: find.byType(Icon)), findsOneWidget);
+    expect(finder, findsNWidgets(2));
+    expect(find.descendant(of: finder, matching: find.byType(CircleAvatar)), findsOneWidget);
+    expect(find.descendant(of: finder, matching: find.byType(Icon)), findsOneWidget);
 
-    expect(find.descendant(of: paddingFinder, matching: find.byIcon(Icons.my_location)), findsOneWidget);
-    //await tester.drag(find.byType(GoogleMap), Offset(10, 10));
-    /*final controller = await mapController.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(10, 10))));
+    expect(find.descendant(of: finder, matching: find.byIcon(Icons.my_location)), findsOneWidget);
+    await tester.drag(gmapFinder, Offset(10, 10));
+    //final controller = await mapController.future;
+    //await controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(10, 10))));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.my_location));
-    await tester.pump();*/
+    await tester.pump();
 
     expect(initialPosition, LatLng(0, 0));
 
 
-    expect(find.descendant(of: paddingFinder, matching: find.byIcon(Icons.explore)), findsNothing);
+    expect(find.descendant(of: finder, matching: find.byIcon(Icons.explore)), findsNothing);
     var testGesture = await tester.createGesture();
     await testGesture.downWithCustomEvent(Offset(10, 30), PointerDownEvent(
         position: Offset(48, 20),orientation: 34));

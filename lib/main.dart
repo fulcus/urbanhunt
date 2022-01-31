@@ -14,7 +14,6 @@ Future<void> main() async {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    //_portraitModeOnly();
     return MaterialApp(
       title: 'UrbanHunt',
       theme: ThemeData(
@@ -23,13 +22,6 @@ class App extends StatelessWidget {
       ),
       home: redirectHomeOrLogin(),
       //debugShowCheckedModeBanner: false,
-      // initialRoute: '/',
-      // routes: {
-      //   // When navigating to the "/" route, build the FirstScreen widget.
-      //   '/first': (context) => Contribute(),
-      //   // When navigating to the "/second" route, build the SecondScreen widget.
-      //   '/second': (context) => LeaderBoard(),
-      // },
     );
   }
 }

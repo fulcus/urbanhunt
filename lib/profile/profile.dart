@@ -14,9 +14,13 @@ import 'package:hunt_app/utils/misc.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
-final db = FirebaseFirestore.instance;
 
 class Profile extends StatefulWidget {
+  final User loggedUser;
+  final FirebaseFirestore db;
+
+  Profile(this.loggedUser, this.db);
+
   @override
   _ProfileState createState() => _ProfileState();
 }
@@ -41,17 +45,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final TextEditingController _nameController = TextEditingController();
 
-  late User _myUser;
   late Stream<QuerySnapshot> _myUserData;
 
   @override
   void initState() {
     super.initState();
-    _myUser = FirebaseAuth.instance.currentUser!;
 
-    _myUserData = db
+    _myUserData = widget.db
         .collection('users')
-        .where(FieldPath.documentId, isEqualTo: _myUser.uid)
+        .where(FieldPath.documentId, isEqualTo: widget.loggedUser.uid)
         .snapshots();
   }
 
@@ -72,7 +74,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         snapshot.data!.docs[0].get('country').toString();
                     var countryName = CountryParser.parse(countryCode).name;
                     var score = snapshot.data!.docs[0].get('score').toString();
-                    var isEmailAuth = isEmailAuthProvider(_myUser);
+                    var isEmailAuth = isEmailAuthProvider(widget.loggedUser);
 
                     return Container(
                       padding: isMobile
@@ -133,7 +135,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                         await imageHelper
                                                             .uploadImage(
                                                                 _image!,
-                                                                _myUser)
+                                                            widget.loggedUser)
                                                       },
                                                     )
                                                   ],
@@ -289,7 +291,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           )),
 
                                       //if the user logged with email and password and the mail is not verified button to send verification
-                                      if (isEmailAuth && !_myUser.emailVerified)
+                                      if (isEmailAuth && !widget.loggedUser.emailVerified)
                                         Padding(
                                             padding: EdgeInsets.only(
                                                 left: 25.0,
@@ -302,7 +304,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   child: TextField(
                                                     controller:
                                                         TextEditingController()
-                                                          ..text = _myUser.email
+                                                          ..text = widget.loggedUser.email
                                                               .toString(),
                                                     decoration:
                                                         const InputDecoration(
@@ -316,7 +318,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 ),
                                                 GestureDetector(
                                                   onTap: () => {
-                                                    _myUser.sendEmailVerification(
+                                                    widget.loggedUser.sendEmailVerification(
                                                         ActionCodeSettings(
                                                             url:
                                                                 'https://hunt-app-ef3f2.firebaseapp.com/__/auth/action',
@@ -342,7 +344,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 )
                                               ],
                                             )),
-                                      if (!isEmailAuth || _myUser.emailVerified)
+                                      if (!isEmailAuth || widget.loggedUser.emailVerified)
                                         Padding(
                                             padding: EdgeInsets.only(
                                                 left: 25.0,
@@ -355,7 +357,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                   child: TextField(
                                                     controller:
                                                         TextEditingController()
-                                                          ..text = _myUser.email
+                                                          ..text = widget.loggedUser.email
                                                               .toString(),
                                                     decoration:
                                                         const InputDecoration(
@@ -620,7 +622,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                             dynamic>(
                                                         context,
                                                         createRoute(
-                                                            UnlockedList())),
+                                                            UnlockedList(widget.loggedUser, widget.db))),
                                                     child: CircleAvatar(
                                                       backgroundColor:
                                                           Colors.indigo,
@@ -779,6 +781,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                           context: context,
                                                           builder: (context) {
                                                             return CustomAlertDialog(
+                                                              loggedUser: widget.loggedUser,
                                                               title:
                                                                   "Delete account",
                                                               description:
@@ -828,13 +831,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   Future<void> _updateCountry(String country) async {
     var data = <String, dynamic>{'country': country};
 
-    return await db.collection('users').doc(_myUser.uid).update(data);
+    return await widget.db.collection('users').doc(widget.loggedUser.uid).update(data);
   }
 
   Future<void> _updateUsername(String username) async {
     var data = <String, dynamic>{'username': username};
 
-    return await db.collection('users').doc(_myUser.uid).update(data);
+    return await widget.db.collection('users').doc(widget.loggedUser.uid).update(data);
   }
 
   String? _validateName(String? value) {
@@ -859,22 +862,22 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   Future<void> _isUsernameUnique(String name) async {
     final username =
-        await db.collection('users').where('username', isEqualTo: name).get();
+        await widget.db.collection('users').where('username', isEqualTo: name).get();
 
     username.docs.isEmpty ? _isUnique = true : _isUnique = false;
   }
 
   Future<void> _changePassword(String password, BuildContext context) async {
-    await _myUser.updatePassword(password).then((_) {
+    await widget.loggedUser.updatePassword(password).then((_) {
       print('Successfully changed password');
     }).catchError((Object error) {
       if (error is FirebaseAuthException) {
         if (error.code == 'requires-recent-login') {
           var oldPassword = retrieveOldPassword(context);
           var credential = EmailAuthProvider.credential(
-              email: _myUser.email!, password: oldPassword);
+              email: widget.loggedUser.email!, password: oldPassword);
 
-          _myUser
+          widget.loggedUser
               .reauthenticateWithCredential(credential)
               .then((_) => print('Re-authenticated'))
               .catchError((Object error) {

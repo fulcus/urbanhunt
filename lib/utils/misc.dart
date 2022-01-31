@@ -1,7 +1,10 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/auth/login_page.dart';
+
+final db = FirebaseFirestore.instance;
 
 //TODO if keyboard is not visible change SnackBar elevation
 void showInSnackBar(String value,

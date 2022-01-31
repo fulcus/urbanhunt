@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:hunt_app/explore/explore.dart';
 import 'package:hunt_app/navigation_bar/navbar.dart';
 import 'package:hunt_app/navigation_bar/sidebar.dart';
 import 'package:hunt_app/utils/form_factor.dart';

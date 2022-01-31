@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hunt_app/utils/misc.dart';
 import 'package:place_picker/entities/location_result.dart';
 
 class PlaceData {
@@ -38,7 +39,7 @@ class PlaceData {
         dislikes = document['dislikes'] as int;
 
   Future<void> upload() async {
-    var places = FirebaseFirestore.instance.collection('places');
+    var places = db.collection('places');
 
     var jsonData = <String, dynamic>{
       'address': {'city': city, 'country': country, 'street': street},
