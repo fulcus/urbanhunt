@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hunt_app/utils/misc.dart';
 
 import '../auth/login_page.dart';
 
@@ -31,6 +30,9 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
     return Dialog(
       elevation: 0,
       backgroundColor: Color(0xffffffff),
+      insetPadding: (isMobile || MediaQuery.of(context).orientation == Orientation.portrait) ?
+          EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0) :
+          EdgeInsets.symmetric(horizontal: 400),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
@@ -57,13 +59,13 @@ class _CustomAlertDialogState extends State<CustomAlertDialog> {
             child: InkWell(
               highlightColor: Colors.grey[200],
               onTap: () {
-                _myUser.delete().catchError((Object error) {
+                _myUser.delete().catchError((Object error) async {
                   if(error is FirebaseAuthException && error.code == 'requires-recent-login') {
-                    //TODO handle exception
+                    List<String> signInMethods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(_myUser.email!);
                     _myUser.reauthenticateWithCredential(
                         AuthCredential(
                             providerId: _myUser.providerData[0].providerId,
-                            signInMethod: _myUser.email!
+                            signInMethod: signInMethods[0]
                         )
                     );
                   }

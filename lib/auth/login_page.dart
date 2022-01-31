@@ -12,19 +12,11 @@ import 'package:hunt_app/utils/misc.dart';
 import 'package:hunt_app/utils/network.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 
 // Backend utils
 const Color fbBlue = Color(0xFF4267B2);
 bool isTablet = false;
 bool isMobile = false;
-//TODO global keys here gives exception when logging out: Duplicate GlobalKey detected in widget tree. (but without consequences)
-final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey1 =
-    GlobalKey<ScaffoldMessengerState>();
-final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey2 =
-    GlobalKey<ScaffoldMessengerState>();
-final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey3 =
-    GlobalKey<ScaffoldMessengerState>();
 
 // To be used in main.dart (App build) as home property (i.e. home: redirectHomeOrLogin()).
 StreamBuilder redirectHomeOrLogin() {
@@ -74,218 +66,6 @@ Future<void> _addUserToDB(String uid, String? imageURL) async {
     print(e);
   }
 }
-
-Future<bool> loginFacebook() async {
-  bool logged = false;
-
-  try {
-    // Trigger the sign-in flow
-    final loginResult = await FacebookAuth.instance.login();
-
-    if (loginResult.status == LoginStatus.success) {
-      // Create a credential from the access token
-      final facebookAuthCredential =
-          FacebookAuthProvider.credential(loginResult.accessToken!.token);
-
-      // Once signed in, return the UserCredential
-      var userCredential = await FirebaseAuth.instance
-          .signInWithCredential(facebookAuthCredential)
-          .catchError((Object error) async {
-        if (error is FirebaseAuthException) {
-          switch (error.code) {
-            case 'account-exists-with-different-credential':
-              var pendingCred = error.credential;
-              var email = error.email;
-
-              List<String> methods = await FirebaseAuth.instance
-                  .fetchSignInMethodsForEmail(email!);
-              if (methods.contains('google.com')) {
-                final googleUser = (await GoogleSignIn().signIn())!;
-                final googleAuth = await googleUser.authentication;
-                final credential = GoogleAuthProvider.credential(
-                  accessToken: googleAuth.accessToken,
-                  idToken: googleAuth.idToken,
-                );
-                var userCredential = await FirebaseAuth.instance
-                    .signInWithCredential(credential);
-                userCredential.user!.linkWithCredential(pendingCred!);
-              } else if (methods.contains('password')) {
-                var prevUser = FirebaseAuth.instance.currentUser;
-                prevUser!.linkWithCredential(pendingCred!);
-              }
-              logged = true;
-              break;
-            case 'invalid-credential':
-              showInSnackBar('Invalid credential', _scaffoldMessengerKey1);
-              logged = false;
-              break;
-            case 'user-not-found':
-              showInSnackBar('User not found', _scaffoldMessengerKey1);
-              logged = false;
-              break;
-          }
-        }
-      });
-      if (userCredential.additionalUserInfo!.isNewUser) {
-        //User logging in for the first time
-        var name = userCredential.user!.displayName;
-        var picture = userCredential.user!.photoURL; // use in NetworkImage
-        print('$name $picture');
-        await _addUserToDB(userCredential.user!.uid, picture);
-      }
-      logged = true;
-    } else if (loginResult.status == LoginStatus.cancelled) {
-      logged = false;
-    } else if (loginResult.status == LoginStatus.failed) {
-      showInSnackBar(
-          'Login has failed. Try again later', _scaffoldMessengerKey1);
-      logged = false;
-    }
-  } on Exception catch (e) {
-    print('Error: $e');
-    logged = false;
-  }
-  return logged;
-}
-
-Future<bool> loginGoogle() async {
-  bool logged = false;
-
-  try {
-    // Trigger the authentication flow
-    final googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return false;
-
-    // Obtain the auth details from the request
-    final googleAuth = await googleUser.authentication;
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    // Once signed in, return the UserCredential
-    var userCredential = await FirebaseAuth.instance
-        .signInWithCredential(credential)
-        .catchError((Object error) async {
-      if (error is FirebaseAuthException) {
-        switch (error.code) {
-          case 'account-exists-with-different-credential':
-            var pendingCred = error.credential;
-            var email = error.email;
-
-            List<String> methods =
-                await FirebaseAuth.instance.fetchSignInMethodsForEmail(email!);
-            if (methods.contains('facebook.com')) {
-              final loginResult = await FacebookAuth.instance.login();
-              if (loginResult.status == LoginStatus.success) {
-                final facebookAuthCredential = FacebookAuthProvider.credential(
-                    loginResult.accessToken!.token);
-                var userCredential = await FirebaseAuth.instance
-                    .signInWithCredential(facebookAuthCredential);
-                userCredential.user!.linkWithCredential(pendingCred!);
-              }
-            } else if (methods.contains('password')) {
-              var prevUser = FirebaseAuth.instance.currentUser;
-              prevUser!.linkWithCredential(pendingCred!);
-            }
-            logged = true;
-            break;
-          case 'invalid-credential':
-            showInSnackBar('Invalid credential', _scaffoldMessengerKey1);
-            logged = false;
-            break;
-          case 'user-not-found':
-            showInSnackBar('User not found', _scaffoldMessengerKey1);
-            logged = false;
-            break;
-        }
-      }
-    });
-    if (userCredential.additionalUserInfo!.isNewUser) {
-      //User logging in for the first time
-      var name = userCredential.user!.displayName;
-      var picture = userCredential.user!.photoURL; // use in NetworkImage
-      print('$name $picture');
-      await _addUserToDB(userCredential.user!.uid, picture);
-    }
-    logged = true;
-  } on Exception catch (e) {
-    print('Error: $e');
-    logged = false;
-  }
-  return logged;
-}
-
-Future<bool> loginEmailPassword(String email, String password) async {
-  return await FirebaseAuth.instance
-      .signInWithEmailAndPassword(email: email, password: password)
-      .then((_) {
-    return true;
-  }).catchError((Object error) {
-    if (error is FirebaseAuthException) {
-      switch (error.code) {
-        case 'invalid-email':
-          showInSnackBar('Invalid email', _scaffoldMessengerKey1);
-          break;
-        case 'user-disabled':
-          showInSnackBar('The user associated to this email is disabled',
-              _scaffoldMessengerKey1);
-          break;
-        case 'user-not-found':
-          showInSnackBar('This email is not associated to any user',
-              _scaffoldMessengerKey1);
-          break;
-        case 'wrong-password':
-          showInSnackBar('The password is wrong', _scaffoldMessengerKey1);
-          break;
-      }
-    }
-    print(error);
-    return false;
-  });
-}
-
-Future<bool> signupAndLoginEmailPassword(String email, String password) async {
-  return await FirebaseAuth.instance
-      .createUserWithEmailAndPassword(email: email, password: password)
-      .then((userCredential) async {
-    if (userCredential.additionalUserInfo!.isNewUser) {
-      //User logging in for the first time
-      userCredential.user!.sendEmailVerification(ActionCodeSettings(
-          url: 'https://hunt-app-ef3f2.firebaseapp.com/__/auth/action',
-          handleCodeInApp: true));
-      await _addUserToDB(userCredential.user!.uid, null);
-    }
-    return loginEmailPassword(email, password);
-  }).catchError((Object error) {
-    if (error is FirebaseAuthException) {
-      switch (error.code) {
-        case 'invalid-email':
-          showInSnackBar('Invalid email', _scaffoldMessengerKey2);
-          break;
-        case 'email-already-in-use':
-          showInSnackBar('This email is already associated to another account',
-              _scaffoldMessengerKey2);
-          break;
-        case 'weak-password':
-          showInSnackBar('The password is too weak', _scaffoldMessengerKey2);
-          break;
-      }
-    }
-    print(error);
-    return false;
-  });
-}
-
-bool validateForm(GlobalKey<FormState> formKey) {
-  final form = formKey.currentState;
-  if (form!.validate()) {
-    form.save();
-    return true;
-  }
-  return false;
-}
-
 
 // Frontend utils
 ValidationHelper validationHelper = ValidationHelper();
@@ -404,10 +184,10 @@ Widget buttonify(String text) {
   );
 }
 
-// Pages and navigation
-// - LoginPage -> SignupPage, ResetPasswordPage
-// - SignupPage -> LoginPage
-// - ResetPasswordPage -> LoginPage
+/// Pages and navigation:
+/// - LoginPage -> SignupPage, ResetPasswordPage
+/// - SignupPage -> LoginPage
+/// - ResetPasswordPage -> LoginPage
 
 class LoginPage extends StatefulWidget {
   final String title = 'Login';
@@ -417,6 +197,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+  GlobalKey<ScaffoldMessengerState>();
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
@@ -424,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-        key: _scaffoldMessengerKey1,
+        key: _scaffoldMessengerKey,
         child: Scaffold(
           body: Align(
             alignment: Alignment.center,
@@ -443,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (validateForm(_formKey)) {
+        if (ValidationHelper().validateForm(_formKey)) {
           loginEmailPassword(_email, _password).then((ok) {
             if (ok) {
               pushNewScreen<void>(
@@ -452,9 +234,6 @@ class _LoginPageState extends State<LoginPage> {
                   menuScreenContext: context,
                 ) : SideNavBar(),
               );
-              //   Navigator.of(context, rootNavigator: true).pushReplacement(
-              //       MaterialPageRoute<void>(
-              //           builder: (context) => BottomNavContainer()));
             }
           });
         }
@@ -473,14 +252,10 @@ class _LoginPageState extends State<LoginPage> {
           if (ok) {
             pushNewScreen<void>(
               context,
-              screen: Navbar(
+              screen: isMobile ? Navbar(
                 menuScreenContext: context,
-              ),
+              ) : SideNavBar(),
             );
-
-            // Navigator.of(context, rootNavigator: true).pushReplacement(
-            //     MaterialPageRoute<void>(
-            //         builder: (context) => BottomNavContainer()));
           }
         });
       },
@@ -530,14 +305,10 @@ class _LoginPageState extends State<LoginPage> {
           if (ok) {
             pushNewScreen<void>(
               context,
-              screen: Navbar(
+              screen: isMobile ? Navbar(
                 menuScreenContext: context,
-              ),
+              ) : SideNavBar(),
             );
-
-            // Navigator.of(context).push<MaterialPageRoute>(
-            //   MaterialPageRoute(builder: (context) => BottomNavContainer()),
-            // );
           }
         });
       },
@@ -585,15 +356,14 @@ class _LoginPageState extends State<LoginPage> {
           Container(
             height: 175.0,
             width: 200.0,
-            child: ScreenTypeLayout(
-              mobile: Stack(
+            child: isMobile ? Stack(
                 children: [
                   heading1('Urban', 0.0, 0.0),
                   heading1('Hunt', 25.0, 75.0),
                   iconLock(246.0, 65.0),
                 ],
-              ),
-              tablet:  Stack(
+              )
+              : Stack(
                 children: [
                     Positioned(
                       left: 15,
@@ -603,7 +373,6 @@ class _LoginPageState extends State<LoginPage> {
                   iconLock(276.0, 120.0),
                 ],
               ),
-            ),
           ),
           SizedBox(height: 25.0),
           emailField((value) {
@@ -624,9 +393,6 @@ class _LoginPageState extends State<LoginPage> {
               'Forgot Password?',
               () {
                 pushNewScreen<void>(context, screen: ResetPasswordPage());
-
-                // Navigator.of(context).push<MaterialPageRoute>(MaterialPageRoute(
-                //     builder: (context) => ResetPasswordPage()));
               },
             ),
           ),
@@ -642,16 +408,183 @@ class _LoginPageState extends State<LoginPage> {
             'Sign up now',
             () {
               pushNewScreen<void>(context, screen: SignupPage());
-
-              // Navigator.of(context).push<MaterialPageRoute>(
-              //   MaterialPageRoute(builder: (context) => SignupPage()),
-              // );
             },
           ),
         ],
       ),
     );
   }
+
+  Future<bool> loginFacebook() async {
+    bool logged = false;
+
+    try {
+      // Trigger the sign-in flow
+      final loginResult = await FacebookAuth.instance.login();
+
+      if (loginResult.status == LoginStatus.success) {
+        // Create a credential from the access token
+        final facebookAuthCredential =
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+        // Once signed in, return the UserCredential
+        var userCredential = await FirebaseAuth.instance
+            .signInWithCredential(facebookAuthCredential)
+            .catchError((Object error) async {
+          if (error is FirebaseAuthException) {
+            switch (error.code) {
+              case 'account-exists-with-different-credential':
+                var pendingCred = error.credential;
+                var email = error.email;
+
+                List<String> methods = await FirebaseAuth.instance
+                    .fetchSignInMethodsForEmail(email!);
+                if (methods.contains('google.com')) {
+                  final googleUser = (await GoogleSignIn().signIn())!;
+                  final googleAuth = await googleUser.authentication;
+                  final credential = GoogleAuthProvider.credential(
+                    accessToken: googleAuth.accessToken,
+                    idToken: googleAuth.idToken,
+                  );
+                  var userCredential = await FirebaseAuth.instance
+                      .signInWithCredential(credential);
+                  userCredential.user!.linkWithCredential(pendingCred!);
+                } else if (methods.contains('password')) {
+                  var prevUser = FirebaseAuth.instance.currentUser;
+                  prevUser!.linkWithCredential(pendingCred!);
+                }
+                logged = true;
+                break;
+              case 'invalid-credential':
+                showInSnackBar('Invalid credential.', _scaffoldMessengerKey);
+                logged = false;
+                break;
+              case 'user-not-found':
+                showInSnackBar('User not found.', _scaffoldMessengerKey);
+                logged = false;
+                break;
+            }
+          }
+        });
+        if (userCredential.additionalUserInfo!.isNewUser) {
+          //User logging in for the first time
+          var name = userCredential.user!.displayName;
+          var picture = userCredential.user!.photoURL; // use in NetworkImage
+          print('$name $picture');
+          await _addUserToDB(userCredential.user!.uid, picture);
+        }
+        logged = true;
+      } else if (loginResult.status == LoginStatus.cancelled) {
+        logged = false;
+      } else if (loginResult.status == LoginStatus.failed) {
+        showInSnackBar(
+            'Login has failed. Try again later.', _scaffoldMessengerKey);
+        logged = false;
+      }
+    } on Exception catch (e) {
+      print('Error: $e');
+      logged = false;
+    }
+    return logged;
+  }
+
+  Future<bool> loginGoogle() async {
+    bool logged = false;
+
+    try {
+      // Trigger the authentication flow
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return false;
+
+      // Obtain the auth details from the request
+      final googleAuth = await googleUser.authentication;
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      // Once signed in, return the UserCredential
+      var userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential)
+          .catchError((Object error) async {
+        if (error is FirebaseAuthException) {
+          switch (error.code) {
+            case 'account-exists-with-different-credential':
+              var pendingCred = error.credential;
+              var email = error.email;
+
+              List<String> methods =
+              await FirebaseAuth.instance.fetchSignInMethodsForEmail(email!);
+              if (methods.contains('facebook.com')) {
+                final loginResult = await FacebookAuth.instance.login();
+                if (loginResult.status == LoginStatus.success) {
+                  final facebookAuthCredential = FacebookAuthProvider.credential(
+                      loginResult.accessToken!.token);
+                  var userCredential = await FirebaseAuth.instance
+                      .signInWithCredential(facebookAuthCredential);
+                  userCredential.user!.linkWithCredential(pendingCred!);
+                }
+              } else if (methods.contains('password')) {
+                var prevUser = FirebaseAuth.instance.currentUser;
+                prevUser!.linkWithCredential(pendingCred!);
+              }
+              logged = true;
+              break;
+            case 'invalid-credential':
+              showInSnackBar('Invalid credential.', _scaffoldMessengerKey);
+              logged = false;
+              break;
+            case 'user-not-found':
+              showInSnackBar('User not found.', _scaffoldMessengerKey);
+              logged = false;
+              break;
+          }
+        }
+      });
+      if (userCredential.additionalUserInfo!.isNewUser) {
+        //User logging in for the first time
+        var name = userCredential.user!.displayName;
+        var picture = userCredential.user!.photoURL; // use in NetworkImage
+        print('$name $picture');
+        await _addUserToDB(userCredential.user!.uid, picture);
+      }
+      logged = true;
+    } on Exception catch (e) {
+      print('Error: $e');
+      logged = false;
+    }
+    return logged;
+  }
+
+  Future<bool> loginEmailPassword(String email, String password) async {
+    return await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password)
+        .then((_) {
+      return true;
+    }).catchError((Object error) {
+      if (error is FirebaseAuthException) {
+        switch (error.code) {
+          case 'invalid-email':
+            showInSnackBar('Invalid email.', _scaffoldMessengerKey);
+            break;
+          case 'user-disabled':
+            showInSnackBar('The user associated to this email is disabled.',
+                _scaffoldMessengerKey);
+            break;
+          case 'user-not-found':
+            showInSnackBar('This email is not associated to any user.',
+                _scaffoldMessengerKey);
+            break;
+          case 'wrong-password':
+            showInSnackBar('The password is wrong.', _scaffoldMessengerKey);
+            break;
+        }
+      }
+      print(error);
+      return false;
+    });
+  }
+
 }
 
 class SignupPage extends StatefulWidget {
@@ -662,6 +595,8 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+  GlobalKey<ScaffoldMessengerState>();
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
@@ -669,7 +604,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-        key: _scaffoldMessengerKey2,
+        key: _scaffoldMessengerKey,
         child: Scaffold(
           body: Align(
             alignment: Alignment.center,
@@ -688,7 +623,7 @@ class _SignupPageState extends State<SignupPage> {
   Widget _buildSignupButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (validateForm(_formKey)) {
+        if (ValidationHelper().validateForm(_formKey)) {
           signupAndLoginEmailPassword(_email, _password).then((ok) {
             if (ok) {
               pushNewScreen<void>(
@@ -749,6 +684,41 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
+
+  Future<bool> signupAndLoginEmailPassword(String email, String password) async {
+    return await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password)
+        .then((userCredential) async {
+      if (userCredential.additionalUserInfo!.isNewUser) {
+        //User logging in for the first time
+        userCredential.user!.sendEmailVerification(ActionCodeSettings(
+            url: 'https://hunt-app-ef3f2.firebaseapp.com/__/auth/action',
+            handleCodeInApp: true));
+        await _addUserToDB(userCredential.user!.uid, null);
+      }
+      return await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then((_) {return true;});
+    }).catchError((Object error) {
+      if (error is FirebaseAuthException) {
+        switch (error.code) {
+          case 'invalid-email':
+            showInSnackBar('Invalid email.', _scaffoldMessengerKey);
+            break;
+          case 'email-already-in-use':
+            showInSnackBar('This email is already associated to another account.',
+                _scaffoldMessengerKey);
+            break;
+          case 'weak-password':
+            showInSnackBar('The password is too weak.', _scaffoldMessengerKey);
+            break;
+        }
+      }
+      print(error);
+      return false;
+    });
+  }
+
 }
 
 class ResetPasswordPage extends StatefulWidget {
@@ -759,13 +729,15 @@ class ResetPasswordPage extends StatefulWidget {
 }
 
 class _ResetPasswordState extends State<ResetPasswordPage> {
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+  GlobalKey<ScaffoldMessengerState>();
   final _formKey = GlobalKey<FormState>();
   String _email = '';
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-        key: _scaffoldMessengerKey3,
+        key: _scaffoldMessengerKey,
         child: Scaffold(
           body: Align(
             alignment: Alignment.center,
@@ -786,23 +758,23 @@ class _ResetPasswordState extends State<ResetPasswordPage> {
     return GestureDetector(
       onTap: () {
         if (_firstPress) {
-          if (validateForm(_formKey)) {
+          if (ValidationHelper().validateForm(_formKey)) {
             _firstPress = false;
             FirebaseAuth.instance
                 .sendPasswordResetEmail(email: _email)
                 .then((_) {
               showInSnackBar(
                   'An email to reset your password has been sent to you. Check your email box.',
-                  _scaffoldMessengerKey3);
+                  _scaffoldMessengerKey);
             }).catchError((Object error) {
               if (error is FirebaseAuthException) {
                 switch (error.code) {
                   case 'invalid-email':
-                    showInSnackBar('Invalid email', _scaffoldMessengerKey3);
+                    showInSnackBar('Invalid email.', _scaffoldMessengerKey);
                     break;
                   case 'user-not-found':
-                    showInSnackBar('This email is not associated to any user',
-                        _scaffoldMessengerKey3);
+                    showInSnackBar('This email is not associated to any user.',
+                        _scaffoldMessengerKey);
                     break;
                 }
               }

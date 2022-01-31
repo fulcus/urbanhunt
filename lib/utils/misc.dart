@@ -1,20 +1,58 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hunt_app/auth/login_page.dart';
 
 //TODO if keyboard is not visible change SnackBar elevation
 void showInSnackBar(String value,
     GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey,
-    {double height = 0.0}) {
+    {double height = 18.0}) {
   _scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
-  _scaffoldMessengerKey.currentState!.showSnackBar(SnackBar(
-    content: Container(child: Text(value), height: height),
-    shape: RoundedRectangleBorder(
+  _scaffoldMessengerKey.currentState!.showSnackBar(
+      isMobile ? SnackBar(
+        content: Container(child: Text(value), height: height),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(14),
+            topLeft: Radius.circular(14),
+          ),
+        ),
+      ) : SnackBar(
+            content: Container(
+              child: FittedBox(child: Text(value)),
+              height: 15,
+            ),
+            width: 300,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(14)),
+            ),
+         )
+  );
+}
+
+void showInFlushBar(String message, BuildContext context) {
+  if(isMobile) {
+    Flushbar<dynamic>(
+      message: message,
+      duration: Duration(seconds: 4),
+      animationDuration: Duration(milliseconds: 300),
+      padding: EdgeInsets.only(left: 26, top: 15, bottom: 65),
       borderRadius: BorderRadius.only(
         topRight: Radius.circular(14),
         topLeft: Radius.circular(14),
       ),
-    ),
-  ));
+    ).show(context);
+  } else {
+    Flushbar<dynamic>(
+      messageText: Center(child: Text(message, style: TextStyle(color: Colors.white))),
+      duration: Duration(seconds: 4),
+      animationDuration: Duration(milliseconds: 300),
+      borderRadius: BorderRadius.all(Radius.circular(14)),
+      maxWidth: 300,
+      margin: EdgeInsets.all(65),
+    ).show(context);
+  }
 }
 
 bool isEmailAuthProvider(User user) {

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class ValidationHelper {
 
   String? validateEmail(String? value) {
@@ -61,6 +63,15 @@ class ValidationHelper {
       return 'Unlocked description is too long, use at most 500 characters';
     }
     return null;
+  }
+
+  bool validateForm(GlobalKey<FormState> formKey) {
+    final form = formKey.currentState;
+    if (form!.validate()) {
+      form.save();
+      return true;
+    }
+    return false;
   }
 
   bool _isBlank(String value) {

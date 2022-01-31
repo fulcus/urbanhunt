@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hunt_app/api_key.dart';
-import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/auth/login_page.dart';
+import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/misc.dart';
 import 'package:hunt_app/utils/validation_helper.dart';
@@ -295,7 +295,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
     if (isEmailAuthProvider(_myUser) && !_myUser.emailVerified) {
       showInSnackBar('Please verify your email first.', _scaffoldMessengerKey,
-          height: 70.0);
+          height: isMobile ? 70.0 : 0.0);
     } else {
       if (form.validate() && _validateImage() && _validateLocation()) {
         form.save();
@@ -338,8 +338,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
   bool _validateImage() {
     if (_image == null) {
-      showInSnackBar('Please select an image', _scaffoldMessengerKey,
-          height: 70.0);
+      showInSnackBar('Please select an image.', _scaffoldMessengerKey,
+          height: isMobile ? 70.0 : 0.0);
       return false;
     } else {
       return true;
@@ -348,8 +348,8 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
   bool _validateLocation() {
     if (pickedLocation == null) {
-      showInSnackBar('Please select the location', _scaffoldMessengerKey,
-          height: 70.0);
+      showInSnackBar('Please select the location.', _scaffoldMessengerKey,
+          height: isMobile ? 70.0 : 0.0);
     }
     return pickedLocation != null;
   }
