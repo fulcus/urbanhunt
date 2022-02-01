@@ -647,89 +647,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
                                       Divider(height: 40),
 
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          //LOGOUT button
-                                          Padding(
-                                              padding: EdgeInsets.only(
-                                                  left: 25.0,
-                                                  right: 25.0,
-                                                  top: 25.0),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: <Widget>[
-                                                  GestureDetector(
-                                                      child: Container(
-                                                        width: 120.0,
-                                                        height: 60.0,
-                                                        decoration: BoxDecoration(
-                                                            color: Colors.white,
-                                                            border: Border.all(
-                                                                color: Colors
-                                                                    .indigo),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            16))),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            SizedBox(
-                                                                width: 6.0),
-                                                            Icon(
-                                                                Icons
-                                                                    .exit_to_app,
-                                                                color: Colors
-                                                                    .indigo),
-                                                            SizedBox(
-                                                                width: 4.0),
-                                                            Text(
-                                                              'Logout',
-                                                              style: TextStyle(
-                                                                color: Colors
-                                                                    .indigo,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 16.0,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      onTap: () {
-                                                        Navigator.of(context,
-                                                                rootNavigator:
-                                                                    true)
-                                                            .pushAndRemoveUntil(
-                                                          MaterialPageRoute<
-                                                                  void>(
-                                                              builder: (context) =>
-                                                                  LoginPage()),
-                                                          (route) => false,
-                                                        );
-                                                      })
-                                                ],
-                                              )),
-
-                                          //DELETE ACCOUNT BUTTON
-                                          Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 25.0,
-                                                right: 25.0,
-                                                top: 25.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: <Widget>[
-                                                GestureDetector(
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 40.0, right: 40.0, top: 25.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            //LOGOUT button
+                                            Expanded(
+                                                child: GestureDetector(
                                                     child: Container(
                                                       width: 120.0,
                                                       height: 60.0,
@@ -739,24 +666,87 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                               color: Colors
                                                                   .indigo),
                                                           borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          16))),
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              16))),
                                                       child: Row(
                                                         mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
+                                                        MainAxisAlignment
+                                                            .center,
                                                         crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                        children: [
+                                                          SizedBox(
+                                                              width: 6.0),
+                                                          Icon(
+                                                              Icons
+                                                                  .exit_to_app,
+                                                              color: Colors
+                                                                  .indigo),
+                                                          SizedBox(
+                                                              width: 4.0),
+                                                          Text(
+                                                            'Logout',
+                                                            style: TextStyle(
+                                                              color: Colors
+                                                                  .indigo,
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .bold,
+                                                              fontSize: 16.0,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    onTap: () {
+                                                      Navigator.of(context,
+                                                          rootNavigator:
+                                                          true)
+                                                          .pushAndRemoveUntil(
+                                                        MaterialPageRoute<
+                                                            void>(
+                                                            builder: (context) =>
+                                                                LoginPage()),
+                                                            (route) => false,
+                                                      );
+                                                    })
+                                            ),
+
+                                            SizedBox(width: 60),
+
+                                            //DELETE ACCOUNT BUTTON
+                                            Expanded(
+                                                child: GestureDetector(
+                                                    child: Container(
+                                                      width: 120.0,
+                                                      height: 60.0,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          border: Border.all(
+                                                              color: Colors
+                                                                  .indigo),
+                                                          borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius
+                                                                  .circular(
+                                                                  16))),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                        crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
                                                         children: [
                                                           SizedBox(width: 6.0),
                                                           Icon(
                                                             Icons
                                                                 .delete_outline,
                                                             color:
-                                                                Colors.indigo,
+                                                            Colors.indigo,
                                                             size: 25,
                                                           ),
                                                           SizedBox(width: 4.0),
@@ -764,10 +754,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                             'Delete\nAccount',
                                                             style: TextStyle(
                                                               color:
-                                                                  Colors.indigo,
+                                                              Colors.indigo,
                                                               fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
+                                                              FontWeight
+                                                                  .bold,
                                                               fontSize: 16.0,
                                                             ),
                                                           ),
@@ -777,24 +767,23 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                     onTap: () {
                                                       showDialog<dynamic>(
                                                           barrierColor:
-                                                              Colors.black26,
+                                                          Colors.black26,
                                                           context: context,
                                                           builder: (context) {
                                                             return CustomAlertDialog(
                                                               loggedUser: widget.loggedUser,
                                                               title:
-                                                                  "Delete account",
+                                                              "Delete account",
                                                               description:
-                                                                  "You will lose all your progress.\n"
+                                                              "You will lose all your progress.\n"
                                                                   "Are you sure to delete your account?\n",
                                                             );
                                                           });
                                                     })
-                                              ],
                                             ),
-                                          )
-                                        ],
-                                      )
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),

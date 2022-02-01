@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:fake_cloud_firestore/src/mock_document_snapshot.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:firebase_storage_mocks/firebase_storage_mocks.dart';
@@ -41,13 +42,13 @@ Future<FakeFirebaseFirestore> getFakeFirestoreInstance() async {
   await firestore.collection('places').add(<String, dynamic>{
     'address': <String, dynamic>{
       'city': 'Milan',
-      'country': 'Italy',
+      'country': 'IT',
       'street': '6, Viale Brianza'
     },
     'categories': <dynamic>[
       'food'
     ],
-    'creatorId': '076R1REcV2cFma2h2gFcrPU8kT92',
+    'creatorId': user.uid,
     'dislikes': 0,
     'imgpath': 'https://camo.githubusercontent.com/b4c566de1ceca472d9c01c7558999fa947a045164019cd180d7713f17fafa9c2/68747470733a2f2f692e6962622e636f2f516d567a4a77562f557365722d486f6d65706167652e706e67',
     'likes': 0,
@@ -57,16 +58,19 @@ Future<FakeFirebaseFirestore> getFakeFirestoreInstance() async {
     'unlockedDescr': 'none',
   });
 
-  await firestore.collection('users').add(<String, dynamic>{
-    'country': 'Italy',
-    'imageURL': '',
+  var snap = await firestore.collection('places').get();
+  var placeId = snap.docs.first.id;
+
+  await firestore.collection('users').doc(user.uid).set(<String, dynamic>{
+    'country': 'IT',
+    'imageURL': 'https://camo.githubusercontent.com/b4c566de1ceca472d9c01c7558999fa947a045164019cd180d7713f17fafa9c2/68747470733a2f2f692e6962622e636f2f516d567a4a77562f557365722d486f6d65706167652e706e67',
     'score': 0,
-    'username': 'MockedUser'
+    'username': user.displayName
   });
 
   await firestore.collection('users').doc(user.uid)
-      .collection('unlockedPlaces')
-      .add(<String, dynamic>{
+      .collection('unlockedPlaces').doc(placeId)
+      .set(<String, dynamic>{
     'disliked': false,
     'liked': false,
     'unlockDate': Timestamp.now(),
@@ -82,5 +86,13 @@ Future<void> setupMockStorage() async {
   await storageRef.putFile(image);
 }
 
+List<DocumentSnapshot<Object?>> getDocumentSnapshots(QuerySnapshot<Map<String, dynamic>> querySnapshot){
+  final snap = querySnapshot.docs.first;
+  MockDocumentSnapshot documentSnapshot = MockDocumentSnapshot(
+      snap.reference, snap.id, snap.data(), Object(), false, true);
+  List<DocumentSnapshot> snapshots = [];
+  snapshots.add(documentSnapshot);
+  return snapshots;
+}
 
 

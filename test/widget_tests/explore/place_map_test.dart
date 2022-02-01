@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:fake_cloud_firestore/src/mock_document_snapshot.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -23,18 +22,10 @@ Future<void> main() async {
   });
 
   final snapshot1 = await firestore.collection('places').get();
-  final snap1 = snapshot1.docs.first;
-  MockDocumentSnapshot documentSnapshot = MockDocumentSnapshot(
-      snap1.reference, snap1.id, snap1.data(), Object(), false, true);
-  List<DocumentSnapshot> places = [];
-  places.add(documentSnapshot);
+  final List<DocumentSnapshot> places = getDocumentSnapshots(snapshot1);
 
   final snapshot2 = await firestore.collection('users').doc(user.uid).collection('unlockedPlaces').get();
-  final snap2 = snapshot2.docs.first;
-  MockDocumentSnapshot documentSnapshot2 = MockDocumentSnapshot(
-      snap2.reference, snap2.id, snap2.data(), Object(), false, true);
-  List<DocumentSnapshot> unlockedPlaces = [];
-  unlockedPlaces.add(documentSnapshot2);
+  final List<DocumentSnapshot> unlockedPlaces = getDocumentSnapshots(snapshot2);
 
   final Completer<GoogleMapController> _mapController = Completer();
 
