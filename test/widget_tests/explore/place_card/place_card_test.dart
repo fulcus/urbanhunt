@@ -3,16 +3,13 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage_mocks/firebase_storage_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 
-import '../../../helpers/test_helpers.dart';
+import '../../../helpers/utils.dart';
 
 bool isClosed = false;
 
@@ -21,59 +18,12 @@ void onCardClose() {
 }
 
 Future<void> main() async {
-  // Mock sign in with Google.
-  final googleSignIn = MockGoogleSignIn();
-  final signInAccount = await googleSignIn.signIn();
-  final googleAuth = await signInAccount!.authentication;
-  final AuthCredential credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
-  // Sign in.
-  final user = MockUser(
-    isAnonymous: false,
-    uid: '076R1REcV2cFma2h2gFcrPU8kT92',
-    email: 'bob@somedomain.com',
-    displayName: 'Bob',
-  );
+  final User user = await getMockedUser();
+  final FakeFirebaseFirestore firestore = await getFakeFirestoreInstance();
+
   user.providerData.add(UserInfo({'providerId':'password'}));
-  final auth = MockFirebaseAuth(signedIn: true, mockUser: user);
-  await auth.signInWithCredential(credential);
-
-  final storage = MockFirebaseStorage();
-  final storageRef = storage.ref().child('assets/images/default_profile.png');
-  final image = File('assets/images/default-profile.png');
-  await storageRef.putFile(image);
-
-  final firestore = FakeFirebaseFirestore();
-  await firestore.collection('places').add(<String, dynamic>{
-    'address': <String, dynamic>{
-      'city': 'Milan',
-      'country': 'Italy',
-      'street': '6, Viale Brianza'
-    },
-    'categories': <String>['food'],
-    'creatorId' : '076R1REcV2cFma2h2gFcrPU8kT92',
-    'dislikes': 0,
-    'imgpath':
-        'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png',
-    'likes': 0,
-    'location': GeoPoint(45.464664, 9.188540),
-    'lockedDescr': 'none',
-    'name': 'mock',
-    'unlockedDescr': 'none',
-  });
-
-  await firestore.collection('users').add(<String, dynamic>{
-    'country': 'IT',
-    'imageURL': '',
-    'score': 0,
-    'username': 'MockedUser'
-  });
-
+  setupMockStorage();
   final snapshot = await firestore.collection('places').get();
-
-  setupFirebaseAuthMocks();
 
   setUpAll(() async {
     await Firebase.initializeApp();

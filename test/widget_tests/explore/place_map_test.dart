@@ -4,77 +4,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:fake_cloud_firestore/src/mock_document_snapshot.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/explore/explore.dart';
 import 'package:hunt_app/explore/place_card.dart';
 
-import '../../helpers/test_helpers.dart';
+import '../../helpers/utils.dart';
 
 
 Future<void> main() async {
-  // Mock sign in with Google.
-  final googleSignIn = MockGoogleSignIn();
-  final signInAccount = await googleSignIn.signIn();
-  final googleAuth = await signInAccount!.authentication;
-  final AuthCredential credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
-  // Sign in.
-  final user = MockUser(
-    isAnonymous: false,
-    uid: '076R1REcV2cFma2h2gFcrPU8kT92',
-    email: 'bob@somedomain.com',
-    displayName: 'Bob',
-  );
-  final auth = MockFirebaseAuth(signedIn: true, mockUser: user);
-  await auth.signInWithCredential(credential);
-
-  final firestore = FakeFirebaseFirestore();
-
-  setupFirebaseAuthMocks();
-  TestWidgetsFlutterBinding.ensureInitialized();
-
+  final User user = await getMockedUser();
+  final FakeFirebaseFirestore firestore = await getFakeFirestoreInstance();
 
   setUpAll(() async {
     await Firebase.initializeApp();
-  });
-
-  await firestore.collection('places').add(<String, dynamic> {
-    'address': <String, dynamic> {
-      'city': 'Milan',
-      'country': 'Italy',
-      'street': '6, Viale Brianza'
-    },
-    'categories': <dynamic>[
-      'food'
-    ],
-    'creatorId': '076R1REcV2cFma2h2gFcrPU8kT92',
-    'dislikes': 0,
-    'imgpath': 'https://camo.githubusercontent.com/b4c566de1ceca472d9c01c7558999fa947a045164019cd180d7713f17fafa9c2/68747470733a2f2f692e6962622e636f2f516d567a4a77562f557365722d486f6d65706167652e706e67',
-    'likes': 0,
-    'location': GeoPoint(0, 0),
-    'lockedDescr': 'none',
-    'name': 'mock',
-    'unlockedDescr': 'none',
-  });
-
-  await firestore.collection('users').add(<String, dynamic> {
-    'country': 'Italy',
-    'imageURL': '',
-    'score': 0,
-    'username': 'MockedUser'
-  });
-
-  await firestore.collection('users').doc(user.uid).collection('unlockedPlaces').add(<String, dynamic> {
-  'disliked': false,
-  'liked': false,
-  'unlockDate': Timestamp.now(),
   });
 
   final snapshot1 = await firestore.collection('places').get();
