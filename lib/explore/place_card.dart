@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -40,8 +41,8 @@ class PlaceCard extends StatefulWidget with ClusterItem {
   Timestamp? unlockDate;
   late void Function() onCardClose;
 
-  PlaceCard(this.loggedUser, this.db, this.place, this.isLocked, this.isLiked, this.isDisliked,
-      this.onCardClose,
+  PlaceCard(this.loggedUser, this.db, this.place, this.isLocked, this.isLiked,
+      this.isDisliked, this.onCardClose,
       {this.fullscreen = false, this.unlockDate, Key? key})
       : super(key: key);
 
@@ -117,7 +118,27 @@ class PlaceCardState extends State<PlaceCard> {
               imageBanner,
               // scroll hint and close button
               if (!widget.fullscreen)
-                Positioned(child: topBar(), right: 0, left: 0, top: 1),
+                if (isMobile ||
+                    MediaQuery.of(context).orientation == Orientation.portrait)
+                  mobileTopBar()
+                else // tablet
+                  Stack(children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: IconButton(
+                          iconSize: 30,
+                          icon: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.rotationY(math.pi),
+                            child: Icon(Icons.arrow_back, color: Colors.grey),
+                          ),
+                          onPressed: widget.onCardClose,
+                        ),
+                      ),
+                    )
+                  ]),
               // Below Image: Place info
               Positioned(
                 right: 0,
@@ -131,8 +152,9 @@ class PlaceCardState extends State<PlaceCard> {
                       topLeft: Radius.circular(8),
                     ),
                   ),
-                  padding: isMobile ? EdgeInsets.only(top: 10.0, left: 32.0, right: 32.0)
-                  : EdgeInsets.only(top: 10.0, left: 70.0, right: 70.0),
+                  padding: isMobile
+                      ? EdgeInsets.only(top: 10.0, left: 32.0, right: 32.0)
+                      : EdgeInsets.only(top: 10.0, left: 70.0, right: 70.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -274,29 +296,29 @@ class PlaceCardState extends State<PlaceCard> {
         ),
       );
     } else {
-      if(isMobile || MediaQuery.of(context).orientation == Orientation.portrait) {
+      if (isMobile ||
+          MediaQuery.of(context).orientation == Orientation.portrait) {
         return DraggableScrollableSheet(
-        minChildSize: 0.44,
-        initialChildSize: 0.44,
-        builder: (context, scrollController) {
-          return Material(
-            elevation: 10,
-            shadowColor: Colors.black,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: content,
-            ),
-          );
-        },
-      );
-      }
-      else {
+          minChildSize: 0.44,
+          initialChildSize: 0.44,
+          builder: (context, scrollController) {
+            return Material(
+              elevation: 10,
+              shadowColor: Colors.black,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: content,
+              ),
+            );
+          },
+        );
+      } else {
         //TODO not scrolling
         return Align(
           alignment: Alignment.bottomRight,
           child: SizedBox(
-              width: MediaQuery.of(context).size.width*0.4,
+              width: MediaQuery.of(context).size.width * 0.4,
               height: MediaQuery.of(context).size.height,
               child: Material(
                 elevation: 10,
@@ -304,11 +326,9 @@ class PlaceCardState extends State<PlaceCard> {
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16.0),
                     bottomLeft: Radius.circular(16.0)),
-                child: SingleChildScrollView(
-                    child: content),
-              )
-            ),
-          );
+                child: SingleChildScrollView(child: content),
+              )),
+        );
       }
     }
   }
@@ -360,7 +380,8 @@ class PlaceCardState extends State<PlaceCard> {
 
   // Interactions
   void tryUnlock() {
-    if (isEmailAuthProvider(widget.loggedUser) && !widget.loggedUser.emailVerified) {
+    if (isEmailAuthProvider(widget.loggedUser) &&
+        !widget.loggedUser.emailVerified) {
       showInFlushBar('Please verify your email first.', context);
     } else {
       Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
@@ -556,7 +577,7 @@ class PlaceCardState extends State<PlaceCard> {
     // All places have actually been already downloaded, so not need to get it again.
     // Only need to update UI with new info and write 'unlocking' to db.
     var unlockedPlaces =
-      widget.db.collection('users').doc(userId).collection('unlockedPlaces');
+        widget.db.collection('users').doc(userId).collection('unlockedPlaces');
     widget.unlockDate = Timestamp.now();
     var data = <String, dynamic>{
       'liked': false,
@@ -568,7 +589,7 @@ class PlaceCardState extends State<PlaceCard> {
   }
 
   // Frontend
-  Widget topBar() {
+  Widget mobileTopBar() {
     Widget scrollHint = Container(
       width: 28.0,
       height: 4.0,
@@ -578,34 +599,37 @@ class PlaceCardState extends State<PlaceCard> {
       ),
     );
 
-    Widget closeIcon = IconButton(
-      icon: Icon(
-        Icons.close_rounded,
-        color: Colors.grey,
-        size: 18.0,
-      ),
-      onPressed: widget.onCardClose,
-    );
-
-    return Container(
-      width: double.infinity,
-      height: 24.0,
-      child: Row(
-        children: <Widget>[
-          Expanded(child: Container(color: Colors.transparent)),
-          Expanded(
-              child: Container(
-            color: Colors.transparent,
-            alignment: Alignment.center,
-            child: scrollHint,
-          )),
-          Expanded(
-              child: Container(
-            color: Colors.transparent,
-            alignment: Alignment.centerRight,
-            child: closeIcon,
-          )),
-        ],
+    return Positioned(
+      right: 0,
+      left: 0,
+      top: 1,
+      child: Container(
+        width: double.infinity,
+        height: 24.0,
+        child: Row(
+          children: <Widget>[
+            Expanded(child: Container(color: Colors.transparent)),
+            Expanded(
+                child: Container(
+              color: Colors.transparent,
+              alignment: Alignment.center,
+              child: scrollHint,
+            )),
+            Expanded(
+                child: Container(
+              color: Colors.transparent,
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: Colors.grey,
+                  size: 18.0,
+                ),
+                onPressed: widget.onCardClose,
+              ),
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -616,7 +640,7 @@ class PlaceCardState extends State<PlaceCard> {
       children: <Widget>[
         Container(
           width: double.infinity,
-          height: isMobile? 180.0 : 350.0,
+          height: isMobile ? 180.0 : 350.0,
           alignment: Alignment.center,
           child: Stack(
             children: <Widget>[
@@ -630,12 +654,14 @@ class PlaceCardState extends State<PlaceCard> {
                   child: Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.only(
-                        topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
+                        topRight: isMobile || widget.fullscreen
+                            ? Radius.circular(14)
+                            : Radius.circular(0),
                         topLeft: Radius.circular(14),
                       ),
                       child: CachedNetworkImage(
                         imageUrl: widget.place.imageURL,
-                        height: isMobile? 180.0 : 350.0,
+                        height: isMobile ? 180.0 : 350.0,
                         width: MediaQuery.of(context).size.width,
                         fit: BoxFit.cover,
                         errorWidget: (context, url, dynamic error) =>
@@ -645,7 +671,9 @@ class PlaceCardState extends State<PlaceCard> {
                   )),
               ClipRRect(
                 borderRadius: BorderRadius.only(
-                  topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
+                  topRight: isMobile || widget.fullscreen
+                      ? Radius.circular(14)
+                      : Radius.circular(0),
                   topLeft: Radius.circular(14),
                 ),
                 child: BackdropFilter(
@@ -678,11 +706,13 @@ class PlaceCardState extends State<PlaceCard> {
   Widget imageBannerUnlocked() {
     return Container(
       width: double.infinity,
-      height: isMobile? 180.0 : 350.0,
+      height: isMobile ? 180.0 : 350.0,
       alignment: Alignment.center,
       child: ClipRRect(
         borderRadius: BorderRadius.only(
-          topRight: isMobile || widget.fullscreen ? Radius.circular(14) : Radius.circular(0),
+          topRight: isMobile || widget.fullscreen
+              ? Radius.circular(14)
+              : Radius.circular(0),
           topLeft: Radius.circular(14),
         ),
         child: ShaderMask(
@@ -694,7 +724,7 @@ class PlaceCardState extends State<PlaceCard> {
           blendMode: BlendMode.darken,
           child: CachedNetworkImage(
             imageUrl: widget.place.imageURL,
-            height: isMobile? 180.0 : 350.0,
+            height: isMobile ? 180.0 : 350.0,
             width: MediaQuery.of(context).size.width,
             fit: BoxFit.cover,
             errorWidget: (context, url, dynamic error) => Icon(Icons.error),
