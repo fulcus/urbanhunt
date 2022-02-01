@@ -1,50 +1,105 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/contribute/form.dart';
+import 'package:hunt_app/contribute/multiselect.dart';
 
-import '../../helpers/test_helpers.dart';
+import '../../helpers/utils.dart';
 
 
 Future<void> main() async {
-// Mock sign in with Google.
-  final googleSignIn = MockGoogleSignIn();
-  final signInAccount = await googleSignIn.signIn();
-  final googleAuth = await signInAccount!.authentication;
-  final AuthCredential credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
-  // Sign in.
-  final user = MockUser(
-    isAnonymous: false,
-    uid: '076R1REcV2cFma2h2gFcrPU8kT92',
-    email: 'bob@somedomain.com',
-    displayName: 'Bob',
-  );
-  final auth = MockFirebaseAuth(signedIn: true, mockUser: user);
-  await auth.signInWithCredential(credential);
-
-  setupFirebaseAuthMocks();
+  final User user = await getMockedUser();
 
   setUpAll(() async {
     await Firebase.initializeApp();
   });
 
 
-  testWidgets('AddPlaceForm Widget', (tester) async {
+  testWidgets('Insert text', (tester) async {
     Widget testWidget = MediaQuery(
-        data: MediaQueryData(),
+        data: MediaQueryData(size: Size(1000, 1000)),
         child: MaterialApp(home: AddPlaceForm(loggedUser: user))
     );
 
     await tester.pumpWidget(testWidget);
 
     expect(find.byType(Form), findsOneWidget);
-    tester.enterText(find.byType(TextFormField).first, 'ciao');
+    expect(find.byType(TextFormField), findsNWidgets(3));
+    await tester.enterText(find.byType(TextFormField).first, 'ciao');
+    await tester.enterText(find.byType(TextFormField).at(1), 'ciao');
+    await tester.enterText(find.byType(TextFormField).last, 'ciao');
+    await tester.pumpAndSettle();
 
+    expect(find.byType(TextFormField).first, findsOneWidget);
   });
+
+  testWidgets('Select category', (tester) async {
+    Widget testWidget = MediaQuery(
+        data: MediaQueryData(size: Size(1000, 1000)),
+        child: MaterialApp(home: AddPlaceForm(loggedUser: user))
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    final multiChipFinder = find.byType(MultiSelectChip);
+    await tester.ensureVisible(multiChipFinder);
+    await tester.tap(multiChipFinder);
+    await tester.pumpAndSettle();
+    print('button tapped');
+
+    expect(find.byType(Form), findsOneWidget);
+  });
+
+  testWidgets('Tap choose picture button', (tester) async {
+    Widget testWidget = MediaQuery(
+        data: MediaQueryData(size: Size(1000, 1000)),
+        child: MaterialApp(home: AddPlaceForm(loggedUser: user))
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    final buttonFinder = find.byType(Center).first;
+    await tester.ensureVisible(buttonFinder);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+    print('button tapped');
+
+    expect(find.byType(Form), findsOneWidget);
+  });
+
+  testWidgets('Tap select location button', (tester) async {
+    Widget testWidget = MediaQuery(
+        data: MediaQueryData(size: Size(1000, 1000)),
+        child: MaterialApp(home: AddPlaceForm(loggedUser: user))
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    final buttonFinder = find.byType(Center).at(1);
+    await tester.ensureVisible(buttonFinder);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+    print('button tapped');
+
+    expect(find.byType(Form), findsOneWidget);
+  });
+
+  testWidgets('Tap submit button', (tester) async {
+    Widget testWidget = MediaQuery(
+        data: MediaQueryData(size: Size(1000, 1000)),
+        child: MaterialApp(home: AddPlaceForm(loggedUser: user))
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    final buttonFinder = find.byType(Center).last;
+    await tester.ensureVisible(buttonFinder);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+    print('button tapped');
+
+    expect(find.byType(TextFormField), findsNothing);
+  });
+
 }

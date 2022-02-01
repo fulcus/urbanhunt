@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hunt_app/explore/place_card.dart';
 
 
-
 Future<void> main() async {
 
   testWidgets('Google Maps button Widget', (tester) async {
