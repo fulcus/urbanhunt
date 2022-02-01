@@ -34,7 +34,7 @@ class _NavbarState extends State<Navbar> {
   List<Widget> _buildScreens() {
     return [
       Explore(loggedUser, db),
-      Contribute(),
+      Contribute(loggedUser),
       LeaderBoard(loggedUser, db),
       Profile(loggedUser, db),
     ];

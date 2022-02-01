@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,8 +29,6 @@ Future<void> main() async {
   final auth = MockFirebaseAuth(signedIn: true, mockUser: user);
   final result = await auth.signInWithCredential(credential);
   final user1 = result.user;
-  print(user1!.displayName);
-
 
   setupFirebaseAuthMocks();
 
@@ -41,8 +38,6 @@ Future<void> main() async {
   });
 
   testWidgets('Explore Widget', (tester) async {
-
-    //final authService = MockFirebaseAuth(signedIn: true, mockUser: user);
 
     // Populate the mock database.
     final firestore = FakeFirebaseFirestore();
@@ -68,19 +63,13 @@ Future<void> main() async {
       'score': 0,
       'username': 'Bob'
     });
-    // final explore = Explore();
-    // final ExploreState exploreState = tester.state(find.byType(Explore));
-    // exploreState.userId = 'abc';
 
     Widget testWidget = MediaQuery(
         data: MediaQueryData(),
-        child: MaterialApp(home: Explore(user1, firestore))
+        child: MaterialApp(home: Explore(user1!, firestore))
     );
 
     await tester.pumpWidget(testWidget);
-
-    //final exploreState = tester.state(find.byType(ExploreState));
-
 
     //create the finders
     final finder = find.byType(Scaffold);

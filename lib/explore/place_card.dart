@@ -274,7 +274,7 @@ class PlaceCardState extends State<PlaceCard> {
         ),
       );
     } else {
-      if(isMobile) {
+      if(isMobile || MediaQuery.of(context).orientation == Orientation.portrait) {
         return DraggableScrollableSheet(
         minChildSize: 0.44,
         initialChildSize: 0.44,

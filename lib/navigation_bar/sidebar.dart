@@ -35,7 +35,7 @@ class _SideNavBarState extends State<SideNavBar> {
       SideNavItem(
           name: 'Contribute',
           iconData: Icons.add_circle,
-          page: Contribute()
+          page: Contribute(loggedUser)
       ),
       SideNavItem(
           name: 'Leaderboard',

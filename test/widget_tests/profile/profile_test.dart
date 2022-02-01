@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/profile/profile.dart';
 
-import '../helpers/test_helpers.dart';
+import '../../helpers/test_helpers.dart';
 
 Future<void> main() async {
   // Mock sign in with Google.

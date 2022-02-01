@@ -15,23 +15,29 @@ import 'multiselect.dart';
 import 'thankyou.dart';
 
 class Contribute extends StatelessWidget {
+  final User loggedUser;
+
+  Contribute(this.loggedUser);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Add new place')),
-      body: const AddPlaceForm(),
+      body: AddPlaceForm(loggedUser: loggedUser),
     );
   }
 }
 
 class AddPlaceForm extends StatefulWidget {
-  const AddPlaceForm({Key? key}) : super(key: key);
+  final User loggedUser;
+
+  const AddPlaceForm({Key? key, required this.loggedUser}) : super(key: key);
 
   @override
-  AddPlaceFormState createState() => AddPlaceFormState();
+  _AddPlaceFormState createState() => _AddPlaceFormState();
 }
 
-class AddPlaceFormState extends State<AddPlaceForm> {
+class _AddPlaceFormState extends State<AddPlaceForm> {
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final _formKey = GlobalKey<FormState>();
   final _textFieldController1 = TextEditingController();
@@ -47,8 +53,6 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   String? name, lockedDescription, unlockedDescription;
   List<String> categories = [];
   LocationResult? pickedLocation;
-
-  final User _myUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -293,7 +297,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
   Future<void> _handleSubmitted() async {
     final form = _formKey.currentState!;
 
-    if (isEmailAuthProvider(_myUser) && !_myUser.emailVerified) {
+    if (isEmailAuthProvider(widget.loggedUser) && !widget.loggedUser.emailVerified) {
       showInSnackBar('Please verify your email first.', _scaffoldMessengerKey,
           height: isMobile ? 70.0 : 0.0);
     } else {
@@ -313,7 +317,7 @@ class AddPlaceFormState extends State<AddPlaceForm> {
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(
-            builder: (context) => Contribute(),
+            builder: (context) => Contribute(widget.loggedUser),
           ),
         );
 

@@ -12,7 +12,7 @@ import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:hunt_app/contribute/place_data.dart';
 import 'package:hunt_app/explore/place_card.dart';
 
-import '../../helpers/test_helpers.dart';
+import '../../../helpers/test_helpers.dart';
 
 bool isClosed = false;
 
@@ -36,12 +36,13 @@ Future<void> main() async {
     email: 'bob@somedomain.com',
     displayName: 'Bob',
   );
+  user.providerData.add(UserInfo({'providerId':'password'}));
   final auth = MockFirebaseAuth(signedIn: true, mockUser: user);
   await auth.signInWithCredential(credential);
 
   final storage = MockFirebaseStorage();
   final storageRef = storage.ref().child('assets/images/default_profile.png');
-  final image = File('assets/images/default_profile.png');
+  final image = File('assets/images/default-profile.png');
   await storageRef.putFile(image);
 
   final firestore = FakeFirebaseFirestore();
@@ -80,11 +81,11 @@ Future<void> main() async {
   });
 
   testWidgets('Like PlaceCard', (tester) async {
-    var placeCard = PlaceCard(user, firestore, PlaceData.fromSnapshot(snapshot.docs.first), true,
-        false, false, onCardClose);
+    var placeCard = PlaceCard(user, firestore, PlaceData.fromSnapshot(snapshot.docs.first), false,
+        false, false, onCardClose, unlockDate: Timestamp.now(),);
 
     Widget testWidget = MediaQuery(
-        data: MediaQueryData(),
+        data: MediaQueryData(size: Size(1000, 1000)),
         child:
             Directionality(textDirection: TextDirection.ltr, child: placeCard));
 
@@ -95,7 +96,7 @@ Future<void> main() async {
     expect(
         find.descendant(
             of: columnFinder, matching: find.byType(GestureDetector)),
-        findsNWidgets(6));
+        findsNWidgets(5));
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
     expect(find.widgetWithIcon(IconButton, Icons.lock), findsNothing);
@@ -103,9 +104,59 @@ Future<void> main() async {
     final finder = find.widgetWithIcon(GestureDetector, Icons.thumb_up_alt);
     expect(finder, findsOneWidget);
 
+    await tester.ensureVisible(finder);
     await tester.tap(finder);
-    await tester.pump();
-    expect(placeCard.isLiked, true); //TODO not working (because of db call)
+    await tester.pumpAndSettle();
+    expect(placeCard.isLiked, true);
+    expect(placeCard.isDisliked, false);
+  });
+
+  testWidgets('Dislike PlaceCard', (tester) async {
+    var placeCard = PlaceCard(user, firestore, PlaceData.fromSnapshot(snapshot.docs.first), false,
+      false, false, onCardClose, unlockDate: Timestamp.now(),);
+
+    Widget testWidget = MediaQuery(
+        data: MediaQueryData(size: Size(1000, 1000)),
+        child:
+        Directionality(textDirection: TextDirection.ltr, child: placeCard));
+
+    await tester.pumpWidget(testWidget);
+
+    expect(find.widgetWithIcon(IconButton, Icons.lock), findsNothing);
+
+    final finder = find.widgetWithIcon(GestureDetector, Icons.thumb_down_alt);
+    expect(finder, findsOneWidget);
+
+    await tester.ensureVisible(finder);
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+    expect(placeCard.isLiked, false);
+    expect(placeCard.isDisliked, true);
+
+  });
+
+  testWidgets('Swipe like and dislike', (tester) async {
+    var placeCard = PlaceCard(user, firestore, PlaceData.fromSnapshot(snapshot.docs.first), false,
+      true, false, onCardClose, unlockDate: Timestamp.now(),);
+
+    Widget testWidget = MediaQuery(
+        data: MediaQueryData(size: Size(1000, 1000)),
+        child:
+        Directionality(textDirection: TextDirection.ltr, child: placeCard));
+
+    await tester.pumpWidget(testWidget);
+
+    expect(find.widgetWithIcon(IconButton, Icons.lock), findsNothing);
+
+    final finder = find.widgetWithIcon(GestureDetector, Icons.thumb_down_alt);
+    expect(finder, findsOneWidget);
+
+    await tester.ensureVisible(finder);
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+    expect(placeCard.isLiked, false);
+    expect(placeCard.isDisliked, true);
+
   });
 
   testWidgets('Close place card', (tester) async {
@@ -113,7 +164,7 @@ Future<void> main() async {
         true, false, onCardClose);
 
     Widget testWidget = MediaQuery(
-        data: MediaQueryData(),
+        data: MediaQueryData(size: Size(1000, 1000)),
         child:
             Directionality(textDirection: TextDirection.ltr, child: placeCard));
 
@@ -121,18 +172,18 @@ Future<void> main() async {
 
     final closeButton = find.widgetWithIcon(IconButton, Icons.close_rounded);
     await tester.ensureVisible(closeButton);
-    await tester.pumpAndSettle();
     await tester.tap(closeButton);
+    await tester.pumpAndSettle();
     expect(isClosed, true);
   });
 
-  testWidgets('Unlock place card', (tester) async {
+  testWidgets('Try unlock place card, GPS off', (tester) async {
     //TODO GPS off
     var placeCard = PlaceCard(user, firestore, PlaceData.fromSnapshot(snapshot.docs.first), true,
-        true, false, onCardClose);
+        false, false, onCardClose);
 
     Widget testWidget = MediaQuery(
-        data: MediaQueryData(),
+        data: MediaQueryData(size: Size(1000, 1000)),
         child:
             Directionality(textDirection: TextDirection.ltr, child: placeCard));
 
@@ -141,9 +192,12 @@ Future<void> main() async {
     final finder = find.widgetWithIcon(IconButton, Icons.lock);
     expect(finder, findsOneWidget);
 
+    await tester.ensureVisible(finder);
     await tester.tap(finder);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(finder, findsNothing);
+    expect(finder, findsOneWidget);
+    expect(placeCard.isLocked, true);
   });
+
 }
