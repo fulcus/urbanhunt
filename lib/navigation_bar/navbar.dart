@@ -136,7 +136,7 @@ class _NavbarState extends State<Navbar> {
         hideNavigationBar: _hideNavBar,
         decoration: NavBarDecoration(
             colorBehindNavBar: Colors.indigo,
-            borderRadius: BorderRadius.circular(20.0)),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
         popAllScreensOnTapOfSelectedTab: true,
         itemAnimationProperties: ItemAnimationProperties(
           duration: Duration(milliseconds: 400),

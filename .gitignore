@@ -80,6 +80,7 @@
 .flutter-plugins
 .flutter-plugins-dependencies
 pubspec.lock
+.perl
 
 # API keys
 #lib/api_key.dart
