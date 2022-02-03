@@ -77,12 +77,11 @@
 .project
 
 # others
-.flutter-plugins
 .flutter-plugins-dependencies
 pubspec.lock
 .perl
 
 # API keys
-#lib/api_key.dart
-#app/google-services.json
-#android/app/src/main/AndroidManifest.xml
+lib/secrets.dart
+android/app/google-services.json
+ios/GoogleService-Info.plist

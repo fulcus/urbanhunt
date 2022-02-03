@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hunt_app/api_key.dart';
 import 'package:hunt_app/auth/login_page.dart';
 import 'package:hunt_app/contribute/place_data.dart';
+import 'package:hunt_app/secrets.dart';
 import 'package:hunt_app/utils/image_helper.dart';
 import 'package:hunt_app/utils/misc.dart';
 import 'package:hunt_app/utils/validation_helper.dart';

@@ -6,6 +6,11 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+def localPropertyApiToken = localProperties.getProperty("MAPS_API_KEY")
+def systemEnvApiToken = System.getenv('MAPS_API_KEY')
+def MAPS_API_KEY = localPropertyApiToken != null ? localPropertyApiToken : systemEnvApiToken
+
+
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
     throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
@@ -34,13 +39,13 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "dev.flutter.hunt_app"
         minSdkVersion 20
         targetSdkVersion 31
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        manifestPlaceholders = [MAPS_API_KEY: MAPS_API_KEY]
     }
 
    /*
